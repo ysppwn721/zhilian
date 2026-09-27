@@ -304,12 +304,111 @@ def apply_document(source, destination, patches, facts):
     document.save(destination)
 
 
+def _sheet_paths(archive):
+    """工作表名 → zip 内路径（xl/worksheets/sheetN.xml）。"""
+    import xml.etree.ElementTree as ET
+
+    ns = {'m': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main',
+          'r': 'http://schemas.openxmlformats.org/officeDocument/2006/relationships',
+          'pr': 'http://schemas.openxmlformats.org/package/2006/relationships'}
+    workbook = ET.fromstring(archive.read('xl/workbook.xml'))
+    rels = ET.fromstring(archive.read('xl/_rels/workbook.xml.rels'))
+    target = {rel.get('Id'): rel.get('Target') for rel in rels.findall('pr:Relationship', ns)}
+    result = {}
+    sheets_node = workbook.find('m:sheets', ns)
+    for index, sheet in enumerate(sheets_node if sheets_node is not None else []):
+        name = sheet.get('name')
+        rel_id = sheet.get('{%s}id' % ns['r'])
+        path = (target.get(rel_id) or '').lstrip('/')
+        if not path:
+            path = 'xl/worksheets/sheet%d.xml' % (index + 1)
+        elif not path.startswith('xl/'):
+            path = 'xl/' + path
+        result[name] = path
+    return result
+
+
 def update_workbook(source, destination, facts, changes):
-    wb = load_workbook(source)
-    try:
-        for fact in facts:
-            if fact['id'] in changes:
-                wb[fact['sheet']][fact['cell']] = float(number(changes[fact['id']]))
-        wb.save(destination)
-    finally:
-        wb.close()
+    """只替换目标单元格的数值，其余 zip 条目原样拷贝。
+
+    为什么不用 openpyxl 的 load→save：**openpyxl 只建模它支持的部分，图表、条件格式、
+    数据透视表、图片等未建模内容在保存时会静默丢失**。实测：一份带柱状图的事实表经
+    load_workbook + save 后图表消失，而导出是"成功"的——这是最糟糕的一类缺陷：
+    用户的数据被悄悄改坏了，却没有任何提示。
+
+    这里改为以 xlsx（本质是 zip）为单位做**定点改写**：只替换 changes 里那几个
+    单元格的 <v> 值，其它 entry 逐字节拷贝。图表引用的是单元格区域，因此数值被正确
+    改写后，**图表会在打开时自动重绘**——不需要我们理解图表本身。
+
+    工作表名/单元格都来自本项目自己解析并持久化的事实记录，因此对 xlsx 结构的要求
+    仅限于标准 OOXML 布局；遇到无法解析的结构时抛错，绝不静默产出残缺文件。
+    """
+    import re
+    import shutil
+    import zipfile
+
+    wanted = {}
+    for fact in facts:
+        if fact['id'] in changes:
+            wanted.setdefault(fact['sheet'], {})[fact['cell']] = float(number(changes[fact['id']]))
+    if not wanted:
+        shutil.copyfile(source, destination)
+        return
+
+    with zipfile.ZipFile(source) as archive:
+        names = set(archive.namelist())
+        sheets = _sheet_paths(archive)
+        missing = [name for name in wanted if sheets.get(name) not in names]
+        if missing:
+            raise ValueError('事实表结构无法解析，未修改文件：找不到工作表 %s' % '、'.join(missing))
+
+        patched = {}
+        for sheet_name, cells in wanted.items():
+            path = sheets[sheet_name]
+            patched[path] = (path, _patch_sheet(archive.read(path), cells))
+
+        with zipfile.ZipFile(destination, 'w', zipfile.ZIP_DEFLATED) as out:
+            for item in archive.infolist():
+                # 保留每个条目的元数据；只替换被改写的工作表。
+                data = patched[item.filename][1] if item.filename in patched else archive.read(item.filename)
+                out.writestr(item, data)
+
+
+def _patch_sheet(xml_bytes, cells):
+    """把工作表 XML 里指定单元格的数值替换掉，返回新的 XML 字节。"""
+    import re
+
+    text = xml_bytes.decode('utf-8')
+    for ref, value in cells.items():
+        # 数值统一用最短往返表示，避免 125.0 这类尾零进入文件。
+        rendered = repr(float(value))
+        if rendered.endswith('.0'):
+            rendered = rendered[:-2]
+        # 1) 已有值：<c r="E2" ...><v>旧值</v>...
+        pattern_value = re.compile(r'(<c\s[^>]*\br="%s"[^>]*>)(.*?)(</c>)' % re.escape(ref), re.S)
+        # 2) 空单元格：<c r="E2" .../>
+        pattern_empty = re.compile(r'<c\s[^>]*\br="%s"[^>]*/>' % re.escape(ref))
+
+        def replace(match):
+            head, body, tail = match.group(1), match.group(2), match.group(3)
+            # 去掉原有的 t="s" 等类型标记：我们要写入的是数值。
+            head = re.sub(r'\s+t="[^"]*"', '', head)
+            if '<v>' in body:
+                body = re.sub(r'<v>.*?</v>', '<v>%s</v>' % rendered, body, count=1, flags=re.S)
+            elif '<is>' in body:                     # 内联字符串单元格
+                body = '<v>%s</v>' % rendered
+            else:
+                body = '<v>%s</v>' % rendered + body
+            return head + body + tail
+
+        new_text, count = pattern_value.subn(replace, text, count=1)
+        if count:
+            text = new_text
+            continue
+        new_text, count = pattern_empty.subn('<c r="%s"><v>%s</v></c>' % (ref, rendered), text, count=1)
+        if count:
+            text = new_text
+            continue
+        # 单元格不存在：不猜位置插入（会破坏行列顺序），直接报错让人知道。
+        raise ValueError('事实表中找不到单元格 %s，未修改文件' % ref)
+    return text.encode('utf-8')
