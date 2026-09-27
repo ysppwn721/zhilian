@@ -7,33 +7,63 @@ fall back to rules or the remote model.
 """
 from __future__ import annotations
 
+import importlib.util
 import math
 import os
+import threading
 from functools import lru_cache
 from pathlib import Path
 
 
 DEFAULT_MODEL = Path("models/bge-reranker-v2-m3-onnx-int8")
 
+# numpy / onnxruntime / tokenizers 都是百毫秒级的重导入，而 status() 会在
+# /api/health 与每次智能体路由决策时被调用。这里缓存"依赖是否可用"，
+# 但不缓存 status() 本身——后者还依赖环境变量，测试会在运行中改动它们。
+_OPTIONAL_DEPS = ('numpy', 'onnxruntime', 'tokenizers')
+_IMPORT_LOCK = threading.Lock()
+_IMPORTED = None
+
 
 def _model_dir() -> Path:
     return Path(os.getenv("ZHILIAN_LOCAL_RERANKER_PATH", str(DEFAULT_MODEL))).expanduser()
 
 
-def _imports():
+@lru_cache(maxsize=1)
+def _dependencies_available() -> bool:
+    """可选依赖是否齐备。只查规格不导入，因此不会拖慢没有装模型的部署。"""
     try:
-        import numpy as np
-        import onnxruntime as ort
-        from tokenizers import Tokenizer
-    except ImportError:
+        return all(importlib.util.find_spec(name) is not None for name in _OPTIONAL_DEPS)
+    except (ImportError, ValueError):
+        return False
+
+
+def _imports():
+    """导入并缓存可选依赖；缺失时返回 None（调用方据此降级为规则模式）。"""
+    global _IMPORTED
+    if not _dependencies_available():
         return None
-    return np, ort, Tokenizer
+    if _IMPORTED is None:
+        with _IMPORT_LOCK:
+            if _IMPORTED is None:
+                try:
+                    import numpy as np
+                    import onnxruntime as ort
+                    from tokenizers import Tokenizer
+                except ImportError:
+                    return None
+                _IMPORTED = (np, ort, Tokenizer)
+    return _IMPORTED
 
 
 def status() -> dict:
     directory = _model_dir()
     configured = bool(os.getenv("ZHILIAN_LOCAL_RERANKER_PATH", "").strip()) or os.getenv(
         "ZHILIAN_LOCAL_RERANKER_ENABLED", "0").lower() in {"1", "true", "yes", "on"}
+    # 未启用时不必探测文件系统与依赖：这是绝大多数部署的路径。
+    if not configured:
+        return {"enabled": False, "configured": False, "path": str(directory),
+                "model": str(_find_model_file(directory)), "dependencies": _dependencies_available()}
     imported = _imports() is not None
     model = _find_model_file(directory)
     return {

@@ -4,9 +4,31 @@ on:
   workflow_dispatch:
   push:
     tags: ['v*']
+    branches: ['main']
+  pull_request:
 
 jobs:
+  # 先把最容易静默出错的几处不一致拦在构建之前。
+  # 登记在案的踩坑：下载白名单是精确匹配，文件名带旧版本号会直接 404；
+  # site/static/ 曾经与 web/ 漂移 3664 字节，导致线上跑的是旧前端。
+  verify:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Version single-source check
+        run: python packaging/sync_version.py --check
+      - name: Web source-of-truth drift check
+        run: bash packaging/sync_web_to_site.sh --check
+      - name: Run test suite
+        run: python -m pytest -q
+
   build:
+    needs: verify
     strategy:
       matrix:
         include:

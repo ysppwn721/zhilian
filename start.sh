@@ -15,7 +15,9 @@ warn() { printf '%s!%s %s\n' "$YELLOW" "$RESET" "$*"; }
 die()  { printf '%s✗ %s%s\n' "$RED" "$*" "$RESET" >&2; exit 1; }
 
 printf '\n%s表里如一 · 跨文档结论一致性治理系统%s\n' "$BOLD" "$RESET"
-printf '%sLinux 免安装版  v0.2.1%s\n\n' "$DIM" "$RESET"
+# 版本横幅取自根目录 VERSION（唯一真源），不再硬编码——否则每发一版都要记得改这里。
+APP_VERSION="$(tr -d '\r\n' < "$ROOT/VERSION" 2>/dev/null || true)"
+printf '%sLinux 免安装版  v%s%s\n\n' "$DIM" "${APP_VERSION:-未知}" "$RESET"
 
 # ---- 1. 选择 Python 解释器（3.10+；优先 3.12/3.11）----------------------
 PY=""
@@ -50,10 +52,12 @@ if [ ! -x "$VENV_PY" ]; then
     fi
     printf '%s[2/3]%s 安装依赖（需联网，约 1—3 分钟）\n' "$BOLD" "$RESET"
     "$VENV_PY" -m pip install --quiet --upgrade pip
-    if ! "$VENV_PY" -m pip install -r requirements.txt; then
+    # 装运行时依赖而非 requirements.txt：后者含 pandas/pdfplumber 与本地重排模型三项，
+    # 只被 答辩评测/ 下的评测脚本使用，装进产品环境纯属浪费（100MB+）。
+    if ! "$VENV_PY" -m pip install -r requirements-runtime.txt; then
         die "依赖安装失败。请检查网络后重试。
   若使用国内网络，可加镜像：
-    $VENV_PY -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple"
+    $VENV_PY -m pip install -r requirements-runtime.txt -i https://pypi.tuna.tsinghua.edu.cn/simple"
     fi
     ok "依赖安装完成"
 else

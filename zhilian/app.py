@@ -18,12 +18,30 @@ from starlette.concurrency import run_in_threadpool
 
 from .demo import create_demo
 from .llm import config, suggest_links, explain_diagnosis
+from . import __version__
 from . import ocr, quota, reranker
 from .store import Store, now
 from .report import build_report
 from .agent import run_agent, decide, agent_status
 
 BASE = Path(__file__).resolve().parent.parent
+DOWNLOAD_ROOT = Path(os.getenv('ZHILIAN_DOWNLOAD_DIR', str(BASE / 'downloads'))).resolve()
+# 下载白名单按精确文件名匹配，任何一处版本号漏改都会直接 404。因此版本号只在这里
+# 出现一次（取自 VERSION 文件），所有带版本的产物名由它插值生成——"发布新版本"
+# 变成改 VERSION 一个文件，而不是在 10 个文件名字符串里找 0.2.1。
+_V = __version__
+PUBLIC_DOWNLOADS = {
+    f'知链_v{_V}_Windows安装版.exe',
+    f'知链_v{_V}_Windows免安装.zip',
+    f'知链_v{_V}_跨平台构建包.zip',
+    f'Zhilian-{_V}-linux-x86_64.tar.gz',
+    f'Zhilian-{_V}-linux-x86_64-glibc228.tar.gz',
+    f'Zhilian-{_V}-linux-x86_64-src.tar.gz',
+    f'知链_源代码_v{_V}.zip',
+    '知链事实表模板.xlsx',
+    'Zhilian-bge-reranker-v2-m3-onnx-int8.zip',
+    'Zhilian-bge-reranker-v2-m3-onnx-int8.tar.gz',
+}
 
 
 def load_environment():
@@ -96,7 +114,7 @@ class DerivationsRequest(BaseModel):
 def create_app(data_dir=None):
     load_environment()
     store = Store(data_dir or os.getenv('ZHILIAN_DATA_DIR', str(BASE / '.zhilian')))
-    app = FastAPI(title='知链', version='0.2.1', description='跨文档结论验证与增量修复')
+    app = FastAPI(title='知链', version=__version__, description='跨文档结论验证与增量修复')
     app.state.store = store
     quota.configure(store.root / 'quota.json')
 
@@ -112,6 +130,11 @@ def create_app(data_dir=None):
             quota.release(token)
 
     async def _boundary(request: Request, call_next):
+        # Public, allow-listed release assets are served without the workbench
+        # Basic Auth prompt.  No directory listing or arbitrary file path is
+        # exposed; all other routes keep the normal authentication boundary.
+        if request.url.path.startswith('/downloads/'):
+            return await call_next(request)
         password = os.getenv('ZHILIAN_ACCESS_PASSWORD', '')
         if password:
             valid = False
@@ -146,12 +169,22 @@ def create_app(data_dir=None):
 
     @app.get('/api/health')
     def health():
-        return {'status': 'ok', 'version': '0.2.1', 'model': config(),
+        return {'status': 'ok', 'version': __version__, 'model': config(),
                 'ocr': ocr.config(),
                 'local_reranker': reranker.status(),
                 'quota': quota.config(),
                 'auto_export': os.getenv('ZHILIAN_AUTO_EXPORT', '').strip().lower() in ('1', 'true'),
                 'password_protected': bool(os.getenv('ZHILIAN_ACCESS_PASSWORD'))}
+
+    @app.get('/downloads/{filename}')
+    def public_download(filename: str):
+        if filename not in PUBLIC_DOWNLOADS:
+            raise HTTPException(status_code=404, detail='下载文件不存在')
+        path = (DOWNLOAD_ROOT / filename).resolve()
+        if DOWNLOAD_ROOT not in path.parents or not path.is_file():
+            raise HTTPException(status_code=404, detail='下载文件不存在')
+        return FileResponse(path, filename=filename,
+                            headers={'Cache-Control': 'public, max-age=86400'})
 
     @app.get('/api/quota')
     def quota_state():
@@ -163,9 +196,12 @@ def create_app(data_dir=None):
         return store.list()
 
     @app.post('/api/projects/demo')
-    def demo():
+    def demo(request: Request):
         with tempfile.TemporaryDirectory() as tmp:
-            return store.create('销售分析 · 演示项目', create_demo(tmp), demo=True)
+            # 线上演示显式请求语义改写夹具；默认 API 保持兼容，便于离线
+            # 集成测试和第三方调用继续使用稳定的确定性样例。
+            semantic_demo = request.query_params.get('semantic', '').lower() in ('1', 'true', 'yes', 'on')
+            return store.create('销售分析 · 演示项目', create_demo(tmp, semantic_demo=semantic_demo), demo=True)
 
     @app.get('/api/template')
     def template():

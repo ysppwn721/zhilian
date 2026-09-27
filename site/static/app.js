@@ -550,6 +550,10 @@ async function refreshQuota(){
 async function init(){
   try{
     health=await api('/api/health');$('connection').innerHTML='工作空间已连接<small>本地持久化存储</small>';
+    // 版本号由 /api/health 提供（后端读根目录 VERSION）。此前页脚硬编码 v0.2，
+    // 而应用已是 v0.2.1，两者长期不一致——前端不再自己维护版本字符串。
+    const versionLabel=$('appVersion');
+    if(versionLabel&&health&&health.version)versionLabel.textContent='v'+health.version;
     await refreshQuota();
     const projects=await refreshProjects();const previous=localStorage.getItem('zhilian-project');
     if(projects.length)await loadProject(projects.find(p=>p.id===previous)?.id||projects[0].id);else render();

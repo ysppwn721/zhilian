@@ -7,7 +7,7 @@ import re
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 KINDS = {'quote': '数值引用', 'growth': '增长率', 'ranking': '排名', 'threshold': '阈值', 'chart': '图表'}
-EXTRACTION_VERSION = 3
+EXTRACTION_VERSION = 4
 UNITS = {'元': ('currency', Decimal(1)), '万元': ('currency', Decimal(10000)),
          '亿元': ('currency', Decimal(100000000)), '件': ('count', Decimal(1)),
          '人': ('people', Decimal(1)), '%': ('percentage', Decimal(1))}
@@ -111,19 +111,25 @@ def build_index(facts):
 
 
 _INDEX_CACHE = {}
+_INDEX_CACHE_MAX = 8
 
 
 def facts_index(facts, bypass_cache=False):
-    """按描述符构造（并可复用）反向索引。改数值不影响索引，描述符变化时自动重建。"""
+    """按描述符构造（并可复用）反向索引。改数值不影响索引，描述符变化时自动重建。
+
+    键是指纹，因此命中条件是"这张事实表的指纹已在缓存里"。旧实现写成
+    `entry['size'] != len(facts)`——指纹相同则事实条数必然相同，这个比较永远为
+    假，真正的失效场景（同条数不同描述符）反而漏网；同时 `> 8` 的整表清空让
+    连续处理 9 张不同事实表后缓存归零，跨请求基本零命中。
+    """
     if bypass_cache:
         return build_index(facts)
     fingerprint = hash(tuple(sorted(
         (f['id'], f.get('metric', ''), f.get('subject', ''), f.get('period', '')) for f in facts)))
     entry = _INDEX_CACHE.get(fingerprint)
-    if entry is None or entry['size'] != len(facts):
+    if entry is None:
         entry = build_index(facts)
-        entry['size'] = len(facts)
-        if len(_INDEX_CACHE) > 8:
+        if len(_INDEX_CACHE) >= _INDEX_CACHE_MAX:
             _INDEX_CACHE.clear()
         _INDEX_CACHE[fingerprint] = entry
     return entry
@@ -224,7 +230,12 @@ def extract_claims(block, facts, index=None):
         ('ranking', r'(.+?)(销售额|销量|收入|支出|得分)(?:并列)?最高'),
         ('threshold', r'(未超过|不超过|超过|不少于|低于|高于)\s*(' + NUM + r')\s*(' + UNIT + r')'),
         ('budget', r'支出(未超过|不超过|超过)预算'),
-        ('quote', r'(?:为|是|达到|达)\s*(' + NUM + r')\s*(' + UNIT + r')'),
+        # 年报中的数值引用连接词远多于“为/是/达到”。连接词允许和数字之间
+        # 有少量空白；末尾的“无连接词”分支覆盖“营业收入125万元”这类
+        # 标题式写法。阈值模式排在前面，因此“超过120万元”仍优先识别为阈值。
+        ('quote', r'(?:(?:约为|实现了|录得了|增至|高达|实现|录得|共计|合计|完成|累计|近|为|是|达到|达)\s*|'
+                  r'(?=(?:' + NUM + r')\s*(?:亿元|万元|元|件|人)(?!\w)))('
+                  + NUM + r')\s*(' + UNIT + r')'),
     ]
     candidate_matches = []
     sentence_meta = []
@@ -274,14 +285,29 @@ def extract_claims(block, facts, index=None):
             legacy_id_index[sentence_index] = legacy_counter
             legacy_counter += 1
     compound_counter, legacy_assigned = 0, set()
+
+    # 同一段文本在一次抽取里会被反复求来源：算 source_text 时一次、按期间各一次、
+    # 每个论断分支又一次、循环末尾还有一次。best_facts 每次都要遍历候选事实做
+    # 子串判断，于是单段的开销按论断数线性放大。这里按 (文本, 期间) 记忆本轮结果——
+    # 事实与索引在函数内是常量，记忆化不改变语义，只去掉重复计算。
+    resolved = {}
+
+    def resolve(text, period=None):
+        key = (text, period)
+        hit = resolved.get(key)
+        if hit is None:
+            hit = best_facts(text, facts, period=period, index=index)
+            resolved[key] = hit
+        return hit
+
     for sentence_index, start, end, text, marker_kind, match in candidate_matches:
         refs, spec, kind, issue = [], {}, None, ''
-        source_text = text if best_facts(text, facts, index=index) else context
+        source_text = text if resolve(text) else context
         if marker_kind == 'growth':
             growth = match
             kind = 'growth'
-            curr = best_facts(source_text, facts, period='本期', index=index)
-            prev = best_facts(source_text, facts, period='上期', index=index)
+            curr = resolve(source_text, '本期')
+            prev = resolve(source_text, '上期')
             suggested = []
             if len(curr) == len(prev) == 1:
                 refs = [prev[0]['id'], curr[0]['id']]
@@ -313,7 +339,7 @@ def extract_claims(block, facts, index=None):
         elif marker_kind == 'threshold':
             threshold = match
             kind = 'threshold'
-            fs = best_facts(source_text, facts, index=index)
+            fs = resolve(source_text)
             refs = [fs[0]['id']] if len(fs) == 1 else []
             positive, negative, op = ('超过', '未超过', '>')
             if threshold[1] in ('不少于', '低于'):
@@ -325,7 +351,7 @@ def extract_claims(block, facts, index=None):
             kind = 'threshold'
             # Resolve each side from an explicit metric phrase; both period and
             # metric are required so similarly named facts stay ambiguous.
-            fs1, fs2 = best_facts('本期支出', facts, index=index), best_facts('本期预算', facts, index=index)
+            fs1, fs2 = resolve('本期支出'), resolve('本期预算')
             refs = [fs1[0]['id'], fs2[0]['id']] if len(fs1) == len(fs2) == 1 else []
             m = match
             spec = {'positive': '超过', 'negative': '未超过', 'op': '>', 'reported_positive': m[1] == '超过', 'span': [m.start(), m.end()]}
@@ -333,7 +359,7 @@ def extract_claims(block, facts, index=None):
         elif marker_kind == 'quote':
             quote = match
             kind = 'quote'
-            fs = best_facts(source_text, facts, index=index)
+            fs = resolve(source_text)
             refs = [fs[0]['id']] if len(fs) == 1 else []
             spec = {'reported': float(number(quote[1])), 'unit': quote[2], 'span': [quote.start(1), quote.end(1)]}
         if kind:
@@ -350,7 +376,7 @@ def extract_claims(block, facts, index=None):
                            'original': text, 'start': start, 'end': end,
                            'kind': kind, 'refs': refs, 'spec': spec, 'confirmed': False,
                            'extraction': '规则识别', 'issue': issue})
-        context = text if best_facts(text, facts, index=index) else context
+        context = text if resolve(text) else context
     return result
 
 

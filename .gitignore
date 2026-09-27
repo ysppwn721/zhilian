@@ -33,7 +33,15 @@ artifacts/
 site_publish/
 wrangler.publish.toml
 
-# ���ļ����أ�>25MiB ������Ϊ Cloudflare Workers ��Դ������ GitHub Release��
+# # 大文件下载（>25MiB 不能作为 Cloudflare Workers 资源，改走 GitHub Release）
+# 注：以上注释原先以 GBK 写入（文件其余部分是 UTF-8），git 按字节比对才碰巧仍然生效。现已统一为 UTF-8。
 downloads-large/Zhilian-bge-reranker-v2-m3-onnx-int8.*
 downloads-large/Zhilian-0.2.1-linux-x86_64.tar.gz
 downloads-large/Zhilian-0.2.1-windows-x64.zip
+
+# 整仓快照目录：与仓库根重复存放同一份源码与文档，已造成改了根目录、快照没改的
+# 双源漂移，并曾在其中留下真实 API Key。源码真源只有仓库根一处。
+华北五省设计/
+
+# 构建用虚拟环境：被误纳入版本控制（430 个文件 / 约 6MB），无任何脚本引用。
+.build-venv/

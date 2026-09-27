@@ -28,7 +28,7 @@ fi
 
 # 2. 校验必需文件
 missing=""
-for f in run.py requirements.txt start.sh install.sh zhilian web; do
+for f in run.py requirements-runtime.txt start.sh install.sh zhilian web VERSION; do
     [ -e "$ROOT/$f" ] || missing="$missing $f"
 done
 if [ -n "$missing" ]; then

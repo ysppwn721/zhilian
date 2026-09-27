@@ -20,9 +20,14 @@ Windows 下双击 `start.bat`，或在项目根目录运行：
 python -m venv .venv
 # Windows: .venv\Scripts\activate
 # Linux/macOS: source .venv/bin/activate
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-runtime.txt
 python run.py
 ```
+
+`requirements-runtime.txt` 只含应用本体真正 import 的依赖（体积最小，适合信创环境）。
+`requirements.txt` 是开发/评测全集，额外含 `pandas`、`pdfplumber` 与本地重排模型三项——
+这些只被 `答辩评测/` 下的脚本使用，应用缺失时会自动降级，不是运行必需。
+跑测试用 `requirements-dev.txt`。
 
 未配置任何模型也可以运行。无需购买 GPU 或服务器即可在本机体验。
 
@@ -174,7 +179,7 @@ tests/             引擎、真实文件、HTTP和模型适配器回归测试
 
 测试覆盖真实Word/PPT修改与图表导出、原文保留、变更不失效、定性增长、排名并列、零基期、口径冲突、歧义来源、公式拒绝、并发版本冲突、磁盘篡改、撤销、导出包、HTTP上传持久化和模型建议校验。
 
-整合后的开发主线全量回归为 **250 项通过**（1 个 deprecation warning，2026-09-26 Windows 环境复核）。测试数据为构造样例，证明这些边界下的实现行为，不代表真实行业泛化准确率。`requirements-lock.txt`记录本机验证过的依赖版本；跨平台部署时需重新验证安装和文件导出。
+整合后的开发主线全量回归为 **260 项通过**（1 个 deprecation warning，2026-09-26 Windows 环境复核）。测试数据为构造样例，证明这些边界下的实现行为，不代表真实行业泛化准确率。`requirements-lock.txt`记录本机验证过的依赖版本；跨平台部署时需重新验证安装和文件导出。
 
 ## MCP 接口
 
@@ -198,7 +203,7 @@ Claude Desktop 等客户端的接入配置示例：
 
 ## 本地 Reranker（可选）
 
-知链支持可选的 ONNX INT8 本地事实来源排序模型。基础模式不需要模型；配置本地模型后，Agent 只把规则收紧后的少量候选交给 reranker，低置信度仍转人工或 API，不直接写入文件。
+知链支持可选的 ONNX INT8 本地事实来源排序模型。基础模式不需要模型；配置本地模型后，Agent 对规则多候选进行排序，并在事实表不超过 150 条时对零候选论断做整表语义召回。低置信度仍转人工或 API，不直接写入文件。
 
 推荐模型为 `bge-reranker-v2-m3` 的 ONNX INT8 版本。模型权重约 570MB，独立放在 `models/bge-reranker-v2-m3-onnx-int8/`，不进入基础源码包。依赖为 `onnxruntime`、`tokenizers` 和 `numpy`，不需要 PyTorch。
 

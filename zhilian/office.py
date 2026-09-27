@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import shutil
+import threading
 from pathlib import Path
 from zipfile import ZipFile, BadZipFile
 from uuid import uuid4
@@ -21,8 +23,34 @@ from .engine import stable_id, number, fmt, convert
 HEADERS = ['事实ID', '主体', '指标', '期间', '数值', '单位', '统计口径']
 
 
+# 摘要缓存。原实现每次调用都把整份文件读进内存重算 SHA256，而 store.verify()
+# 会在**每次读取类请求**上对全部文档校验一遍（上限 500 份），于是"打开项目"这类
+# 只读操作的开销与项目体积成正比。摘要只由文件内容决定，用 (路径, 大小, mtime_ns)
+# 做键即可命中；任何写入都会改变 mtime/大小，因此不存在读到陈旧摘要的风险。
+_DIGEST_CACHE = {}
+_DIGEST_CACHE_MAX = 2048
+_DIGEST_LOCK = threading.Lock()
+
+
 def digest(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    path = Path(path)
+    try:
+        stat = path.stat()
+        key = (os.path.normcase(str(path.resolve())), stat.st_size, stat.st_mtime_ns)
+    except OSError:
+        # 文件不可 stat（缺失或权限不足）时退化为直读，让原有异常语义保持不变。
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    with _DIGEST_LOCK:
+        cached = _DIGEST_CACHE.get(key)
+    if cached is not None:
+        return cached
+    value = hashlib.sha256(path.read_bytes()).hexdigest()
+    with _DIGEST_LOCK:
+        if len(_DIGEST_CACHE) >= _DIGEST_CACHE_MAX:
+            # 简单整体清空：条目等价、重建廉价，避免引入 LRU 依赖与额外簿记。
+            _DIGEST_CACHE.clear()
+        _DIGEST_CACHE[key] = value
+    return value
 
 
 def validate_office(path):

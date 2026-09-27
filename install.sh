@@ -30,7 +30,7 @@ printf '\n%s%s · Linux 安装%s\n\n' "$BOLD" "$APP_CN" "$RESET"
 command -v python3 >/dev/null 2>&1 || die "未找到 python3。请先安装 Python 3.10+。"
 ok "检测到 $(python3 --version 2>&1)"
 
-for f in run.py requirements.txt start.sh; do
+for f in run.py requirements-runtime.txt start.sh; do
     [ -e "$SRC/$f" ] || die "安装包不完整：缺少 $f。请在解压后的目录内运行本脚本。"
 done
 ok "安装包完整"
@@ -46,8 +46,8 @@ mkdir -p "$PREFIX"
 for item in zhilian web tests third_party site; do
     [ -e "$SRC/$item" ] && cp -r "$SRC/$item" "$PREFIX/" 2>/dev/null || true
 done
-for f in run.py requirements.txt requirements-dev.txt start.sh README.md \
-         THIRD_PARTY_NOTICES.md Dockerfile .env.example "知链事实表模板.xlsx"; do
+for f in run.py requirements-runtime.txt requirements.txt requirements-dev.txt start.sh README.md \
+         VERSION THIRD_PARTY_NOTICES.md Dockerfile .env.example "知链事实表模板.xlsx"; do
     [ -e "$SRC/$f" ] && cp "$SRC/$f" "$PREFIX/" || true
 done
 chmod +x "$PREFIX/start.sh"

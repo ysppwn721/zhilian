@@ -5,6 +5,7 @@ Agent 是编排器/大脑，不是让大模型自由选工具的 ReAct 循环。
 业务副作用只能经 decide 的人工闸门。轨迹和审计本身属于任务元数据。
 """
 from copy import deepcopy
+import os
 from time import perf_counter
 from uuid import uuid4
 
@@ -43,22 +44,46 @@ def suggest_links_llm(store, ws, payload):
 
 
 def suggest_links_local(store, ws, payload):
-    """Rank only the narrow deterministic candidate set with local ONNX."""
+    """Rank deterministic candidates and semantically recall zero-candidate claims.
+
+    A zero lexical hit is exactly where a reranker adds value.  The full fact
+    table is scored only when it is small enough for predictable latency; large
+    tables are left for the remote/API or human fallback.
+    """
     if not reranker.status()['enabled']:
         return {'suggestions': []}
     suggestions = []
-    for claim in [c for c in ws['claims'] if not c['confirmed'] and c['kind'] != 'chart'][:40]:
+    stats = {'zero_seen': 0, 'zero_scored': 0, 'multi_scored': 0, 'abstained': 0}
+    max_zero_facts = max(1, int(os.getenv('ZHILIAN_LOCAL_ZERO_MAX_FACTS', '150')))
+    requested = payload.get('claim_ids') if isinstance(payload, dict) else None
+    allowed = {cid for cid in requested if isinstance(cid, str)} if isinstance(requested, list) else None
+    eligible = [c for c in ws['claims'] if not c['confirmed'] and c['kind'] != 'chart'
+                and (allowed is None or c['id'] in allowed)][:40]
+    for claim in eligible:
         candidates = engine.best_facts(claim['original'], ws['facts'])
-        # A single rule candidate needs no model; zero candidates are escalated
-        # to the remote model or human review rather than scoring the full table.
-        if len(candidates) <= 1:
+        zero_claim = len(candidates) == 0
+        if zero_claim:
+            stats['zero_seen'] += 1
+            if len(ws['facts']) > max_zero_facts:
+                continue
+            candidates = ws['facts']
+            stats['zero_scored'] += 1
+        elif len(candidates) == 1:
+            # A single deterministic candidate needs no model.
             continue
+        else:
+            stats['multi_scored'] += 1
         scores = reranker.score_pairs(claim['original'], candidates)
         choice = reranker.choose(scores)
         if choice['action'] == 'link':
             suggestions.append({'claim_id': claim['id'], 'refs': choice['refs'],
-                                'reason': '本地 reranker 在收紧后的候选中排序通过阈值'})
-    return {'suggestions': suggestions}
+                                'source': 'local-reranker',
+                                'reason': ('本地 reranker 对零候选事实表完成语义召回并通过阈值'
+                                           if zero_claim else
+                                           '本地 reranker 在收紧后的候选中排序通过阈值')})
+        else:
+            stats['abstained'] += 1
+    return {'suggestions': suggestions, 'stats': stats}
 
 
 def _candidate_buckets(ws, rules):
@@ -111,19 +136,27 @@ def _write(store, ws):
     store.write(ws)
 
 
-def _trace(store, ws, node, summary, model=None, duration_ms=0):
+def _trace(store, ws, node, summary, model=None, duration_ms=0, commit=True):
     entry = {'node': node, 'at': now(), 'summary': summary, 'model': model, 'duration_ms': duration_ms}
     ws['agent']['trace'].append(entry)
     ws['audit'].append({'time': entry['at'], 'event': 'Agent 执行',
                         'detail': f'{node}：{summary}' + (f'；模型 {model}' if model else '')})
-    _write(store, ws)
+    if commit:
+        _write(store, ws)
 
 
-def _tool(store, ws, name, payload=None, *, approved=False):
+def _tool(store, ws, name, payload=None, *, approved=False, commit=True):
+    """执行一个登记在 TOOLS 里的工具，并把开始/结束两条轨迹写入工作区。
+
+    commit=False 时只更新内存中的轨迹，不落盘——调用方负责在批量结束后写一次。
+    诊断阶段对**每条论断**调一次 check_claim，而这里原本每次会写两遍完整的
+    state.json（500 条论断 = 1000 次全量序列化）；轨迹内容完全一样，只是写得太频繁。
+    失败路径仍强制落盘，保证"工具执行失败"留痕不会因为延迟写而丢失。
+    """
     if name in MUTATIONS and not approved:
         raise ValueError('此工具需要人工批准')
     model = llm.config()['model'] if name == 'suggest_links_llm' else ('local-reranker' if name == 'suggest_links_local' else None)
-    _trace(store, ws, name, '开始执行工具', model)
+    _trace(store, ws, name, '开始执行工具', model, commit=commit)
     trace_index, audit_index = len(ws['agent']['trace']) - 1, len(ws['audit']) - 1
     started = perf_counter()
     try:
@@ -137,7 +170,7 @@ def _tool(store, ws, name, payload=None, *, approved=False):
         entry = ws['agent']['trace'][trace_index]
         entry.update(summary='工具执行失败，未记录外部错误原文', duration_ms=round((perf_counter()-started)*1000))
         ws['audit'][audit_index]['detail'] = f'{name}：工具执行失败'
-        _write(store, ws)
+        _write(store, ws)   # 失败必须立刻留痕，不受 commit 影响
         raise
     if name in MUTATIONS:
         # store 返回的是 public 视图；持久化必须重新读取含 stored_name 的原状态。
@@ -152,7 +185,8 @@ def _tool(store, ws, name, payload=None, *, approved=False):
     entry = ws['agent']['trace'][trace_index]
     entry.update(summary=summary, duration_ms=round((perf_counter()-started)*1000))
     ws['audit'][audit_index]['detail'] = f'{name}：{summary}' + (f'；模型 {model}' if model else '')
-    _write(store, ws)
+    if commit:
+        _write(store, ws)
     return result
 
 
@@ -207,7 +241,8 @@ def _options(claim, facts, refs, suggestions, rules=None):
     for suggestion in suggestions:
         if suggestion['claim_id'] == claim['id']:
             # 不把模型自由文本复制到审计或决策提示，避免回显外部敏感内容。
-            add(suggestion['refs'], 'DeepSeek 提出的来源候选，仍需人工核对')
+            source = '本地 reranker' if suggestion.get('source') == 'local-reranker' else 'DeepSeek'
+            add(suggestion['refs'], f'{source} 提出的来源候选，仍需人工核对')
     if not refs:
         # 规则没给出候选时不能让界面进入"零选项"死结：人工必须至少有一个可勾
         # 选项，否则 decide 会以"请选择真实存在的来源事实"失败，项目直接卡住。
@@ -232,31 +267,39 @@ def _item(ws, c, checked=None):
 def _diagnose(store, ws):
     started = perf_counter()
     diagnostics = []
+    # commit=False：逐条核验只更新内存轨迹，诊断小结写完后再统一落盘一次。
+    # 原实现对每条论断写两遍完整 state.json，是这一阶段最大的固定开销。
     for c in ws['claims']:
-        checked = _tool(store, ws, 'check_claim', {'claim_id': c['id']})
+        checked = _tool(store, ws, 'check_claim', {'claim_id': c['id']}, commit=False)
         diagnostics.append(dict(_item(ws, c, checked), status=checked['status'], confirmed=c['confirmed']))
     _, summary = engine.inspect(ws)
     ws['agent']['result'].update({k: summary[k] for k in ('consistent', 'inconsistent', 'unverifiable')})
     ws['agent']['diagnostics'] = diagnostics
     _trace(store, ws, 'diagnose', f'一致 {summary["consistent"]} 项，不一致 {summary["inconsistent"]} 项，无法判断 {summary["unverifiable"]} 项',
-           duration_ms=round((perf_counter()-started)*1000))
+           duration_ms=round((perf_counter()-started)*1000))   # 这一条会落盘，上面的轨迹一并写入
 
 
 def _advance(store, ws):
     _anchors(ws)
     if 'candidates' not in ws['agent']:
         started = perf_counter()
-        _tool(store, ws, 'list_facts')
-        _tool(store, ws, 'list_claims')
-        rules = _tool(store, ws, 'propose_links')['links']
+        # 这三步是纯只读的盘点，中间不需要落盘；本段末尾的 _trace('link') 会一次性
+        # 把它们的轨迹写下去。任一步抛错时 _tool 的失败分支仍会强制落盘留痕。
+        _tool(store, ws, 'list_facts', commit=False)
+        _tool(store, ws, 'list_claims', commit=False)
+        rules = _tool(store, ws, 'propose_links', commit=False)['links']
         suggestions = []
         unique, multi, zero = _candidate_buckets(ws, rules)
         local_ids = set()
+        local_stats = {'zero_seen': 0, 'zero_scored': 0, 'multi_scored': 0, 'abstained': 0}
         local_enabled = reranker.status()['enabled']
         api_batches = 0
-        if local_enabled and multi:
+        if local_enabled and (multi or zero):
             try:
-                local = _tool(store, ws, 'suggest_links_local')['suggestions']
+                local_result = _tool(store, ws, 'suggest_links_local',
+                                     {'claim_ids': [c['id'] for c in (multi + zero)]})
+                local = local_result['suggestions']
+                local_stats.update(local_result.get('stats') or {})
                 suggestions.extend(local)
                 local_ids = {item['claim_id'] for item in local}
             except Exception:
@@ -265,7 +308,8 @@ def _advance(store, ws):
         # API is a semantic fallback.  It receives only zero-candidate claims,
         # or multi-candidate claims that the local model abstained on.  It can
         # never replace a rule or local suggestion already collected above.
-        api_claims = zero + [c for c in multi if c['id'] not in local_ids]
+        api_claims = ([c for c in zero if c['id'] not in local_ids]
+                      + [c for c in multi if c['id'] not in local_ids])
         gate = quota.check()
         skip = ''
         if not llm.config()['enabled']:
@@ -309,6 +353,9 @@ def _advance(store, ws):
         ws['agent']['model_routing'] = {
             'unique_rule_claims': len(unique), 'multi_candidate_claims': len(multi),
             'zero_candidate_claims': len(zero), 'local_reranker_suggestions': len(local_ids),
+            'local_zero_recall_claims': local_stats['zero_scored'],
+            'local_multi_rank_claims': local_stats['multi_scored'],
+            'local_abstentions': local_stats['abstained'],
             'api_candidate_claims': len(api_claims), 'api_batches': api_batches, 'api_suggestions': sum(
                 1 for item in suggestions if item.get('claim_id') not in local_ids),
             'model_quota': quota.snapshot(), 'quota_blocked': quota_blocked or skip,
