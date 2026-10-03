@@ -57,19 +57,48 @@ def canon(x):
 def fact_text(rec: dict) -> str:
     """事实文本：与 llm.suggest_links / reranker 的既有格式保持一致。"""
     return (f"subject={rec.get('subject') or '公司'}；metric={rec['metric']}；"
-            f"period={rec['period']}；unit={rec.get('unit') or ''}；scope={rec.get('scope') or ''}")
+            f"period={rec['period']}；unit={rec.get('unit') or ''}；"
+            f"scope={rec.get('scope_confirmed') or rec.get('scope') or ''}")
+
+
+def signature(rec: dict) -> tuple:
+    """(指标, 期间, 口径) 三元组——负例必须与正例在此三元组上**至少一维不同**，
+    否则事实文本与正例完全一致，模型学不到任何区分（实测有这类退化负例）。
+    """
+    return (rec.get('metric'), rec.get('period'),
+            rec.get('scope_confirmed') or rec.get('scope'))
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument('--corpus', type=Path, default=ROOT / '答辩评测' / 'annual_reports_merged')
+    ap.add_argument('--corpus', type=Path, default=ROOT / '答辩评测' / 'annual_reports_final')
     ap.add_argument('--neg-per-positive', type=int, default=4,
                     help='每条正例最多采多少条负例（按类型配额）')
     args = ap.parse_args()
 
     d = args.corpus
+    # 以**已准入**的候选为基准，而不是原始候选。
+    # 原始 candidates_v2.jsonl 含未过口径/三值/单位门槛的记录（1215 条），
+    # 用它会为正例不存在的记录造负例，训练时对不上（实测 1215 vs 1029）。
+    admitted_path = d / 'training_candidates.jsonl'
+    if admitted_path.is_file():
+        usable = [json.loads(l) for l in admitted_path.read_text(encoding='utf-8').splitlines() if l.strip()]
+        src_name = admitted_path.name
+    else:
+        cs_all = [json.loads(l) for l in (d / 'candidates_v2.jsonl').read_text(encoding='utf-8').splitlines() if l.strip()]
+        usable = [c for c in cs_all if c['claim_kind'] in ('growth', 'quote')]
+        src_name = 'candidates_v2.jsonl'
+    print(f'负例基准：{src_name}（{len(usable)} 条正例）')
+
+    # 口径以准入后的 scope_confirmed 为准（原始 scope 多为"未标明"）
+    for c in usable:
+        if c.get('scope_confirmed'):
+            c['scope'] = c['scope_confirmed']
+    # 跨表索引仍需全部候选（用来找同一指标在别张表/别的口径下的出现）
     cs = [json.loads(l) for l in (d / 'candidates_v2.jsonl').read_text(encoding='utf-8').splitlines() if l.strip()]
-    usable = [c for c in cs if c['claim_kind'] in ('growth', 'quote')]
+    for c in cs:
+        if c.get('scope_confirmed'):
+            c['scope'] = c['scope_confirmed']
 
     # 按 (公司, 指标) 建索引，用于跨表取错口径
     by_company_metric: dict[tuple[str, str], list[dict]] = defaultdict(list)
@@ -110,27 +139,36 @@ def main() -> int:
             stats['positive_prior_slot'] += 1
 
         # ---- 错指标：同表内其他候选 ----
+        # 上限由「同表其他事实」决定（实测 485 张有正例的表内共 3692 条其他事实，
+        # 平均 7.6 条/表），故每例最多取 6 条，并强制与正例在 (指标,期间,口径) 上
+        # 至少一维不同——否则事实文本与正例一致，模型学不到区分。
+        pos_sig = signature(c)
+        seen_sig = {pos_sig}
+        scope_picked = 0
         same_table = [x for x in cs
                       if x['company'] == c['company'] and x['fact_page'] == c['fact_page']
                       and x['metric'] != c['metric']]
         picked = 0
         for x in same_table:
-            if picked >= 2:
+            if picked >= 6:
                 break
+            sig = signature(x)
+            if sig in seen_sig:
+                continue
+            seen_sig.add(sig)
             pairs.append({
                 'claim_id': claim_id, 'claim_text': c['claim_text'], 'claim_page': c['claim_page'],
                 'fact_id': x['metric'], 'fact_text': fact_text(x), 'fact_page': x['fact_page'],
                 'fact_value': x['value'], 'label': 0, 'negative_kind': 'wrong_metric',
-                'company': c['company'], 'scope': x['scope'], 'unit': x['unit'],
+                'company': c['company'], 'scope': x.get('scope_confirmed') or x['scope'],
+                'unit': x['unit'],
             })
             picked += 1
             stats['wrong_metric'] += 1
 
         # ---- 错期间：同一指标在**其他年份列**的真实数值 ----
-        # 三年表（主要会计数据常见 2023/2022/2021）里，非本期/上期的年份列
-        # 是错期间负例的真实来源。原先没有这类负例，是因为抽取器丢弃了这些列。
         other_years = c.get('other_years') or {}
-        for year, val in list(other_years.items())[:2]:
+        for year, val in list(other_years.items())[:3]:
             if val is None or val == c['value']:
                 continue
             pairs.append({
@@ -138,33 +176,53 @@ def main() -> int:
                 'fact_id': f"{c['metric']}@{year}", 'fact_text': fact_text({**c, 'period': f'{year}年'}),
                 'fact_page': c['fact_page'], 'fact_value': val, 'label': 0,
                 'negative_kind': 'wrong_period',
-                'company': c['company'], 'scope': c['scope'], 'unit': c['unit'],
+                'company': c['company'], 'scope': c.get('scope_confirmed') or c['scope'],
+                'unit': c['unit'],
                 'note': f"同表 {year} 年列：{val}",
             })
             stats['wrong_period'] += 1
 
-        # ---- 错口径：同一指标在别张表（caption 不同）出现 ----
-        others = [x for x in by_company_metric[(c['company'], c['metric'])]
-                  if x is not c and (x.get('caption') or '')[:20] != (c.get('caption') or '')[:20]]
-        for x in others[:2]:
+        # ---- 错口径：同一指标在别张表出现，且口径确实不同 ----
+        # 必须校验口径真的不同。实测有退化情形：另一张表的 scope 也是「未标明」，
+        # 事实文本与正例完全一致，模型学不到任何区分。
+        for x in by_company_metric[(c['company'], c['metric'])]:
+            if scope_picked >= 2:
+                break
+            if x is c:
+                continue
+            if (x.get('caption') or '')[:20] == (c.get('caption') or '')[:20]:
+                continue
+            x_scope = x.get('scope_confirmed') or x.get('scope')
+            c_scope = c.get('scope_confirmed') or c.get('scope')
+            if not x_scope or x_scope == c_scope:
+                stats['wrong_scope_skip_degenerate'] += 1
+                continue
             pairs.append({
                 'claim_id': claim_id, 'claim_text': c['claim_text'], 'claim_page': c['claim_page'],
                 'fact_id': f"{x['metric']}@{x['fact_page']}页", 'fact_text': fact_text(x),
                 'fact_page': x['fact_page'], 'fact_value': x['value'], 'label': 0,
                 'negative_kind': 'wrong_scope',
-                'company': c['company'], 'scope': x['scope'], 'unit': x['unit'],
-                'note': f"另一张表：{(x.get('caption') or '')[:36]}",
+                'company': c['company'], 'scope': x_scope, 'unit': x['unit'],
+                'note': f"另一张表（{c_scope} → {x_scope}）：{(x.get('caption') or '')[:36]}",
             })
             stats['wrong_scope'] += 1
+            scope_picked += 1
 
-        # （错期间负例已在上方按「其他年份列」构造；旧的跨表近似法已废弃，
-        #   它只能产出 5 条——因为跨表同指标同值的情形占多数。）
+    # 去重：同一 (claim_id, fact_text, label) 只保留一条。
+    # 实测有 24 条重复（同一负例被"跨表取指标"路径重复采到）。
+    dedup: dict[tuple, dict] = {}
+    for p in pairs:
+        key = (p['claim_id'], p['fact_text'], p['label'])
+        if key not in dedup:
+            dedup[key] = p
+    dropped = len(pairs) - len(dedup)
+    pairs = list(dedup.values())
 
     out = d / 'negatives_v1.jsonl'
     out.write_text('\n'.join(json.dumps(p, ensure_ascii=False) for p in pairs), encoding='utf-8')
 
     print(f'=== 难负例池重建 ===')
-    print(f'  总条目 {len(pairs)}')
+    print(f'  总条目 {len(pairs)}' + (f'（去重丢弃 {dropped} 条重复）' if dropped else ''))
     for k in ('positive', 'positive_prior_slot', 'wrong_metric', 'wrong_scope', 'wrong_period'):
         print(f'  {k:20} {stats[k]:>5}')
     print()
