@@ -53,6 +53,7 @@ DEFAULT_CORPUS = ROOT / '答辩评测' / 'annual_reports_all'
 
 NUM = re.compile(r'[-−(]?\d[\d,]*(?:\.\d+)?%?[)]?')
 UNIT_PAT = re.compile(r'单位\s*[:：]\s*(人民币)?\s*(元|万元|亿元|千元)')
+UNIT_SUFFIX_PAT = re.compile(r'[（(]\s*(元/股|元|万元|亿元|千元|%|万TEU)\s*[）)]')
 CUR_PAT = re.compile(r'本期|本报告期|本期数|本期金额|本期发生额|期末|期末数|期末余额|本年度|报告期')
 PRI_PAT = re.compile(r'上期|上年同期|上期数|上期金额|上年同期数|期初|期初数|期初余额|上年度|去年同期')
 CHG_PAT = re.compile(r'增减|变动|变动比例|同比|增幅|变化')
@@ -74,6 +75,7 @@ SYNONYM_GROUPS = [
     ('净利润', '纯利润', '归母净利润'),
 ]
 NOISE_METRIC = re.compile(r'^(合计|小计|其中|附注|说明|序号|项目|科目|单位)$')
+UNIT_FACTORS = {'元': 1.0, '千元': 1_000.0, '万元': 10_000.0, '亿元': 100_000_000.0}
 
 
 def canon(x):
@@ -94,6 +96,78 @@ def clean(c) -> str:
     return re.sub(r'[\s\u3000]+', '', str(c or ''))
 
 
+def monetary_factor(unit: str | None) -> float | None:
+    return UNIT_FACTORS.get(unit or '')
+
+
+def _line_texts(page_words):
+    """把 pdfplumber 单词按版面行聚合，供表格附近的单位定位。"""
+    groups = {}
+    for word in page_words:
+        groups.setdefault(round(float(word['top']), 1), []).append(word)
+    for top, words in groups.items():
+        words = sorted(words, key=lambda w: w['x0'])
+        yield top, max(float(w['bottom']) for w in words), ''.join(w['text'] for w in words)
+
+
+def table_unit(page_words, bbox, fallback=None):
+    """优先取当前表格上方最近的单位行，避免一页多表时串用页面单位。"""
+    if not bbox:
+        return fallback
+    candidates = []
+    for _top, bottom, text in _line_texts(page_words):
+        if bottom > bbox[1] + 3:
+            continue
+        match = UNIT_PAT.search(text)
+        unit = match.group(2) if match else None
+        if not unit:
+            suffix = UNIT_SUFFIX_PAT.search(text)
+            unit = suffix.group(1) if suffix else None
+        if unit and bbox[1] - bottom <= 220:
+            candidates.append((bbox[1] - bottom, unit))
+    return min(candidates, key=lambda item: item[0])[1] if candidates else fallback
+
+
+def _decimal_places(raw_text: str) -> int:
+    raw = raw_text.replace(',', '').replace('−', '-').replace('－', '-')
+    raw = raw.strip('()%')
+    return len(raw.split('.', 1)[1]) if '.' in raw else 0
+
+
+def sentence_values(sentence: str):
+    """返回句中数值及其显示单位，金额同时保留换算到元的值。"""
+    values = []
+    for match in NUM.finditer(sentence):
+        raw_text = match.group(0)
+        raw = canon(raw_text)
+        if raw is None:
+            continue
+        tail = sentence[match.end():match.end() + 10]
+        if raw_text.endswith('%') or tail.lstrip().startswith('%'):
+            values.append((raw, raw, '%', _decimal_places(raw_text), 1.0))
+            continue
+        unit_match = re.match(r'\s*(亿元|万元|千元|元|万TEU)', tail)
+        mentioned = unit_match.group(1) if unit_match else None
+        factor = monetary_factor(mentioned) if mentioned else None
+        base = raw * factor if factor else raw
+        values.append((raw, base, mentioned, _decimal_places(raw_text), factor or 1.0))
+    return values
+
+
+def value_in_sentence(target: float, target_unit: str | None, sentence: str) -> bool:
+    """按显示单位换算后匹配，允许年报金额因四舍五入产生的误差。"""
+    target_factor = monetary_factor(target_unit)
+    target_base = target * target_factor if target_factor else target
+    for raw, base, mentioned, decimals, factor in sentence_values(sentence):
+        if target_factor and mentioned in UNIT_FACTORS:
+            tolerance = max(0.5 * (10 ** (-decimals)) * factor, abs(target_base) * 1e-7, 0.01)
+            if abs(base - target_base) <= tolerance:
+                return True
+        elif abs(raw - target) <= max(0.01, abs(target) * 1e-7):
+            return True
+    return False
+
+
 def cell_kind(c: str) -> str:
     c = c.strip()
     if not c:
@@ -103,8 +177,31 @@ def cell_kind(c: str) -> str:
     return 'num' if re.match(r'^-?[\d,]+(?:\.\d+)?$', c) else 'text'
 
 
-def header_rows(t, max_scan=4):
-    """定位表头行：开头连续若干行，直到出现数据行特征。"""
+def compact_columns(table):
+    """压掉全空列。
+
+    pdfplumber 会把列间距大的表抽成大量空列：实测 002124 第 10 页「主要会计数据」表
+    真实只有 6 列，却被抽成 **21 列**，每个真实列后面跟 2 个空列：
+        ['', '', '', '', '2023年', '', '', '本年比上年', '', '', '', '', ...]
+        ['', '营业收入（元）', '', '10,231,927,988.44', '', '', '9,570,942,144.13', ...]
+    表头文本本身能被匹配到，但列索引整体错位，导致数据行判定与取值都失败。
+    这是 8309 张表里 4949 张（60%）列角色判定失败的直接原因。
+    """
+    if not table:
+        return table
+    ncols = max(len(r) for r in table)
+    keep = [c for c in range(ncols)
+            if any(clean(row[c]) for row in table if c < len(row))]
+    if not keep or len(keep) == ncols:
+        return table
+    return [[row[c] if c < len(row) else None for c in keep] for row in table]
+
+
+def header_rows(t, max_scan=6):
+    """定位表头行：开头连续若干行，直到出现数据行特征。
+
+    多层表头（如追溯调整表的「调整前/调整后」）可能占 3-4 行，故放宽到 6。
+    """
     out = []
     for i, row in enumerate(t[:max_scan]):
         cells = [clean(c) for c in row]
@@ -297,7 +394,7 @@ def main() -> int:
                     page = pdf.pages[pno - 1]
                     ptext = pages[pno - 1][1]
                     um = UNIT_PAT.search(ptext)
-                    unit = um.group(2) if um else None
+                    page_unit = um.group(2) if um else None
                     page_words = page.extract_words(use_text_flow=False) or []
                     table_objs = page.find_tables() or []
                     page_unit_line = ''
@@ -310,7 +407,14 @@ def main() -> int:
                     for t_idx, t in enumerate(page.extract_tables() or []):
                         if not t or len(t) < 2:
                             continue
+                        # 压掉全空列（必须在 header_rows/classify 之前）。
+                        # pdfplumber 会把列间距大的表抽成大量空列：实测 002124 第 10 页
+                        # 「主要会计数据」表真实 6 列被抽成 21 列，每个真实列后跟 2 个空列，
+                        # 表头与数据行因此整体错位。这是 8309 张表里 4949 张（60%）
+                        # 判定失败的主因。
+                        t = compact_columns(t)
                         bbox = table_objs[t_idx].bbox if t_idx < len(table_objs) else None
+                        unit = table_unit(page_words, bbox, page_unit)
                         raw_title = title_above(page_words, bbox)
                         if raw_title:
                             caption = raw_title
@@ -380,8 +484,7 @@ def main() -> int:
                                 lv = metric_match_level(metric, s)
                                 if not lv:
                                     continue
-                                nums = [canon(m.group(0)) for m in NUM.finditer(s)]
-                                if f['current'] not in nums:
+                                if not value_in_sentence(f['current'], f.get('unit'), s):
                                     if name_only is None and NUM.search(s) and re.search(
                                             r'[，,。！？；]|实现|达到|完成|为|较|同比|增长|下降|其中|公司|报告期|说明', s):
                                         name_only = (sp, s)
