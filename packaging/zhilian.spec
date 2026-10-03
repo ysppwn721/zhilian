@@ -15,6 +15,9 @@ hiddenimports = [
     "uvicorn.logging", "uvicorn.loops.auto", "uvicorn.protocols.http.auto",
     "uvicorn.protocols.websockets.auto", "uvicorn.lifespan.on",
     "multipart", "docx", "pptx", "openpyxl", "pydantic", "fastapi",
+    "webview", "webview.platforms", "webview.platforms.edgechromium",
+    "webview.platforms.winforms", "webview.platforms.mshtml",
+    "bottle", "proxy_tools", "clr_loader", "pythonnet",
 ]
 
 a = Analysis(
@@ -45,6 +48,7 @@ exe = EXE(
     strip=False,
     upx=False,
     console=True,
+    icon=str(ROOT / "web" / "assets" / "brand" / "concept-a.ico"),
 )
 coll = COLLECT(exe, a.binaries, a.datas, strip=False, upx=False, name="Zhilian")
 if sys.platform == 'darwin':

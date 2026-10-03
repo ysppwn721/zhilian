@@ -35,9 +35,18 @@ def main() -> int:
     args = ap.parse_args()
 
     d = args.corpus
-    cs = [json.loads(l) for l in (d / 'candidates_v2.jsonl').read_text(encoding='utf-8').splitlines() if l.strip()]
+    # 读**已准入**的候选，而不是原始候选。
+    # 原始 candidates_v2.jsonl 含未过口径/三值/单位门槛的记录（301 条），
+    # 用它会高估可划分规模、并让划分与训练集不一致（实测 301 vs 242）。
+    admitted_path = d / 'training_candidates.jsonl'
+    src_path = admitted_path if admitted_path.is_file() else (d / 'candidates_v2.jsonl')
+    cs = [json.loads(l) for l in src_path.read_text(encoding='utf-8').splitlines() if l.strip()]
+    if src_path is admitted_path:
+        usable = cs
+    else:
+        usable = [c for c in cs if c['claim_kind'] in ('growth', 'quote')]
+    print(f'划分数据源：{src_path.name}（{len(usable)} 条）\n')
     mf = [json.loads(l) for l in (d / 'manifest.jsonl').read_text(encoding='utf-8').splitlines() if l.strip()]
-    usable = [c for c in cs if c['claim_kind'] in ('growth', 'quote')]
 
     per_company = Counter(c['company'] for c in usable)
     companies = sorted({r['stock_code'] for r in mf})

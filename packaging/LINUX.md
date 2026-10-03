@@ -1,6 +1,6 @@
 # Linux 安装包设计说明
 
-> 产物：`Zhilian-0.2.1-linux-x86_64-src.tar.gz`（约 0.38 MB）
+> 产物：`Zhilian-0.2.1-linux-x86_64-src.tar.gz`（源码安装包）和 `Zhilian-0.2.1-linux-x86_64.tar.gz`（原生免 Python 包）
 > 设计目标：**不依赖 root、不污染系统环境、覆盖主流发行版、可一键卸载**
 > 与 Windows/macOS 原生包的关系见第五节（两条路线并存，互不替代）
 
@@ -29,7 +29,7 @@ Linux 上没有统一的安装包格式。可选方案与取舍：
 
 ~/.local/bin/biaoliruyi               ← 启动命令
 ~/.local/share/applications/biaoliruyi.desktop   ← 应用菜单项
-~/.local/share/icons/hicolor/256x256/apps/biaoliruyi.png  ← 图标
+~/.local/share/icons/hicolor/256x256/apps/zhilian.png      ← 知链图标
 ```
 
 **为什么不用 `/opt` 或 `/usr/local`**：那些位置需要 root。用户级安装换来的是
@@ -87,10 +87,16 @@ $ tar -tzvf Zhilian-0.2.1-linux-x86_64-src.tar.gz | grep install.sh
 | 需要 Python | 3.10+ | **不需要** |
 | 构建环境 | 任意平台 | **必须 Linux** |
 | 桌面菜单集成 | **有** | 无 |
-| 当前可交付 | **是** | 需在 Linux 实机构建 |
+| 当前可交付 | **是** | **已在 WSL Ubuntu 22.04 构建并完成健康检查** |
 
 **建议**：两者都发布，在下载页标注清楚需要 Python 与否。
 多数 Linux 用户本机已有 Python，src 包更轻；无 Python 或需免安装的场景用原生包。
+
+## 国产系统兼容基础包（2026-09-27 新增）
+
+下载页已增加统信 UOS / 银河麒麟 x86_64 兼容包，详情见 [DOMESTIC_LINUX.md](DOMESTIC_LINUX.md)。
+已通过 glibc 2.28 容器启动及 Ubuntu WSL 离线业务闭环检查；目标系统实机验收仍待完成。
+此基础包不含本地语义模型及推理依赖，不适用于 ARM64、龙芯、申威。
 
 ## 六、验收命令
 
@@ -119,17 +125,19 @@ bash uninstall.sh
 
 ## 七、未在本机验证的部分（如实说明）
 
-本机为 Windows，**无法执行 Linux 端到端安装流程**。已完成的验证：
+本机为 Windows，通过 WSL Ubuntu 22.04 完成了 Linux 原生包构建和安装启动验证。已完成的验证：
 
 - ✅ 三个脚本 `bash -n` 语法检查全部通过（用 Git 自带 bash）
 - ✅ 行尾为纯 LF（无 CRLF 污染）
 - ✅ 图标生成代码实测产出合法 PNG（256×256，Pillow 校验通过）
 - ✅ 安装脚本引用的文件均在包内
 - ✅ 站点下载链接与锚点校验通过
+- ✅ PyInstaller Linux x86_64 原生包构建成功
+- ✅ 原生包 `bash install.sh` 用户级安装成功
+- ✅ 安装后的 `~/.local/bin/zhilian` 启动并返回 `/api/health` 200
 
-**尚未验证（需在真实 Linux 机器上执行）**：
+**仍需在真实桌面 Linux 机器上补做的验证**：
 
-- ⚠️ `python3 -m venv` 建环境与依赖安装
 - ⚠️ 桌面菜单项在各桌面环境（GNOME/KDE/XFCE）的实际显示
 - ⚠️ ONNX Runtime 在 Linux 上的动态库加载（若启用本地 reranker）
 

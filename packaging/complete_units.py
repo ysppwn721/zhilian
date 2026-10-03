@@ -32,18 +32,36 @@ UNIT_DECL = re.compile(r'单位\s*[:：]\s*(人民币)?\s*(元|万元|亿元|千
 NAME_UNIT_RULES = [
     (re.compile(r'每股收益|每股净资产|每股'), '元/股'),
     (re.compile(r'比例\s*[（(]%|占比|率\s*[（(]%|（%）|\(%\)'), '%'),
-    (re.compile(r'万TEU|标准箱'), '万TEU'),
-    (re.compile(r'万千瓦|装机容量'), '万千瓦'),
-    (re.compile(r'万千瓦时|电量'), '万千瓦时'),
+    (re.compile(r'万TEU|万标准箱|标准箱'), '万TEU'),
+    (re.compile(r'亿千瓦时'), '亿千瓦时'),
+    (re.compile(r'万千瓦时'), '万千瓦时'),
+    (re.compile(r'万千瓦'), '万千瓦'),
+    (re.compile(r'亿吨公里'), '亿吨公里'),
+    (re.compile(r'万吨公里'), '万吨公里'),
+    (re.compile(r'亿吨'), '亿吨'),
+    (re.compile(r'万吨'), '万吨'),
+    (re.compile(r'万人次|万人'), '万人次'),
+    (re.compile(r'万台|万辆|万件|万个|万只|万套'), '万台'),
     (re.compile(r'万元'), '万元'),
-    (re.compile(r'人数|数量|个数|人数（人）'), '人'),
+    (re.compile(r'人数|数量|个数'), '人'),
+    # 兜底：指标名末尾带括号单位的（如「营业收入（元）」「总资产(万元)」），
+    # 直接取括号内内容。必须放在最后，避免抢走上面更具体规则的优先级。
+    (re.compile(r'[（(]\s*(元|万元|亿元|千元|万吨|亿吨|万TEU|元/股|%)\s*[）)]\s*$'), None),
 ]
 
 
 def infer_from_name(metric: str) -> tuple[str, str] | None:
     for pat, unit in NAME_UNIT_RULES:
-        if pat.search(metric or ''):
-            return unit, f'指标名含量纲标记 → {unit}'
+        m = pat.search(metric or '')
+        if not m:
+            continue
+        if unit is None:
+            # 兜底规则：单位就在括号里，取捕获组
+            got = (m.group(1) or '').strip()
+            if got:
+                return got, f'指标名括号内单位 → {got}'
+            continue
+        return unit, f'指标名含量纲标记 → {unit}'
     return None
 
 

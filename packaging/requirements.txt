@@ -7,3 +7,6 @@ python-docx==1.2.0
 python-pptx==1.0.2
 httpx==0.28.1
 pyinstaller==6.16.0
+# Embed the local web workbench in a native window. Windows uses WebView2;
+# macOS uses Cocoa; Linux uses GTK when available and falls back to a browser.
+pywebview==5.4
