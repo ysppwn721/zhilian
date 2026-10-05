@@ -1,0 +1,592 @@
+{
+  "experiment": "three_route",
+  "status": "ok",
+  "dataset": "答辩评测\\v3_eval_20261005\\v3_human_gold_40\\human_gold.jsonl",
+  "human_gold": true,
+  "layers": [
+    "rules",
+    "annual_bert",
+    "api",
+    "abstain/manual"
+  ],
+  "note": "规则→年报BERT→API兜底→人工确认。路由输入不含人工 Gold 标签与 task_type；task_type 仅用于分层统计。",
+  "document_profile": {
+    "profile": "annual",
+    "selection": "annual_repaired_v1",
+    "basis": "六位代码文件名 33/33；年份 33；「年度报告」字样 0；文本年报特征 3/5",
+    "files": 33
+  },
+  "thresholds": {
+    "min_top_score": 0.5,
+    "min_margin": 0.15
+  },
+  "route_counts": {
+    "rules": 3,
+    "annual_bert": 31,
+    "api": 3,
+    "abstain": 0
+  },
+  "model_fallback": false,
+  "model_elapsed_seconds": 31.689,
+  "api_fallback": {
+    "triggered": true,
+    "claims": 3,
+    "batches": 3,
+    "batch_log": [
+      {
+        "batch": 1,
+        "claims": 1,
+        "facts": 8,
+        "elapsed_seconds": 1.343,
+        "outcome": "succeeded",
+        "error": null,
+        "attempts": 1,
+        "prompt_tokens": 595,
+        "completion_tokens": 105
+      },
+      {
+        "batch": 2,
+        "claims": 1,
+        "facts": 9,
+        "elapsed_seconds": 1.286,
+        "outcome": "succeeded",
+        "error": null,
+        "attempts": 1,
+        "prompt_tokens": 645,
+        "completion_tokens": 88
+      },
+      {
+        "batch": 3,
+        "claims": 1,
+        "facts": 8,
+        "elapsed_seconds": 1.321,
+        "outcome": "succeeded",
+        "error": null,
+        "attempts": 1,
+        "prompt_tokens": 600,
+        "completion_tokens": 157
+      }
+    ],
+    "prompt_tokens": 1840,
+    "completion_tokens": 350,
+    "elapsed_seconds": 3.95,
+    "estimated_cost_cny": 0.00324
+  },
+  "validity": {
+    "checked_claims": 37,
+    "invalid": [],
+    "all_valid": true
+  },
+  "metrics": {
+    "claims_scored": 37,
+    "quote_claims": 19,
+    "quote_top1": 0.894737,
+    "quote_error_association_rate": 0.105263,
+    "growth_claims": 18,
+    "growth_exact_match": 0.888889,
+    "growth_precision": 0.944444,
+    "growth_recall": 0.944444,
+    "growth_f1": 0.944444,
+    "coverage": 1.0,
+    "abstain_rate": 0.0,
+    "by_route": {
+      "annual_bert": {
+        "claims": 31,
+        "correct": 28,
+        "accuracy": 0.903226
+      },
+      "api": {
+        "claims": 3,
+        "correct": 2,
+        "accuracy": 0.666667
+      },
+      "rules": {
+        "claims": 3,
+        "correct": 3,
+        "accuracy": 1.0
+      }
+    }
+  },
+  "per_claim": [
+    {
+      "claim_id": "v3-000543-0089",
+      "task_type": "quote_current",
+      "route": "rules",
+      "gold_fact_ids": [
+        "经营活动产生的现金流量净额@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "经营活动产生的现金流量净额@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-000586-0194",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润（元）@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润（元）@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-000736-0184",
+      "task_type": "quote_current",
+      "route": "api",
+      "gold_fact_ids": [
+        "总资产（元）@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "总资产（元）@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-000806-0189",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-000889-0179",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润(元)@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润(元)@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-000916-0201",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "经营活动产生的现金流量净额@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "加权平均净资产收益率@本期@合并"
+      ],
+      "exact_match": false
+    },
+    {
+      "claim_id": "v3-000950-0199",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-000993-0198",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-002166-0173",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润（元）@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润（元）@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-002390-0181",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-002663-0123",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "经营活动产生的现金流量净额@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "经营活动产生的现金流量净额@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-300093-0193",
+      "task_type": "quote_current",
+      "route": "rules",
+      "gold_fact_ids": [
+        "研发投入金额（元）@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "研发投入金额（元）@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-300147-0027",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "营业收入@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "营业收入@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-300165-0167",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-300313-0077",
+      "task_type": "quote_current",
+      "route": "rules",
+      "gold_fact_ids": [
+        "研发费用@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "研发费用@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-300341-0166",
+      "task_type": "quote_current",
+      "route": "api",
+      "gold_fact_ids": [
+        "营业收入（元）@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "exact_match": false
+    },
+    {
+      "claim_id": "v3-300482-0083",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-300529-0113",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-300539-0191",
+      "task_type": "quote_current",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润（元）@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润（元）@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-000543-0252",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "经营活动产生的现金流量净@上期@合并",
+        "经营活动产生的现金流量净@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "经营活动产生的现金流量净@本期@合并",
+        "经营活动产生的现金流量净@上期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-000595-0125",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润@上期@合并",
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并",
+        "归属于上市公司股东的净利润@上期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-000597-0170",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "经营活动产生的现金流量净@上期@合并",
+        "经营活动产生的现金流量净@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "经营活动产生的现金流量净@本期@合并",
+        "经营活动产生的现金流量净@上期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-000737-0183",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "营业收入（元）@上期@合并",
+        "营业收入（元）@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "营业收入（元）@本期@合并",
+        "营业收入（元）@上期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-000818-0200",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润@上期@合并",
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并",
+        "归属于上市公司股东的净利润@上期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-000889-0109",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "经营活动产生的现金流量净额@上期@合并",
+        "经营活动产生的现金流量净额@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "经营活动产生的现金流量净额@上期@合并",
+        "经营活动产生的现金流量净额@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-002100-0188",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "一、营业总收入@上期@合并",
+        "一、营业总收入@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "一、营业总收入@本期@合并",
+        "一、营业总收入@上期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-002166-0287",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "总资产（元）@上期@合并",
+        "总资产（元）@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "总资产（元）@本期@合并",
+        "总资产（元）@上期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-002198-0182",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "经营活动产生的现金流量净@上期@合并",
+        "经营活动产生的现金流量净@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "经营活动产生的现金流量净@本期@合并",
+        "经营活动产生的现金流量净@上期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-002220-0075",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润@上期@合并",
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并",
+        "归属于上市公司股东的净利润@上期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-002412-0196",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "研发投入资本化的金额（元）@上期@合并",
+        "研发投入资本化的金额（元）@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "研发投入资本化的金额（元）@上期@合并",
+        "研发投入资本化的金额（元）@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-002553-0192",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "营业收入（元）@上期@合并",
+        "营业收入（元）@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "营业收入（元）@本期@合并",
+        "营业收入（元）@上期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-002644-0063",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "营业收入@上期@合并",
+        "营业收入@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "营业收入@本期@合并",
+        "营业收入@上期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-002663-0233",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "基本每股收益（元/股）@上期@合并",
+        "基本每股收益（元/股）@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "基本每股收益（元/股）@本期@合并",
+        "基本每股收益（元/股）@2013年@合并"
+      ],
+      "exact_match": false
+    },
+    {
+      "claim_id": "v3-002880-0087",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润@上期@合并",
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并",
+        "归属于上市公司股东的净利润@上期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-002932-0151",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "基本每股收益（元/股）@上期@合并",
+        "基本每股收益（元/股）@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "基本每股收益（元/股）@本期@合并",
+        "基本每股收益（元/股）@2016年@合并"
+      ],
+      "exact_match": false
+    },
+    {
+      "claim_id": "v3-300040-0156",
+      "task_type": "growth_set",
+      "route": "api",
+      "gold_fact_ids": [
+        "营业收入（元）@上期@合并",
+        "营业收入（元）@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "营业收入（元）@上期@合并",
+        "营业收入（元）@本期@合并"
+      ],
+      "exact_match": true
+    },
+    {
+      "claim_id": "v3-300119-0033",
+      "task_type": "growth_set",
+      "route": "annual_bert",
+      "gold_fact_ids": [
+        "归属于上市公司股东的净利润@上期@合并",
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并",
+        "归属于上市公司股东的净利润@上期@合并"
+      ],
+      "exact_match": true
+    }
+  ]
+}

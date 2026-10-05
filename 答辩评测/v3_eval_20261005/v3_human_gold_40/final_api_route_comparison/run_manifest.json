@@ -1,0 +1,24 @@
+{
+  "dataset": "答辩评测\\v3_eval_20261005\\v3_human_gold_40\\human_gold.jsonl",
+  "claims_scored": 37,
+  "candidates": 279,
+  "human_abstains_excluded": 3,
+  "abstain_ids": [
+    "v3-002529-0186",
+    "v3-000678-0101",
+    "v3-002390-0232"
+  ],
+  "experiment": "both",
+  "allow_api": true,
+  "api_key_present": true,
+  "api_key_written": false,
+  "batching_limits": {
+    "claims": 1,
+    "facts": 60
+  },
+  "pricing": {
+    "input_cny_per_million": 1.0,
+    "output_cny_per_million": 4.0
+  },
+  "generated_at": "2026-10-05T21:37:29"
+}
