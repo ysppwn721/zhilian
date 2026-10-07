@@ -1,0 +1,323 @@
+{
+  "ready_for_training": false,
+  "validation_status": "quarantined_after_data_audit",
+  "validation_limitations": [
+    "Training reused 20 report files from the frozen external evaluation source.",
+    "Company 300149 overlaps train/dev; company 600165 overlaps dev/test.",
+    "Always selecting the current-period candidate achieves 100% Top-1 on each split.",
+    "PDF text anchoring does not validate accounting scope or period labels.",
+    "Semantic variants are generated text, not verbatim PDF sentences."
+  ],
+  "source": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\external_programmatic_holdout_all.jsonl",
+  "reports": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\cn_reports",
+  "label_basis": "programmatic current/prior candidates from public annual-report PDFs",
+  "claim_basis": "sentences extracted from the corresponding PDF text layer; no template fallback",
+  "group_split": {
+    "train": {
+      "rows": 285,
+      "claims": 95,
+      "groups": 20
+    },
+    "dev": {
+      "rows": 48,
+      "claims": 16,
+      "groups": 5
+    },
+    "test": {
+      "rows": 51,
+      "claims": 17,
+      "groups": 6
+    }
+  },
+  "semantic_variants_train_only": 135,
+  "stats": [
+    {
+      "group_id": "external-pdf-000615-2023-9317d6",
+      "file": "000615_奥园美谷科技股份有限公司2023年年度报告更正后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 1,
+      "rows": 9
+    },
+    {
+      "group_id": "external-pdf-000930-2023-fd0ecb",
+      "file": "000930_2023年年度报告更正后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 1,
+      "rows": 6
+    },
+    {
+      "group_id": "external-pdf-002097-2020-6a3732",
+      "file": "002097_2020年年度报告全文更新后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 3,
+      "rows": 18
+    },
+    {
+      "group_id": "external-pdf-002097-2021-c1b80f",
+      "file": "002097_2021年年度报告全文更新后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 3,
+      "rows": 18
+    },
+    {
+      "group_id": "external-pdf-002097-2022-8120ab",
+      "file": "002097_2022年年度报告更新后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 2,
+      "rows": 12
+    },
+    {
+      "group_id": "external-pdf-002097-2023-853a81",
+      "file": "002097_2023年年度报告全文更新后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 1,
+      "rows": 3
+    },
+    {
+      "group_id": "external-pdf-002388-2023-5fc666",
+      "file": "002388_2023年年度报告更正后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 0,
+      "rows": 0
+    },
+    {
+      "group_id": "external-pdf-002413-2023-81287c",
+      "file": "002413_2023年年度报告更新后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 3,
+      "rows": 24
+    },
+    {
+      "group_id": "external-pdf-002425-2021-93bbab",
+      "file": "002425_凯撒中国文化股份有限公司2021年年度报告更正后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 1,
+      "rows": 6
+    },
+    {
+      "group_id": "external-pdf-002425-2022-85b696",
+      "file": "002425_凯撒中国文化股份有限公司2022年年度报告更正后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 3,
+      "rows": 18
+    },
+    {
+      "group_id": "external-pdf-002425-2023-8f1426",
+      "file": "002425_凯撒中国文化股份有限公司2023年年度报告更正后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 2,
+      "rows": 9
+    },
+    {
+      "group_id": "external-pdf-002569-2019-17fa76",
+      "file": "002569_2019年年度报告全文更正后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 1,
+      "rows": 6
+    },
+    {
+      "group_id": "external-pdf-002569-2021-a2faa5",
+      "file": "002569_2021年年度报告全文补充更正后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 1,
+      "rows": 3
+    },
+    {
+      "group_id": "external-pdf-002569-2022-246c69",
+      "file": "002569_2022年年度报告补充更正后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 0,
+      "rows": 0
+    },
+    {
+      "group_id": "external-pdf-002569-2022-87fb3d",
+      "file": "002569_2022年年度报告更正后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 0,
+      "rows": 0
+    },
+    {
+      "group_id": "external-pdf-002569-2023-0be4d0",
+      "file": "002569_2023年年度报告补充更正后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 0,
+      "rows": 0
+    },
+    {
+      "group_id": "external-pdf-002569-2023-f26dc3",
+      "file": "002569_2023年年度报告更正后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 0,
+      "rows": 0
+    },
+    {
+      "group_id": "external-pdf-002598-2023-99fc14",
+      "file": "002598_2023年年度报告全文更新后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 3,
+      "rows": 21
+    },
+    {
+      "group_id": "external-pdf-002808-2019-6af0d0",
+      "file": "002808_2019年年度报告更新后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 4,
+      "rows": 15
+    },
+    {
+      "group_id": "external-pdf-002808-2020-c938e4",
+      "file": "002808_2020年年度报告更新后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 4,
+      "rows": 15
+    },
+    {
+      "group_id": "external-pdf-002808-2021-6c6791",
+      "file": "002808_2021年年度报告更新后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 5,
+      "rows": 24
+    },
+    {
+      "group_id": "external-pdf-002808-2022-0af8bf",
+      "file": "002808_2022年年度报告更新后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 4,
+      "rows": 24
+    },
+    {
+      "group_id": "external-pdf-002808-2023-cc1737",
+      "file": "002808_2023年年度报告更新后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 2,
+      "rows": 18
+    },
+    {
+      "group_id": "external-pdf-002825-2023-aeeadc",
+      "file": "002825_上海纳尔实业股份有限公司2023年年度报告更正后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 4,
+      "rows": 21
+    },
+    {
+      "group_id": "external-pdf-300149-2022-59308b",
+      "file": "300149_2022年年度报告更新后.pdf",
+      "split": "train",
+      "source_claims": 16,
+      "kept_claims": 2,
+      "rows": 15
+    },
+    {
+      "group_id": "external-pdf-300149-2023-9d019b",
+      "file": "300149_2023年年度报告更新后.pdf",
+      "split": "dev",
+      "source_claims": 16,
+      "kept_claims": 2,
+      "rows": 6
+    },
+    {
+      "group_id": "external-pdf-300632-2022-b4f0df",
+      "file": "300632_2022年年度报告更正后.pdf",
+      "split": "dev",
+      "source_claims": 16,
+      "kept_claims": 3,
+      "rows": 9
+    },
+    {
+      "group_id": "external-pdf-300632-2023-f43880",
+      "file": "300632_2023年年度报告更正后.pdf",
+      "split": "dev",
+      "source_claims": 16,
+      "kept_claims": 6,
+      "rows": 18
+    },
+    {
+      "group_id": "external-pdf-600080-2023-2900d7",
+      "file": "600080_金花企业集团股份有限公司2023年年度报告更正版.pdf",
+      "split": "dev",
+      "source_claims": 16,
+      "kept_claims": 4,
+      "rows": 12
+    },
+    {
+      "group_id": "external-pdf-600165-2022-fda51e",
+      "file": "600165_ST宁科2022年年度报告2024年12月修订.pdf",
+      "split": "dev",
+      "source_claims": 16,
+      "kept_claims": 1,
+      "rows": 3
+    },
+    {
+      "group_id": "external-pdf-600165-2023-516644",
+      "file": "600165_ST宁科2023年年度报告2024年12月修订.pdf",
+      "split": "test",
+      "source_claims": 16,
+      "kept_claims": 2,
+      "rows": 6
+    },
+    {
+      "group_id": "external-pdf-600187-2023-96d3db",
+      "file": "600187_2023年年度报告修订版.pdf",
+      "split": "test",
+      "source_claims": 16,
+      "kept_claims": 2,
+      "rows": 6
+    },
+    {
+      "group_id": "external-pdf-603839-2023-4a86e6",
+      "file": "603839_安正时尚集团股份有限公司2023年年度报告更正后.pdf",
+      "split": "test",
+      "source_claims": 16,
+      "kept_claims": 3,
+      "rows": 9
+    },
+    {
+      "group_id": "external-pdf-688152-2023-b712a7",
+      "file": "688152_麒麟信安2023年年度报告更正后.pdf",
+      "split": "test",
+      "source_claims": 16,
+      "kept_claims": 3,
+      "rows": 9
+    },
+    {
+      "group_id": "external-pdf-836263-2023-0b211f",
+      "file": "836263_2023年年度报告更正后.pdf",
+      "split": "test",
+      "source_claims": 16,
+      "kept_claims": 4,
+      "rows": 12
+    },
+    {
+      "group_id": "external-pdf-873576-2023-a281a9",
+      "file": "873576_2023年年度报告更正后.pdf",
+      "split": "test",
+      "source_claims": 16,
+      "kept_claims": 3,
+      "rows": 9
+    }
+  ]
+}

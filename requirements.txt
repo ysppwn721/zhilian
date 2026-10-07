@@ -1,9 +1,7 @@
 # 开发 / 评测 / 训练全集。
 #
 # ⚠️ 部署或产品环境请用 requirements-runtime.txt：
-#    本文件额外包含 pandas、pdfplumber 与本地重排模型三项（约 100MB+），
-#    而 zhilian/ 并不 import 它们——只被 答辩评测/ 下的数据集与评测脚本使用。
-#    实测：grep -rE 'pandas|pdfplumber' zhilian/ tests/  → 零命中。
+#    本文件额外包含 pandas 与本地重排模型；PyMuPDF 和 pdfplumber 是网页 PDF 导入必需项。
 #
 # 运行测试：pip install -r requirements-dev.txt
 fastapi==0.141.1
@@ -13,6 +11,7 @@ openpyxl>=3.1.5,<4
 python-docx>=1.1.2,<2
 python-pptx>=1.0.2,<2
 httpx==0.28.1
+pymupdf>=1.24,<2
 # MCP 只读工具服务。1.x 提供 mcp.server.fastmcp，2.x 改名为 mcp.server.mcpserver；
 # zhilian/mcp_server.py 对两者都做了兼容，此处给出经过验证的版本。
 # 注意：2.2.0 > 1.30，满足 >=1.30,<3（1.30 是"一点三十"，不是"一点三点零"）。

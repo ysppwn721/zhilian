@@ -1,0 +1,81 @@
+{
+  "dataset": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\v3_real_value_20261005\\benchmark_v3.jsonl",
+  "claims": 340,
+  "candidate_rows": 2654,
+  "companies": 97,
+  "models": [
+    {
+      "strategy": "纯规则-指标字段",
+      "device": "规则",
+      "quote_current_top1": 0.37777777777777777,
+      "growth_exact_match": 0.43389830508474575,
+      "growth_precision": null,
+      "growth_recall": null,
+      "growth_f1": null,
+      "elapsed_seconds": null,
+      "order_consistency": null
+    },
+    {
+      "strategy": "规则-数值单位",
+      "device": "规则+数值",
+      "quote_current_top1": 0.5333333333333333,
+      "growth_exact_match": 0.04406779661016949,
+      "growth_precision": 0.6220338983050847,
+      "growth_recall": 0.33559322033898303,
+      "growth_f1": null,
+      "elapsed_seconds": null,
+      "order_consistency": null
+    },
+    {
+      "strategy": "BGE",
+      "device": "CPU",
+      "quote_current_top1": 0.7111111111111111,
+      "growth_exact_match": 0.6203389830508474,
+      "growth_precision": 0.7949152542372881,
+      "growth_recall": 0.7949152542372881,
+      "growth_f1": 0.794915254237288,
+      "elapsed_seconds": 69.161,
+      "order_consistency": 1.0
+    },
+    {
+      "strategy": "BERT v1",
+      "device": "CUDA",
+      "quote_current_top1": 0.8222222222222222,
+      "growth_exact_match": 0.0847457627118644,
+      "growth_precision": 0.5338983050847458,
+      "growth_recall": 0.5338983050847458,
+      "growth_f1": 0.5338983050847458,
+      "elapsed_seconds": 17.53,
+      "order_consistency": 1.0
+    },
+    {
+      "strategy": "BERT v2",
+      "device": "CUDA",
+      "quote_current_top1": 0.7333333333333333,
+      "growth_exact_match": 0.49491525423728816,
+      "growth_precision": 0.7288135593220338,
+      "growth_recall": 0.7288135593220338,
+      "growth_f1": 0.7288135593220338,
+      "elapsed_seconds": 16.729,
+      "order_consistency": 1.0
+    },
+    {
+      "strategy": "年报修正版 BERT",
+      "device": "CUDA",
+      "quote_current_top1": 0.9333333333333333,
+      "growth_exact_match": 0.8135593220338984,
+      "growth_precision": 0.9050847457627119,
+      "growth_recall": 0.9050847457627119,
+      "growth_f1": 0.9050847457627119,
+      "elapsed_seconds": 18.149,
+      "order_consistency": 1.0
+    }
+  ],
+  "limitations": [
+    "v3 含 45 条真实数值单值题和 295 条真实增长题，没有合法的纯上期单值句，因此不能宣称本期/上期期间配平。",
+    "标签由 PDF 事实抽取和规则生成，属于程序化弱标签；公司与训练/既有评测集隔离。",
+    "BGE 在 CPU、BERT 在 CUDA，耗时不可作同硬件速度排名。",
+    "纯 API 未在本机重跑，当前公网 TCP 443 阻断，不能填入 v3 API 指标。"
+  ],
+  "decision": "暂不重训；先修自动任务识别和增长规则核验，再决定 ONNX 导出与训练。"
+}

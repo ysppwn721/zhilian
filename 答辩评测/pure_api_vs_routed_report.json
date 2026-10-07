@@ -1,0 +1,80 @@
+{
+  "dataset": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\semantic_rewrite_eval_v2.jsonl",
+  "api_replay": {
+    "provider": "DeepSeek",
+    "model": "deepseek-flash",
+    "dataset": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\semantic_rewrite_eval_v2.jsonl",
+    "claims": 72,
+    "calls": [
+      {
+        "batch": 1,
+        "claims": 40,
+        "suggestions": 40,
+        "latency_ms": 5245.1,
+        "status": "ok"
+      },
+      {
+        "batch": 2,
+        "claims": 32,
+        "suggestions": 32,
+        "latency_ms": 4484.3,
+        "status": "ok"
+      }
+    ],
+    "failed_calls": 0,
+    "api_key_written": false
+  },
+  "metrics": [
+    {
+      "system": "pure-api",
+      "claims": 72,
+      "linked": 60,
+      "top1_accuracy": 0.833333,
+      "error_association_rate": 0.0,
+      "coverage": 0.833333,
+      "abstain_rate": 0.166667,
+      "label_basis": "programmatic semantic rewrite; evaluation-only"
+    },
+    {
+      "system": "rule-local-api",
+      "claims": 72,
+      "linked": 69,
+      "top1_accuracy": 0.902778,
+      "error_association_rate": 0.055556,
+      "coverage": 0.958333,
+      "abstain_rate": 0.041667,
+      "label_basis": "programmatic semantic rewrite; evaluation-only"
+    }
+  ],
+  "route_counts": {
+    "rule_unique": 15,
+    "local": 43,
+    "api": 14,
+    "abstain": 3
+  },
+  "large_batch_cost": [
+    {
+      "mode": "pure_api",
+      "claims_sent_to_api": 280,
+      "api_batches": 7,
+      "input_tokens": 12303,
+      "output_tokens": 10288,
+      "cost_yuan_per_report": 0.053455,
+      "price_assumption": "DeepSeek input 1 yuan/M, output 4 yuan/M; no cache"
+    },
+    {
+      "mode": "rule_local_api",
+      "claims_sent_to_api": 48,
+      "api_batches": 2,
+      "input_tokens": 2115,
+      "output_tokens": 1584,
+      "cost_yuan_per_report": 0.008451,
+      "price_assumption": "DeepSeek input 1 yuan/M, output 4 yuan/M; no cache"
+    }
+  ],
+  "caveats": [
+    "API 结果来自已完成的真实 DeepSeek 回放，未再次发送网络请求；密钥未写入报告。",
+    "gold 是程序化语义改写标签，仅用于同集对照，不是人工行业真值。",
+    "成本按同一 DeepSeek 单价（输入 1 元/M、输出 4 元/M）与生产端 40 条/批计算，不代表产品售价。"
+  ]
+}

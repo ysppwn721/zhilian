@@ -1,0 +1,43 @@
+{
+  "model": "bert_v1",
+  "device": "cuda",
+  "elapsed_seconds": 17.53,
+  "metrics": {
+    "by_task": {
+      "growth_set": {
+        "claims": 295,
+        "source_set_exact_match": 0.0847457627118644,
+        "source_set_completeness_recall": 0.5338983050847458,
+        "source_set_precision": 0.5338983050847458,
+        "ambiguous_at_top2_boundary": 1,
+        "source_set_f1": 0.5338983050847458
+      },
+      "quote_current": {
+        "claims": 45,
+        "top1_accuracy": 0.8222222222222222,
+        "error_association_rate": 0.1777777777777778,
+        "ambiguous_top1": 0
+      }
+    },
+    "by_variant": {
+      "literal": {
+        "quote_claims": 34,
+        "quote_top1_accuracy": 0.7941176470588235,
+        "growth_claims": 233,
+        "growth_set_exact_match": 0.10300429184549356
+      },
+      "synonym": {
+        "quote_claims": 11,
+        "quote_top1_accuracy": 0.9090909090909091,
+        "growth_claims": 62,
+        "growth_set_exact_match": 0.016129032258064516
+      }
+    }
+  },
+  "candidate_order_invariance": {
+    "seed": 20261005,
+    "claims": 340,
+    "changed_claims": 0,
+    "prediction_set_consistency": 1.0
+  }
+}

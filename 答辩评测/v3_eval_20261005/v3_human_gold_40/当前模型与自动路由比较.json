@@ -1,0 +1,79 @@
+{
+  "dataset": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\v3_eval_20261005\\v3_human_gold_40\\human_gold.jsonl",
+  "claims_scored": 37,
+  "human_gold": true,
+  "document_profile": {
+    "profile": "annual",
+    "selection": "automatic annual reranker",
+    "basis": "normalized listed-company PDF name + report/audit text"
+  },
+  "models": {
+    "bge": {
+      "quote_top1": 0.631578947368421,
+      "growth_exact": 0.5555555555555556,
+      "growth_precision": 0.7222222222222222,
+      "growth_recall": 0.7222222222222222,
+      "elapsed_seconds": 23.786
+    },
+    "bge_evidence_experiment": {
+      "weights": [
+        2.0,
+        0.75,
+        0.5,
+        2.25
+      ],
+      "quote_top1": 0.8947368421052632,
+      "growth_exact": 0.7777777777777778,
+      "growth_f1": 0.8611111111111112,
+      "metrics": {
+        "by_task": {
+          "quote_current": {
+            "claims": 19,
+            "top1_accuracy": 0.8947368421052632,
+            "error_association_rate": 0.10526315789473684,
+            "ambiguous_top1": 0
+          },
+          "growth_set": {
+            "claims": 18,
+            "source_set_exact_match": 0.7777777777777778,
+            "source_set_completeness_recall": 0.8611111111111112,
+            "source_set_precision": 0.8611111111111112,
+            "ambiguous_at_top2_boundary": 0
+          }
+        },
+        "by_variant": {
+          "literal": {
+            "quote_claims": 19,
+            "quote_top1_accuracy": 0.8947368421052632,
+            "growth_claims": 18,
+            "growth_set_exact_match": 0.7777777777777778
+          }
+        }
+      }
+    },
+    "annual_bert_auto_profile": {
+      "quote_top1": 0.9473684210526315,
+      "growth_exact": 0.8888888888888888,
+      "growth_precision": 0.9444444444444444,
+      "growth_recall": 0.9444444444444444,
+      "elapsed_seconds": 36.238
+    },
+    "three_route_offline": {
+      "quote_top1": 0.9473684210526315,
+      "growth_exact": 0.8888888888888888,
+      "growth_precision": 0.9444444444444444,
+      "growth_recall": 0.9444444444444444,
+      "elapsed_seconds": 19.285,
+      "route_counts": {
+        "rules": 3,
+        "annual_bert": 34
+      },
+      "api_fallback": "not_measured"
+    }
+  },
+  "caveats": [
+    "纯 API 未在这 37 条人工 Gold 上同集实测，因此不填入本次主结果。",
+    "三层路由是离线规则+年报 BERT 路由，API 兜底仅统计为未测；不把本地耗时写成完整端到端耗时。",
+    "BGE 证据重排权重只在程序化 v3 开发集选择，再在人工 Gold 上验证。"
+  ]
+}

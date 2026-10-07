@@ -1,0 +1,3 @@
+﻿mode,seconds,measurement
+pure_api,9.729,real API replay
+three_route_rule_local,9.087,local measured; API fallback excluded

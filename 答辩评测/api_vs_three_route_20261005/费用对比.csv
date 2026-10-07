@@ -1,0 +1,3 @@
+﻿mode,claims,api_calls,input_tokens,output_tokens,estimated_cost_yuan,measurement
+pure_api,280,7,12303,10288,0.053455,token estimate
+three_route_api_fallback,280,2,2115,1584,0.008451,token estimate

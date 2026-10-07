@@ -1,0 +1,192 @@
+{
+  "created_local": "2026-10-01T09:38:35",
+  "git_head": "5ddaad83e89c941b4bec674dfa5bfb9184bba4f7",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "files": {
+    "答辩评测/eval_dataset.jsonl": {
+      "sha256": "fc26bd7bd968abd905aa0bf5a09a8891ebdea8908fb3eede4ca6145119c04c53",
+      "bytes": 251820
+    },
+    "答辩评测/real_human_eval_dataset.jsonl": {
+      "sha256": "c4cda48af90492d9c44153eb35d4ac3f2693da0cbd085265382cf37d09d07eea",
+      "bytes": 513608
+    },
+    "答辩评测/semantic_rewrite_eval_v2.jsonl": {
+      "sha256": "2863324414b86e6875387a69bb41f9a3359a2fa902ed07b4c36d244ac7d15ba2",
+      "bytes": 157050
+    },
+    "答辩评测/semantic_rewrite_eval_v2_api_predictions.jsonl": {
+      "sha256": "346cc9364d20e8c7f0e054d541371b116291897acbd061c583307a2fef04e2c4",
+      "bytes": 7432
+    },
+    "答辩评测/external_programmatic_holdout_all.jsonl": {
+      "sha256": "71c60205167aca6e13db48063e546f79e71f2840f3668197b01b983f4298a1f0",
+      "bytes": 894930
+    },
+    "长文Word测试/配套数据_初始.xlsx": {
+      "sha256": "32556fe5e76d33dc7904f309dc166ccec322b03ce3fb2b52019d33e2d8acf2c6",
+      "bytes": 5621
+    },
+    "答辩评测/cn_reports/000506_2023年年度报告更正后.pdf": {
+      "sha256": "e5595b5b7e4f43836f510889442653efa598e1a5faa79bfeef83030be4c21059",
+      "bytes": 1113883
+    },
+    "答辩评测/cn_reports/000615_奥园美谷科技股份有限公司2023年年度报告更正后.pdf": {
+      "sha256": "8765ec6005caba324cab68fea15a95d576535c21e58e2e97ddeff45f76932bc6",
+      "bytes": 5814700
+    },
+    "答辩评测/cn_reports/000930_2023年年度报告更正后.pdf": {
+      "sha256": "d0ce35a53b3dafb1cdafdd77d6ea18189580e82ae2ef55e5428b643a56996af0",
+      "bytes": 4212985
+    },
+    "答辩评测/cn_reports/002097_2020年年度报告全文更新后.pdf": {
+      "sha256": "4fb71064bb8a96db4aeaaa5c468994a7383133828429240a34d5ae04053d5471",
+      "bytes": 5342891
+    },
+    "答辩评测/cn_reports/002097_2021年年度报告全文更新后.pdf": {
+      "sha256": "fa81e3e9850f17799fc095bd31910e96031e5271b666e95320782a2613bdfa0a",
+      "bytes": 6290137
+    },
+    "答辩评测/cn_reports/002097_2022年年度报告更新后.pdf": {
+      "sha256": "343bd2c983d2014eca6c5145bedb46a523564ddb148597c9ea727509ccb634b5",
+      "bytes": 3340279
+    },
+    "答辩评测/cn_reports/002097_2023年年度报告全文更新后.pdf": {
+      "sha256": "802abf3837579593cd09839e7d7bae8da60f3cfb3a292eed5acf13e66b0ace2e",
+      "bytes": 4919404
+    },
+    "答辩评测/cn_reports/002388_2023年年度报告更正后.pdf": {
+      "sha256": "1b28a2920f6d746af4013a284f82b7dbd5ace29b9ca490f543a8ae6af605d733",
+      "bytes": 5706544
+    },
+    "答辩评测/cn_reports/002413_2023年年度报告更新后.pdf": {
+      "sha256": "3eb72a588a5bc2a7f567fde6f12dfb9fec4c87dbd1c1cbe1e3ba0350f2a47d71",
+      "bytes": 5844921
+    },
+    "答辩评测/cn_reports/002425_凯撒中国文化股份有限公司2021年年度报告更正后.pdf": {
+      "sha256": "65aba73ab68941b7c463f7c1f2c9858ae7e25b59556ccfd22b9131905c6a0d2c",
+      "bytes": 5358886
+    },
+    "答辩评测/cn_reports/002425_凯撒中国文化股份有限公司2022年年度报告更正后.pdf": {
+      "sha256": "52d60b22091dc735459d954ca5e3f8b74f289f0026d23715ba2a4d6b92e8c11d",
+      "bytes": 4293347
+    },
+    "答辩评测/cn_reports/002425_凯撒中国文化股份有限公司2023年年度报告更正后.pdf": {
+      "sha256": "4faad652134aba091ea13f04f01b62c532ac662244460b262e5ca51886efeabd",
+      "bytes": 4822214
+    },
+    "答辩评测/cn_reports/002569_2019年年度报告全文更正后.pdf": {
+      "sha256": "07ab5ad1c5da6b92d114b8e5649e31fc73953c6a813f680aad4175e660f2bea2",
+      "bytes": 4775383
+    },
+    "答辩评测/cn_reports/002569_2021年年度报告全文更正后.pdf": {
+      "sha256": "7afe341e0214d0b77d563309b9785df636746b32d8482649c4a6935819cdcf08",
+      "bytes": 1127883
+    },
+    "答辩评测/cn_reports/002569_2021年年度报告全文补充更正后.pdf": {
+      "sha256": "e2f2b203652c2aeb028b87308805c73ee5ea41b65561711395c605a3d257858a",
+      "bytes": 5011664
+    },
+    "答辩评测/cn_reports/002569_2022年年度报告更正后.pdf": {
+      "sha256": "d76013eeb08bd938398d8b03c3941476fe263f5822e04316973bed8a3ee2af82",
+      "bytes": 3324570
+    },
+    "答辩评测/cn_reports/002569_2022年年度报告补充更正后.pdf": {
+      "sha256": "50fd459c4aedc79fe393ec7cf036cf8e79476217336e7bac94c934c223ac30fb",
+      "bytes": 3151324
+    },
+    "答辩评测/cn_reports/002569_2023年年度报告更正后.pdf": {
+      "sha256": "15b60effbf4bc1bc93d5408b11cedeb5463088e0d68b8aa4d327263afeecdb6c",
+      "bytes": 4034804
+    },
+    "答辩评测/cn_reports/002569_2023年年度报告补充更正后.pdf": {
+      "sha256": "87419f3056532c1a6844bfd913c55e95283166fb4f23996de11b7d74f176b268",
+      "bytes": 3854575
+    },
+    "答辩评测/cn_reports/002598_2023年年度报告全文更新后.pdf": {
+      "sha256": "770b6c1cb33da69584a56f701986a584769d9a8cb6cf988ce0094f6ab8cc6889",
+      "bytes": 3020730
+    },
+    "答辩评测/cn_reports/002808_2019年年度报告更新后.pdf": {
+      "sha256": "32c0dd555f36fa34c9cfb9a2c421eac361e73a9f6a146695f0fd8a1dbaaa065e",
+      "bytes": 5402342
+    },
+    "答辩评测/cn_reports/002808_2020年年度报告更新后.pdf": {
+      "sha256": "ed170434c150604601f53da3c25d01f0b5a68b2722850421b365e3c8c6b10014",
+      "bytes": 5335021
+    },
+    "答辩评测/cn_reports/002808_2021年年度报告更新后.pdf": {
+      "sha256": "37d6393838ac94bbf80d62a21b8f84c27432a67f3822f94a19dcf7025b0ddb35",
+      "bytes": 5031910
+    },
+    "答辩评测/cn_reports/002808_2022年年度报告更新后.pdf": {
+      "sha256": "2831fbc213c9bfa6d069f1442480509f1eb320235ec01047876968b584eb44a8",
+      "bytes": 4244983
+    },
+    "答辩评测/cn_reports/002808_2023年年度报告更新后.pdf": {
+      "sha256": "cc21dd94bfac77ee617892f33f222bb4ebcdf35fac1c7bed49d64230d18a710c",
+      "bytes": 4406326
+    },
+    "答辩评测/cn_reports/002825_上海纳尔实业股份有限公司2023年年度报告更正后.pdf": {
+      "sha256": "6a29c6a1c3149de1b5c5182f70a661bddd84f78b798d6fc60064f68304135bac",
+      "bytes": 3303740
+    },
+    "答辩评测/cn_reports/300149_2022年年度报告更新后.pdf": {
+      "sha256": "250f76a9cea9436e2fa919535baf36ba0c0c2bc6ad58bb67c4dd6ef16d2bd21d",
+      "bytes": 4469634
+    },
+    "答辩评测/cn_reports/300149_2023年年度报告更新后.pdf": {
+      "sha256": "482bc1388d659b451b2b4aa5c1eecf53e1c1c0a0bd1d58d880e28ee480abd269",
+      "bytes": 5022831
+    },
+    "答辩评测/cn_reports/300632_2022年年度报告更正后.pdf": {
+      "sha256": "38854296e87ba2d9df93a771122cdabbfb50eab51357eb6e64cac8d9ba0508f8",
+      "bytes": 3172808
+    },
+    "答辩评测/cn_reports/300632_2023年年度报告更正后.pdf": {
+      "sha256": "878185d1503dadca2b618d77da50c0e2390cb4f3ae87d644428e8df29820ec12",
+      "bytes": 3116617
+    },
+    "答辩评测/cn_reports/600080_金花企业集团股份有限公司2023年年度报告更正版.pdf": {
+      "sha256": "8b20e633b8bf5c858a4a71a402928eec99d452127bec0f07f9caa48990b48df8",
+      "bytes": 3854711
+    },
+    "答辩评测/cn_reports/600165_ST宁科2022年年度报告2024年12月修订.pdf": {
+      "sha256": "8892da6df0b5a67edcbb45dfd12c51c8c01ec45bf598e5b0cfb67e1ed968988b",
+      "bytes": 3721565
+    },
+    "答辩评测/cn_reports/600165_ST宁科2023年年度报告2024年12月修订.pdf": {
+      "sha256": "fbe21675283ea0ddbdcb524b4c27efe5ec5102ba833988bba132ea899d787c3c",
+      "bytes": 3907606
+    },
+    "答辩评测/cn_reports/600187_2023年年度报告修订版.pdf": {
+      "sha256": "bcc81b41e1526db30af2e9ce7bc3211fb4a065bd83dc494def3302bd7ded70df",
+      "bytes": 6090088
+    },
+    "答辩评测/cn_reports/603839_安正时尚集团股份有限公司2023年年度报告更正后.pdf": {
+      "sha256": "d76aa663c537bd41df94562f0e69ecf054f4a204cd68726de6fc92ff6964b634",
+      "bytes": 6643613
+    },
+    "答辩评测/cn_reports/688152_麒麟信安2023年年度报告摘要更正后.pdf": {
+      "sha256": "d9eb2392fc28aed58ed53cd4b3fcd302dca824394ed652126c8e648485ea9477",
+      "bytes": 1190860
+    },
+    "答辩评测/cn_reports/688152_麒麟信安2023年年度报告更正后.pdf": {
+      "sha256": "c4f606c1ee8cc3cb0113339bf9c32aab366d4060674322f00ee783c472fb381d",
+      "bytes": 4398709
+    },
+    "答辩评测/cn_reports/688516_无锡奥特维科技股份有限公司2024年半年度报告英文版.pdf": {
+      "sha256": "49276a8182ffce906f8ad4ec69039dabf934fe11119be0e67a888d512cd54703",
+      "bytes": 1749806
+    },
+    "答辩评测/cn_reports/836263_2023年年度报告更正后.pdf": {
+      "sha256": "a12f4b916597b6f22c0df262b3cecb9ce53c69d35c59a07fc6d2f79ad9b14a04",
+      "bytes": 2095059
+    },
+    "答辩评测/cn_reports/873576_2023年年度报告更正后.pdf": {
+      "sha256": "55af3cfdc542a67ad0027e1190aa06fd32ebf8aa028219a31404b081f6e4e4f6",
+      "bytes": 2331698
+    }
+  },
+  "note": "Working tree already contains pre-existing edits; git HEAD is not the code snapshot."
+}

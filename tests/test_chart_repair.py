@@ -29,6 +29,8 @@ def test_repair_chart_with_missing_embedded_workbook(tmp_path):
     ids = [c['claim_id'] for c in ws['checks'] if c['status'] == 'inconsistent']
     ws = store.repair(ws['id'], ws['revision'], ids)
     assert ws['last_repair']['verified'] and ws['summary']['inconsistent'] == 0
+    assert ws['last_repair']['chart_verification'] == {
+        'checked': 1, 'xml_reread': True, 'render_check': 'external_tool_required', 'status': 'passed'}
     raw = store.read(ws['id'])
     output = store.folder(ws['id']) / raw['generation']
     ppt = next(d for d in raw['documents'] if d['kind'] == 'pptx')

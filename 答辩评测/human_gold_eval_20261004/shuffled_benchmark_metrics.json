@@ -1,0 +1,126 @@
+{
+  "dataset": "答辩评测\\human_gold_eval_20261004\\human_gold_20261004_shuffled.jsonl",
+  "dataset_shuffled": true,
+  "questions": 150,
+  "candidates": 1613,
+  "zero_information_baselines": {
+    "总选第 1 个候选": {
+      "quote_current": 0.08,
+      "quote_prior": 0.18,
+      "growth_set": 0.0
+    },
+    "总选最后 1 个候选": {
+      "quote_current": 0.16,
+      "quote_prior": 0.3,
+      "growth_set": 0.0
+    },
+    "总选中位候选": {
+      "quote_current": 0.14,
+      "quote_prior": 0.28,
+      "growth_set": 0.0
+    }
+  },
+  "random_expected_top1_single_value": 0.1686,
+  "always_last_top1_on_original_set": 0.7,
+  "results": {
+    "bge": {
+      "quote_current": {
+        "n": 50,
+        "accuracy": 0.9
+      },
+      "quote_prior": {
+        "n": 50,
+        "accuracy": 0.9
+      },
+      "growth_set": {
+        "n": 50,
+        "accuracy": 0.58
+      }
+    },
+    "bert_v1": {
+      "quote_current": {
+        "n": 50,
+        "accuracy": 0.96
+      },
+      "quote_prior": {
+        "n": 50,
+        "accuracy": 0.08
+      },
+      "growth_set": {
+        "n": 50,
+        "accuracy": 0.06
+      }
+    },
+    "bert_v2": {
+      "quote_current": {
+        "n": 50,
+        "accuracy": 0.96
+      },
+      "quote_prior": {
+        "n": 50,
+        "accuracy": 0.0
+      },
+      "growth_set": {
+        "n": 50,
+        "accuracy": 0.7
+      }
+    },
+    "annual_repaired_v1": {
+      "quote_current": {
+        "n": 50,
+        "accuracy": 0.68
+      },
+      "quote_prior": {
+        "n": 50,
+        "accuracy": 0.98
+      },
+      "growth_set": {
+        "n": 50,
+        "accuracy": 1.0
+      }
+    },
+    "纯规则": {
+      "quote_current": {
+        "n": 50,
+        "accuracy": 1.0
+      },
+      "quote_prior": {
+        "n": 50,
+        "accuracy": 1.0
+      },
+      "growth_set": {
+        "n": 50,
+        "accuracy": 0.32
+      }
+    },
+    "BGE + BERT 等权 RRF": {
+      "quote_current": {
+        "n": 50,
+        "accuracy": 0.86
+      },
+      "quote_prior": {
+        "n": 50,
+        "accuracy": 0.94
+      },
+      "growth_set": {
+        "n": 50,
+        "accuracy": 0.9
+      }
+    },
+    "固定任务路由": {
+      "quote_current": {
+        "n": 50,
+        "accuracy": 0.9
+      },
+      "quote_prior": {
+        "n": 50,
+        "accuracy": 0.9
+      },
+      "growth_set": {
+        "n": 50,
+        "accuracy": 1.0
+      }
+    }
+  },
+  "note": "在打乱版人工 Gold 集上评测（种子 20261004）。原集末位正例率 100%，\"总选最后一个\"= 70.00%，故原集分数不可解读。"
+}

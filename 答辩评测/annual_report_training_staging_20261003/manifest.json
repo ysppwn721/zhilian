@@ -1,0 +1,48 @@
+{
+  "ready_for_training": false,
+  "validation_status": "pending_human_labels_scope_period_unit_and_balance",
+  "source_audit": "答辩评测\\annual_reports_new_20261002\\audit_candidates.jsonl",
+  "source_rows": 8214,
+  "staging_rows_with_narrative_anchor": 81,
+  "label_values": {
+    "all": null
+  },
+  "company_disjoint": true,
+  "splits": {
+    "train": {
+      "rows": 73,
+      "companies": 21,
+      "anchors": {
+        "growth_sentence": 30,
+        "current_anchor": 35,
+        "prior_anchor": 8
+      }
+    },
+    "dev": {
+      "rows": 4,
+      "companies": 3,
+      "anchors": {
+        "current_anchor": 2,
+        "growth_sentence": 2
+      }
+    },
+    "test": {
+      "rows": 4,
+      "companies": 2,
+      "anchors": {
+        "current_anchor": 1,
+        "growth_sentence": 3
+      }
+    }
+  },
+  "rejection_summary": {
+    "missing_or_table_only_claim": 8133
+  },
+  "blocking_reasons": [
+    "label_scope_and_period_audit_not_approved",
+    "current_period_selection_shortcut_scores_100_percent",
+    "prior_anchor_balance_insufficient",
+    "unit_and_scope_evidence_incomplete"
+  ],
+  "training_rule": "Do not pass this directory to train_reranker.py until ready_for_training=true and labels are audited."
+}

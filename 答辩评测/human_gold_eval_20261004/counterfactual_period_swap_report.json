@@ -1,0 +1,64 @@
+{
+  "model": "annual_repaired_v1",
+  "runs": {
+    "gold_原始": {
+      "quote_current": 0.68,
+      "quote_prior": 0.98
+    },
+    "gold_交换期间词": {
+      "quote_current": 0.32,
+      "quote_prior": 0.58
+    },
+    "gold_交换数值": {
+      "quote_current": 0.68,
+      "quote_prior": 0.98
+    },
+    "train_原始": {
+      "quote_本期": 0.7088,
+      "quote_上期": 0.956
+    },
+    "train_交换期间词": {
+      "quote_本期": 0.3077,
+      "quote_上期": 0.3846
+    },
+    "dev_原始": {
+      "quote_本期": 0.7018,
+      "quote_上期": 0.9532
+    },
+    "dev_交换期间词": {
+      "quote_本期": 0.3099,
+      "quote_上期": 0.3626
+    },
+    "test_原始": {
+      "quote_本期": 0.7246,
+      "quote_上期": 0.9565
+    },
+    "test_交换期间词": {
+      "quote_本期": 0.314,
+      "quote_上期": 0.4058
+    }
+  },
+  "gold_follows_swap": {
+    "quote_current": 0.68,
+    "quote_prior": 0.42
+  },
+  "scope_composition": {
+    "本期": {
+      "合并": 45,
+      "负:未标明": 466,
+      "负:合并": 148,
+      "负:分部": 5,
+      "分部": 2,
+      "负:母公司": 21,
+      "母公司": 3
+    },
+    "上期": {
+      "负:合并": 130,
+      "负:分部": 3,
+      "负:母公司": 14,
+      "合并": 45,
+      "母公司": 4,
+      "分部": 1
+    }
+  }
+}

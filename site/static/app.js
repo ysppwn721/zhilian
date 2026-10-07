@@ -1,7 +1,40 @@
 'use strict';
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let workspace = null, currentView = 'overview', filter = 'all', health = null, graphFact = null, quota = null;
+let workspace = null, currentView = 'overview', filter = 'attention', health = null, graphFact = null, quota = null;
+let showAllFacts = false, factSearchTerm = '';
+const sourcePages = {files: 0, facts: 0, segments: 0, rules: 0};
+let sourceSearch = '', fileSearch = '';
+const pageSize = 20;
+function pageControls(key, count, size=pageSize) {
+  const pages = Math.max(1, Math.ceil(count/size));
+  sourcePages[key] = Math.min(sourcePages[key], pages-1);
+  return `<div class="page-controls"><span>共 ${count} 项 · ${sourcePages[key]+1} / ${pages} 页</span><button class="icon-button" data-source-page="${key}" data-offset="-1" title="上一页" aria-label="上一页" ${sourcePages[key]===0?'disabled':''}>←</button><button class="icon-button" data-source-page="${key}" data-offset="1" title="下一页" aria-label="下一页" ${sourcePages[key]+1===pages?'disabled':''}>→</button></div>`;
+}
+const modelModes={rules:'纯规则',local:'规则 + 本地模型',hybrid:'规则 + 本地模型 + API',api:'规则 + API',api_only:'纯 API（研究对照）'};
+function currentModelMode(){return workspace?.model_mode||health?.model_mode||'hybrid';}
+function remoteModelAllowed(){return !['rules','local'].includes(currentModelMode());}
+function modelModeOptions(){return Object.entries(modelModes).map(([value,label])=>`<option value="${value}" ${value===currentModelMode()?'selected':''}>${esc(label)}</option>`).join('');}
+function modelModeHint(value=currentModelMode()){
+  const descriptions={rules:'只使用规则；关联、诊断解释和图片 OCR 均不会请求远程模型。',local:'规则无法确定时使用已配置的本地模型；低置信结果转人工，不使用 API。',hybrid:'规则先处理；本地模型处理语义难例；仍无法确定时请求 API，可能消耗额度。',api:'规则无法确定时请求 API，跳过本地模型，可能消耗额度。',api_only:'把全部已识别、未确认的非图表正文论断按每批最多 40 条发送 API；不提供规则候选。用于研究对照，可能产生更多调用费用。'};
+  let hint=descriptions[value]||descriptions.hybrid;
+  if(['local','hybrid'].includes(value)&&!health?.local_reranker?.enabled)hint+=' 本地模型未就绪，'+(value==='local'?'当前只能使用规则和人工确认。':'困难项将转 API 或人工。');
+  if(!['rules','local'].includes(value)&&!health?.model?.enabled)hint+=' API 未配置，无法完成远程建议，将保留人工处理。';
+  return hint;
+}
+function renderModelMode(){
+  const select=$('modelModeSelect');
+  if(select){select.innerHTML=modelModeOptions();select.disabled=!workspace;select.title=workspace?modelModeHint():'导入或打开项目后可选择处理模式';}
+  const badge=$('modelBadge');
+  if(badge){badge.textContent=remoteModelAllowed()?health?.model?.enabled?'API 已配置'+quotaLabel(quota):'API 未配置':'离线模式';badge.title=modelModeHint()+' '+(remoteModelAllowed()?quotaTitle(quota):'');}
+}
+async function switchModelMode(selected){
+  if(!workspace||!(selected in modelModes)){renderModelMode();return;}
+  const result=await post('model-mode',{mode:selected},'正在保存项目处理模式');
+  renderModelMode();
+  if(result){toast('已切换为 '+modelModes[selected]+'；点击运行智能体重新生成候选');return true;}
+  return false;
+}
 const statusNames = {consistent:'仍成立', inconsistent:'已失效', unverifiable:'无法判断'};
 const kindNames = {quote:'数值引用', growth:'增长率', ranking:'排名', threshold:'阈值判断', chart:'图表数据'};
 const classNames = {consistent:'green', inconsistent:'red', unverifiable:'amber'};
@@ -163,22 +196,99 @@ function afterDataUpdate() {
 
 async function refreshProjects() {
   const projects=await api('/api/projects');
-  $('projects').innerHTML=projects.map(p=>`<button class="project-link ${workspace?.id===p.id?'active':''}" data-project="${p.id}">${esc(p.name)}</button>`).join('');
+  $('projects').innerHTML=projects.map(p=>`<div class="project-item"><button class="project-link ${workspace?.id===p.id?'active':''}" data-project="${p.id}">${esc(p.name)}</button><button class="project-delete" data-project-delete="${p.id}" data-project-name="${esc(p.name)}" title="删除项目" aria-label="删除 ${esc(p.name)}">×</button></div>`).join('');
+  $('projects').querySelectorAll('[data-project-delete]').forEach(button=>button.onclick=async event=>{
+    event.stopPropagation();
+    const id=button.dataset.projectDelete, name=button.dataset.projectName||'这个项目';
+    if(!window.confirm(`确定删除“${name}”吗？\n项目文件、历史版本和核验记录都会永久删除。`))return;
+    const result=await busy('正在删除项目',()=>api(`/api/projects/${id}`,{method:'DELETE'}));
+    if(!result)return;
+    if(workspace?.id===id){workspace=null;graphFact=null;localStorage.removeItem('zhilian-project');render();}
+    await refreshProjects();
+    toast(`已删除项目：${name}`);
+  });
   return projects;
 }
 async function loadProject(id) {
   const w=await busy('正在读取项目',()=>api('/api/projects/'+id));
-  if(w){workspace=w;graphFact=null;localStorage.setItem('zhilian-project',w.id);render();await refreshProjects();}
+  if(w){if(workspace?.id!==id){sourceSearch='';fileSearch='';Object.keys(sourcePages).forEach(k=>sourcePages[k]=0);}workspace=w;graphFact=null;localStorage.setItem('zhilian-project',w.id);render();await refreshProjects();}
 }
 function switchView(view) {
   currentView=view;
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
-  const labels={overview:'一致性工作台',diagnosis:'异常诊断',ocr:'图片文字',sources:'来源与文件',graph:'证据依赖图',history:'变更记录',report:'变更报告'};
+  const labels={overview:'一致性工作台',diagnosis:'异常诊断',ocr:'图片文字',sources:'来源与文件',graph:'证据依赖图',history:'变更记录',report:'变更报告',models:'模型调用'};
   $('breadcrumb').textContent=labels[view];
   if(workspace)render();
 }
+function renderWorkspacePulse(w) {
+  const el = $('workspacePulse');
+  if (!el) return;
+  const s = w.summary || {};
+  const pending = Number(s.pending || 0);
+  const repairable = Number(s.repairable || 0);
+  const inconsistent = Number(s.inconsistent || 0);
+  const unverifiable = Number(s.unverifiable || 0);
+  let state = 'ready', title = '项目已就绪', copy = '先确认来源，再处理数据变化。';
+  let action = `<button class="button primary small" data-pulse-action="agent">运行智能体</button>`;
+  if (pending) {
+    state = 'attention'; title = `${pending} 项来源等待确认`; copy = '模型和规则只提供候选，确认后才会进入确定性核验。';
+    action = `<button class="button primary small" data-pulse-action="confirm">审阅候选来源</button>`;
+  } else if (repairable || inconsistent) {
+    state = 'repair'; title = `${inconsistent || repairable} 项结论需要处理`; copy = '系统已定位受影响内容，预览后只修改失效论断。';
+    action = `<button class="button primary small" data-pulse-action="repair">预览修复</button>`;
+  } else if (unverifiable) {
+    state = 'review'; title = `${unverifiable} 项需要人工复核`; copy = '这些内容超出当前确定性支持范围，已被单独保留。';
+    action = `<button class="button secondary small" data-pulse-action="diagnosis">查看诊断</button>`;
+  } else if (w.last_repair) {
+    state = 'complete'; title = '本轮核验已完成'; copy = '文件已重新读取复核，可以导出成果和变更报告。';
+    action = `<button class="button primary small" data-pulse-action="export">导出成果</button>`;
+  }
+  el.innerHTML = `<div class="pulse-mark ${state}"><span></span></div><div class="pulse-copy"><strong>${esc(title)}</strong><span>${esc(copy)}</span></div><div class="pulse-meta"><span>${s.documents || 0} 文件</span><span>${s.claims || 0} 条论断</span><span>版本 ${w.revision}</span></div>${action}`;
+  el.querySelector('[data-pulse-action]')?.addEventListener('click', e => {
+    const action = e.currentTarget.dataset.pulseAction;
+    if (action === 'agent') agentModal();
+    if (action === 'confirm') confirmAllModal();
+    if (action === 'repair') repairModal();
+    if (action === 'diagnosis') switchView('diagnosis');
+    if (action === 'export') deliveryModal();
+  });
+  const routeSummary = $('routingSummary'), a = w.agent;
+  if (routeSummary) {
+    routeSummary.classList.toggle('hidden', !a?.model_routing);
+    if (a?.model_routing) {
+      const routes = Object.values(a.claim_routes || {});
+      const labels = {rules:'规则', local:'本地模型', api:'API', human:'人工复核'};
+      const selected = a.model_profile || {};
+      const model = selected.selected === 'annual' ? '年报 BERT' : (selected.model_name || '通用本地模型');
+      const stale = a.revision !== w.revision;
+      routeSummary.innerHTML = `<span class="route-profile">${a.document_profile?.profile === 'annual' ? '年报资料' : '通用资料'} · ${esc(model)}${selected.fallback ? ' · 已回退' : ''}${stale ? ' · 历史任务' : ''}</span><div class="routing-strip">${Object.entries(labels).map(([key,label])=>`<span><b>${routes.filter(r=>r.source===key).length}</b> ${label}</span>`).join('')}</div><button class="link-button" id="openRoutingLedger">查看调用依据 →</button>`;
+      $('openRoutingLedger').onclick=()=>switchView('models');
+    }
+  }
+}
+function renderFactInputs() {
+  const facts = workspace?.facts || [], container = $('factInputs');
+  if (!container) return;
+  const term = factSearchTerm.trim().toLowerCase();
+  const matches = facts.filter(f => !term || [f.subject, f.metric, f.period, f.scope, f.id].some(v => String(v ?? '').toLowerCase().includes(term)));
+  const attentionIds = new Set((workspace?.claims || []).filter(c => {
+    const r = resultOf(c); return !c.confirmed || r?.status === 'inconsistent' || r?.status === 'unverifiable';
+  }).flatMap(c => c.refs || []));
+  const priority = matches.filter(f => drafts().has(f.id) || attentionIds.has(f.id));
+  const visible = showAllFacts || term ? matches : [...priority, ...matches.filter(f => !priority.includes(f))].slice(0, 5);
+  const label = $('factCountLabel');
+  if (label) label.textContent = term ? `找到 ${matches.length} / ${facts.length} 条` : `共 ${facts.length} 条 · 显示 ${visible.length} 条`;
+  const toggle = $('toggleFacts');
+  if (toggle) toggle.textContent = showAllFacts ? '收起' : (facts.length > visible.length ? '查看全部' : '已全部显示');
+  container.innerHTML = visible.length ? visible.map(f => `<div class="fact-row"><label for="fact-${esc(f.id)}">${esc(factName(f))}<small>${esc(f.sheet+'!'+f.cell)}</small></label><div class="fact-field"><input id="fact-${esc(f.id)}" data-fact="${esc(f.id)}" type="number" step="any" value="${f.value??''}" aria-label="${esc(factName(f))}"><span>${esc(f.unit)}</span></div></div>`).join('') : '<div class="empty-list compact-empty">没有匹配的事实数据</div>';
+  for (const input of container.querySelectorAll('[data-fact]')) {
+    if (drafts().has(input.dataset.fact)) input.value = drafts().get(input.dataset.fact);
+    input.oninput = () => trackDraft(input);
+  }
+}
 function render() {
   $('welcome').classList.toggle('hidden',!!workspace);$('workspace').classList.toggle('hidden',!workspace);
+  renderModelMode();
   if(!workspace)return;
   const w=workspace,s=w.summary;
   const textIssues=w.claims.filter(c=>c.source!=='ocr'&&resultOf(c).status==='inconsistent').length;
@@ -186,20 +296,48 @@ function render() {
   $('projectName').textContent=w.name;
   $('workspaceEyebrow').textContent=w.demo?'DEMO PROJECT · 模拟数据':'PROJECT WORKSPACE';
   $('projectSubtitle').textContent=`${s.documents} 份文件 · ${s.facts} 条来源事实 · 版本 ${w.revision} · 数据与成果均保留历史版本`;
-  ['overview','diagnosis','ocr','sources','graph','history','report'].forEach(v=>$(v+'View').classList.toggle('hidden',currentView!==v));
+  renderWorkspacePulse(w);
+  ['overview','diagnosis','ocr','sources','graph','history','report','models'].forEach(v=>$(v+'View').classList.toggle('hidden',currentView!==v));
   $('undoButton').disabled=!w.history.length;
   $('agentButton').textContent=w.agent?.phase==='awaiting_decision'&&w.agent.revision===w.revision?'继续智能体待办':'运行智能体';
   const verified=w.claims.filter(c=>c.confirmed&&resultOf(c).status==='consistent').length;
   const stats=[['已识别论断',s.claims,'','逐项核验已识别的受支持表达','◇'],['已确认且成立',verified,'success','来源已确认，计算结果一致','✓'],['计算不一致',s.inconsistent,'danger','确认来源后可预览局部修复','↗'],['来源待确认',s.pending,'','候选结果须经人工核对','◷']];
   $('stats').innerHTML=stats.map(([label,value,cls,note,icon])=>`<div class="stat"><div class="stat-top">${label}<span class="stat-icon">${icon}</span></div><div class="stat-value ${cls}">${value}<span style="font-size:11px;color:#9bab9d;font-weight:400;margin-left:7px">项</span></div><div class="stat-bottom">${note}</div></div>`).join('');
+  const chartTotal = Math.max(Number(s.claims || 0), 1);
+  const confirmedBad = w.claims.filter(c => c.confirmed && resultOf(c)?.status === 'inconsistent').length;
+  const confirmedUnknown = w.claims.filter(c => c.confirmed && resultOf(c)?.status === 'unverifiable').length;
+  const chartItems = [['已确认成立', verified, 'ok'], ['来源待确认', s.pending || 0, 'pending'], ['已确认失效', confirmedBad, 'bad'], ['已确认需复核', confirmedUnknown, 'unknown']];
+  $('statusChart').innerHTML = `<div class="status-chart-head"><span>当前处理进度</span><b>${verified} / ${s.claims || 0} 条已确认成立</b></div><div class="status-bar">${chartItems.map(([,value,cls]) => `<span class="status-segment ${cls}" style="width:${value / chartTotal * 100}%" title="${value} 项"></span>`).join('')}</div><div class="status-legend">${chartItems.map(([label,value,cls]) => `<span><i class="legend-dot ${cls}"></i>${label} ${value}</span>`).join('')}</div>`;
   $('successBanner').innerHTML=textIssues?`<div class="banner">${textIssues} 项正文内容尚未更新到 Word / PPT。${s.repairable?'请预览并确认修复。':'请先确认来源关联。'} <button class="button primary small" id="continueRepair">${s.repairable?'预览修复并生成文件':'审阅候选来源'}</button></div>`:w.last_repair?`<div class="banner">✓ 已修复 ${w.last_repair.count} 项并重新验证。${s.pending?`另有 ${s.pending} 项来源待确认。`:''}<div class="delivery-links">${downloadLinks()}</div></div>`:'';
   if(w.claims.some(c=>c.source==='ocr'))$('successBanner').insertAdjacentHTML('beforeend','<p class="hint">OCR 图片论断只读：候选来源不能确认关联，图片异常请在原文件中人工处理。智能体只处理正文和原生图表。</p>');
   if($('continueRepair'))$('continueRepair').onclick=s.repairable?repairModal:confirmAllModal;
-  $('workflow').innerHTML=`<span class="step done"><i>✓</i> 导入文件</span><span class="rule"></span><span class="step ${s.pending===0?'done':''}"><i>${s.pending===0?'✓':'2'}</i> 确认来源</span><span class="rule"></span><span class="step ${s.pending===0?'done':''}"><i>3</i> 验证结论</span><span class="rule"></span><span class="step ${w.last_repair?'done':''}"><i>4</i> 修复与导出</span>`;
-  $('suggestButton').disabled=!health?.model.enabled;
-  $('suggestButton').title=health?.model.enabled?'将待确认论断及事实元数据发送给 DeepSeek':'DeepSeek 尚未开通，请联系管理员或继续人工确认';
+  const flow = {
+    sources: {done: true, active: false},
+    confirm: {done: s.pending === 0, active: s.pending > 0},
+    verify: {done: s.pending === 0 && !s.inconsistent && !s.unverifiable && !s.repairable, active: s.pending === 0 && !s.repairable && (s.inconsistent > 0 || s.unverifiable > 0)},
+    repair: {done: !!w.last_repair && !s.repairable, active: s.pending === 0 && s.repairable > 0},
+  };
+  const step = (key, number, label) => {
+    const state = flow[key];
+    const cls = `${state.done ? 'done' : ''} ${state.active ? 'active' : ''}`.trim();
+    const icon = state.done ? '✓' : number;
+    const current = state.active ? ' aria-current="step"' : '';
+    return `<button class="step ${cls}" data-flow-step="${key}"${current} title="${state.active ? '当前步骤' : state.done ? '已完成' : '待处理'}"><i>${icon}</i> ${label}${state.active ? '<small>当前</small>' : ''}</button>`;
+  };
+  $('workflow').innerHTML=`${step('sources', 1, '导入文件')}<span class="rule"></span>${step('confirm', 2, '确认来源')}<span class="rule"></span>${step('verify', 3, '验证结论')}<span class="rule"></span>${step('repair', 4, '修复与导出')}`;
+  $('workflow').querySelectorAll('[data-flow-step]').forEach(button => button.onclick=()=>{
+    const step=button.dataset.flowStep;
+    if(step==='sources')switchView('sources');
+    if(step==='confirm')confirmAllModal();
+    if(step==='verify')switchView('overview');
+    if(step==='repair')w.summary.repairable?repairModal():deliveryModal();
+  });
+  const currentMode=currentModelMode();
+  const remoteAllowed=remoteModelAllowed();
+  $('suggestButton').disabled=!health?.model.enabled||!remoteAllowed;
+  $('suggestButton').title=!remoteAllowed?`当前为 ${currentMode} 模式，不调用远程 API`:health?.model.enabled?'将待确认论断及事实元数据发送给 DeepSeek':'DeepSeek 尚未开通，请联系管理员或继续人工确认';
   $('filters').querySelectorAll('button').forEach(b=>b.classList.toggle('selected',b.dataset.filter===filter));
-  const claims=w.claims.filter(c=>filter==='all'||(filter==='pending'?!c.confirmed:resultOf(c).status===filter));
+  const claims=w.claims.filter(c=>filter==='all'||(filter==='attention'?(!c.confirmed||['inconsistent','unverifiable'].includes(resultOf(c).status)):(filter==='pending'?!c.confirmed:resultOf(c).status===filter)));
   $('claimCount').textContent=`显示 ${claims.length} 项 · 仅覆盖已识别的论断`;
   $('claims').innerHTML=claims.length?claims.map(c=>{
     const r=resultOf(c),f=fileOf(c),names=c.refs.map(id=>w.facts.find(f=>f.id===id)).filter(Boolean).map(f=>`${factName(f)} ${f.value??'缺失'}${f.unit}`);
@@ -208,14 +346,15 @@ function render() {
   $('confirmAll').disabled=!w.claims.some(c=>c.source!=='ocr'&&c.repairable!==false&&!c.confirmed&&c.refs.length&&resultOf(c).status!=='unverifiable');
   $('reviewRepairs').disabled=!s.repairable;
   $('repairHint').textContent=s.repairable?`${s.repairable} 项已确认来源的结论可修复`:'确认来源后，仅修复已失效的结论';
-  $('factInputs').innerHTML=w.facts.map(f=>`<div class="fact-row"><label for="fact-${esc(f.id)}">${esc(factName(f))}<small>${esc(f.sheet+'!'+f.cell)}</small></label><div class="fact-field"><input id="fact-${esc(f.id)}" data-fact="${esc(f.id)}" type="number" step="any" value="${f.value??''}" aria-label="${esc(factName(f))}"><span>${esc(f.unit)}</span></div></div>`).join('');
+  renderFactInputs();
   if (!$('factDraftStatus')) $('factInputs').insertAdjacentHTML('afterend','<div class="draft-status" id="factDraftStatus"></div><button class="button text full hidden" id="discardDrafts">撤销未应用输入</button>');
   $('demoChange').classList.toggle('hidden',!w.demo);
-  document.querySelectorAll('[data-fact]').forEach(input => {if(drafts().has(input.dataset.fact))input.value=drafts().get(input.dataset.fact);});
   renderDraftStatus();
-  renderOcr();renderDiagnosis();renderSources();renderGraph();renderHistory();
+  const viewRenderers={ocr:renderOcr,diagnosis:renderDiagnosis,sources:renderSources,graph:renderGraph,history:renderHistory,models:renderModelLedger};
+  if(viewRenderers[currentView])viewRenderers[currentView]();
   if(currentView==='report')renderReport();
-  document.querySelectorAll('[data-fact]').forEach(input => input.oninput=()=>trackDraft(input));
+  $('factSearch').oninput=event=>{factSearchTerm=event.target.value;renderFactInputs();renderDraftStatus();};
+  $('toggleFacts').onclick=()=>{showAllFacts=!showAllFacts;renderFactInputs();renderDraftStatus();};
   $('discardDrafts').onclick=()=>{drafts().clear();render();toast('已撤销尚未应用的输入');};
 }
 async function renderReport(){
@@ -235,10 +374,42 @@ async function renderReport(){
 function renderSources(){
   const w=workspace, segments=w.unmatched_segments||[];
   const rules=(Array.isArray(w.link_rules)?w.link_rules:[]).filter(r=>r&&typeof r==='object');
-  $('sourcesView').innerHTML=`<div class="file-grid">${w.documents.map(d=>`<article class="file-card"><span class="file-icon ${d.kind}">${d.kind==='xlsx'?'X':d.kind==='docx'?'W':'P'}</span><h3>${esc(d.name)}</h3><p>${d.kind==='xlsx'?'主要数据源':'关联成果'} · SHA256 ${esc(d.sha256.slice(0,12))}…</p><a class="button secondary small" href="${d.download_url}">↓ 下载当前版本</a></article>`).join('')}</div><section class="panel"><h2>结构化事实表</h2><p class="hint">主体、期间、单位与统计口径共同决定一条事实的含义。</p><div class="table-scroll"><table class="data-table"><thead><tr><th>ID</th><th>主体</th><th>指标</th><th>期间</th><th>数值</th><th>单位</th><th>口径</th><th>位置</th></tr></thead><tbody>${w.facts.map(f=>`<tr>${[f.id,f.subject,f.metric,f.period,f.value??'缺失',f.unit,f.scope,f.sheet+'!'+f.cell].map(x=>`<td>${esc(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section><section class="panel" style="margin-top:20px"><h2>检查范围与未识别内容</h2><p class="hint">${segments.length} 个片段没有覆盖受支持论断，可能是标题、普通说明或不支持的表达，不能据此认定正确。</p><ul class="warning-list">${w.documents.flatMap(d=>(d.warnings||[]).map(x=>`<li>${esc(d.name)}：${esc(x)}</li>`)).join('')}<li>不验证业务因果关系或主观评价；不保证任意排版和嵌入对象保真。</li></ul><details><summary class="link-button">查看未识别文本</summary>${segments.map(b=>`<div class="evidence-block"><small>${esc(b.label)}</small><p>${esc(b.text)}</p></div>`).join('')||'<p class="hint">所有可读正文片段都已有受支持论断覆盖。</p>'}</details></section>`;
-  $('sourcesView').insertAdjacentHTML('afterbegin',`<section class="panel" style="margin-bottom:20px"><div class="panel-top"><div><h2>追加成果文档</h2><p class="hint">当前项目共 ${w.documents.length} 份文件。Excel 保持唯一，Word / PPT / 图片可分批追加，单批最多 50 份。</p></div><button class="button primary small" id="appendDocuments">＋ 追加文档</button></div></section>`);
+  const warnings=w.documents.flatMap(d=>(d.warnings||[]).map(x=>`<li>${esc(d.name)}：${esc(x)}</li>`));
+  $('sourcesView').innerHTML=`<div class="view-toolbar"><div><h2>来源与文件</h2><p class="hint">${w.documents.length} 份文件 · ${w.facts.length} 条事实 · ${segments.length} 个未覆盖片段</p></div><div class="source-actions"><button class="button secondary small" id="runCrossAudit">运行跨文档审计</button><button class="button primary small" id="buildRepairPlan">生成修复计划</button><button class="button secondary small" id="appendDocuments">＋ 追加文档</button></div></div><div id="reviewSummary"></div><div class="fact-search"><input id="sourceFileSearch" type="search" value="${esc(fileSearch)}" placeholder="搜索文件名" aria-label="搜索文件名"></div><div id="sourceFileList"></div><details class="source-section"><summary>事实数据 <span>${w.facts.length} 条</span></summary><div class="fact-search"><input id="sourceFactSearch" type="search" value="${esc(sourceSearch)}" placeholder="搜索主体、指标、期间或事实 ID" aria-label="搜索事实表"></div><div id="sourceFactTable"></div></details><details class="source-section"><summary>检查范围与未识别内容 <span>${segments.length} 个片段</span></summary><p class="hint">未覆盖内容可能是标题、普通说明或不支持的表达，不能据此认定正确。</p><ul class="warning-list">${warnings.join('')}<li>不验证业务因果关系或主观评价；不保证任意排版和嵌入对象保真。</li></ul><div id="sourceSegmentList"></div></details><details class="source-section"><summary>已学习关联规则 <span>${rules.length} 条</span></summary><p class="hint">规则用于候选排序，来源仍需人工批准。</p><div id="sourceRuleList"></div></details>`;
+  const quality=w.fact_quality||{};
+  if(quality.status){const qClass=quality.status==='pass'?'green':quality.status==='review'?'amber':'red';const qTitle=quality.status==='pass'?'结构质量检查通过':quality.status==='review'?'事实源需要复核':'事实源已阻止自动修复';$('sourcesView').insertAdjacentHTML('afterbegin',`<div class="source-quality"><span class="badge ${qClass}">${qTitle}</span><span>阻断 ${quality.summary?.blocking||0} · 警告 ${quality.summary?.warnings||0}</span>${quality.issues?.length?`<details><summary>查看 ${quality.issues.length} 项问题</summary><ul class="warning-list">${quality.issues.map(i=>`<li>${esc(i.message)} · ${esc(i.sheet||'')}${i.cell?'!'+esc(i.cell):''}</li>`).join('')}</ul></details>`:''}</div>`)}
+  if((w.pdf_origins||[]).length)$('sourcesView').insertAdjacentHTML('afterbegin',`<section class="panel" style="margin-bottom:20px"><h2>原始 PDF 溯源</h2><p class="hint">PDF 仅作为只读证据保存，正文和表格已转换为可维护的 Word 与 Excel。</p>${w.pdf_origins.map(o=>`<p><a class="button secondary small" href="${o.download_url}" download>↓ 下载原始 PDF</a> <span class="hint">SHA256 ${esc((o.sha256||'').slice(0,12))}…</span></p>`).join('')}</section>`);
+  if((w.pdf_origins||[]).length && w.documents.some(d=>d.kind==='docx')){
+    const revisions=w.pdf_revisions||[];
+    $('sourcesView').insertAdjacentHTML('afterbegin',`<section class="panel" style="margin-bottom:20px"><div class="panel-top"><div><h2>独立修订版 PDF</h2><p class="hint">确认 Word 修复后重新导出新 PDF；原始 PDF 始终只读。页数、文字层或像素存在差异时，系统阻止正式下载并提示视觉复核。</p></div><button class="button secondary small" id="exportRevisedPdf">生成修订版 PDF</button></div>${revisions.map(r=>{const passed=r.verification?.status==='passed';const visual=r.verification?.visual_check;const detail=visual&&visual.changed_page_count?` · ${visual.changed_page_count} 页存在视觉差异`:'';return `<p>${passed?`<a class="button secondary small" href="${r.download_url}" download>↓ 下载 ${esc(r.name)}</a>`:`<span class="button secondary small" aria-disabled="true">⛔ 未通过视觉验收，暂不下载</span>`} <a class="link-button" href="${r.manifest_url}" download>查看转换清单</a> <span class="hint">${esc(r.verification?.status||'待复核')}${detail}</span></p>`}).join('')}</section>`);
+    $('exportRevisedPdf').onclick=async()=>{const result=await busy('正在由 Word 重新导出 PDF',()=>api(`/api/projects/${workspace.id}/pdf-revised`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({revision:workspace.revision})}));if(result){workspace=await api(`/api/projects/${workspace.id}`);render();toast(`已生成修订版 PDF：${result.pdf_revision.verification.status}`);}};
+  }
   $('appendDocuments').onclick=appendDocumentsModal;
-  $('sourcesView').insertAdjacentHTML('beforeend',`<section class="panel" style="margin-top:20px"><h2>已学习关联规则</h2><p class="hint">规则仅用于候选排序与预选，仍需勾选批准。次数仅在人工确认时增加；再次确认会更新来源记录。</p>${rules.length?`<div class="table-scroll"><table class="data-table"><thead><tr><th>规则 key</th><th>事实 ID</th><th>统计口径</th><th>确认次数</th><th>最近来源论断</th><th>最近确认时间</th></tr></thead><tbody>${rules.map(r=>`<tr>${[r.key,r.fact_id,r.scope,r.hits,r.source_claim_id,r.created_at?localTime(r.created_at):''].map(x=>`<td>${esc(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`:'<p class="hint">尚无已确认的复用规则</p>'}</section>`);
+  $('runCrossAudit').onclick=async()=>{const result=await busy('正在归并 Word、Excel、PPT 并检查冲突',()=>api(`/api/projects/${w.id}/review/cross-document`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({revision:w.revision})}));if(result){workspace=result;render();toast(`跨文档审计完成：发现 ${result.cross_audit?.findings?.length||0} 项疑点`);}};
+  $('buildRepairPlan').onclick=async()=>{const result=await busy('正在生成结构化修复计划',()=>api(`/api/projects/${w.id}/review/repair-plan`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({revision:w.revision})}));if(result){workspace=result;render();toast(`修复计划已生成：${result.repair_plan?.summary?.total||0} 项，仍需人工批准`);}};
+  const audit=w.cross_audit, plan=w.repair_plan;
+  if(audit || plan){$('reviewSummary').innerHTML=`<div class="review-summary-grid">${audit?`<section class="review-summary"><div><b>跨文档审计</b><span class="badge ${audit.stale?'red':audit.findings?.length?'amber':'green'}">${audit.stale?'已过期':`${audit.findings?.length||0} 项疑点`}</span></div><p>已归并 ${audit.groups?.length||0} 组同主体、指标和期间内容。数值差异由程序计算；语义模型状态：${esc(audit.semantic_status||'未请求')}，模型疑点仍需人工复核。</p>${audit.findings?.length?`<details><summary>查看疑点</summary>${audit.findings.slice(0,8).map(f=>`<div class="review-finding"><b>${esc(f.category)} · ${esc(f.source||'rules')}</b><span>${esc(f.reason)}</span><small>${f.evidence?.map(e=>esc(e.file_name+' · '+e.label)).join('；')}</small></div>`).join('')}</details>`:''}</section>`:''}${plan?`<section class="review-summary"><div><b>修复规划</b><span class="badge ${plan.stale||plan.audit_stale?'red':plan.summary?.blocked?'red':'neutral'}">${plan.stale||plan.audit_stale?'已过期':`${plan.summary?.total||0} 项计划`}</span></div><p>高风险 ${plan.summary?.high_risk||0} 项 · 涉及 ${plan.summary?.files||0} 个文件 · ${plan.requires_approval?'等待用户批准后才能写回':'只读计划'}</p>${plan.items?.length?`<details><summary>查看修复计划</summary>${plan.items.slice(0,8).map(i=>`<div class="review-finding"><b>${esc(i.file_name)} · ${esc(i.label)}</b><span>${esc(i.before)} → ${esc(i.after)}</span><small>风险：${esc(i.risk_level)} · ${esc(i.risk_reasons?.join('；')||'常规复核')}</small></div>`).join('')}</details>`:''}</section>`:''}</div>`;}
+  ['files','facts','segments','rules'].forEach(renderSourcePage);
+  $('sourceFileSearch').oninput=e=>{fileSearch=e.target.value;sourcePages.files=0;renderSourcePage('files');};
+  $('sourceFactSearch').oninput=e=>{sourceSearch=e.target.value;sourcePages.facts=0;renderSourcePage('facts');};
+}
+function renderSourcePage(key){
+  const w=workspace, term=sourceSearch.trim().toLowerCase();
+  if(key==='files'){
+    const files=w.documents.filter(d=>d.name.toLowerCase().includes(fileSearch.trim().toLowerCase()));
+    const pager=pageControls(key,files.length,12), page=files.slice(sourcePages.files*12,(sourcePages.files+1)*12);
+    $('sourceFileList').innerHTML=`<div class="file-grid">${page.map(d=>`<article class="file-card"><span class="file-icon ${d.kind}">${d.kind==='xlsx'?'X':d.kind==='docx'?'W':d.kind==='pptx'?'P':'I'}</span><h3>${esc(d.name)}</h3><p>${d.kind==='xlsx'?'事实源':'成果文件'}${d.warnings?.length?' · '+d.warnings.length+' 项提示':''}</p><a class="button secondary small" href="${esc(d.download_url)}" download>↓ 下载</a><details><summary>文件校验</summary><small class="hash-value">SHA256 ${esc(d.sha256||'')}</small></details></article>`).join('')||'<p class="hint">没有匹配的文件。</p>'}</div>${pager}`;
+  }else if(key==='facts'){
+    const facts=w.facts.filter(f=>[f.id,f.subject,f.metric,f.period,f.scope].some(v=>String(v||'').toLowerCase().includes(term)));
+    const pager=pageControls(key,facts.length), page=facts.slice(sourcePages.facts*pageSize,(sourcePages.facts+1)*pageSize);
+    $('sourceFactTable').innerHTML=`<div class="table-scroll"><table class="data-table"><thead><tr><th>主体 / 指标</th><th>期间</th><th>数值</th><th>单位</th><th>口径</th><th>来源</th></tr></thead><tbody>${page.map(f=>`<tr><td>${esc(f.subject)} · ${esc(f.metric)}<small class="cell-meta">${esc(f.id)}</small></td><td>${esc(f.period)}</td><td>${esc(f.value??'缺失')}</td><td>${esc(f.unit)}</td><td>${esc(f.scope)}</td><td>${esc(f.sheet)}!${esc(f.cell)}</td></tr>`).join('')}</tbody></table></div>${pager}`;
+  }else if(key==='segments'){
+    const rows=w.unmatched_segments||[], pager=pageControls(key,rows.length);
+    $('sourceSegmentList').innerHTML=rows.slice(sourcePages[key]*pageSize,(sourcePages[key]+1)*pageSize).map(b=>`<div class="source-text-row"><small>${esc(w.documents.find(d=>d.id===b.file_id)?.name||'')} · ${esc(b.label)}</small><p>${esc(b.text)}</p></div>`).join('')+pager;
+  }else{
+    const rows=(w.link_rules||[]).filter(r=>r&&typeof r==='object'),pager=pageControls(key,rows.length);
+    $('sourceRuleList').innerHTML=`<div class="table-scroll"><table class="data-table"><thead><tr><th>规则</th><th>事实 ID</th><th>口径</th><th>确认次数</th><th>最近确认</th></tr></thead><tbody>${rows.slice(sourcePages[key]*pageSize,(sourcePages[key]+1)*pageSize).map(r=>`<tr>${[r.key,r.fact_id,r.scope,r.hits,r.created_at?localTime(r.created_at):''].map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>${pager}`;
+  }
 }
 function appendDocumentsModal(){
   const revision=workspace.revision;
@@ -246,24 +417,44 @@ function appendDocumentsModal(){
   const input=$('appendFiles'), submit=$('appendSubmit'), status=$('appendStatus');
   input.onchange=()=>{const files=[...input.files], total=files.reduce((n,f)=>n+f.size,0);status.textContent=files.length?`已选择 ${files.length} 份 · ${(total/1024/1024).toFixed(2)} / 100 MB`:'尚未选择文件';submit.disabled=!files.length||files.length>50||total>100*1024*1024;};
   $('appendCancel').onclick=closeModal;
-  $('appendForm').onsubmit=async e=>{e.preventDefault();const form=new FormData();form.set('revision',revision);[...input.files].forEach(f=>form.append('files',f,f.name));const result=await busy('追加文档并重新扫描',()=>api(`/api/projects/${workspace.id}/documents`,{method:'POST',body:form}));if(result){workspace=result;render();await refreshProjects();closeModal();toast(`已追加 ${result.batch.count} 份文档`);}};
+  $('appendForm').onsubmit=async e=>{e.preventDefault();const form=new FormData();form.set('revision',revision);form.set('continue_on_error','true');[...input.files].forEach(f=>form.append('files',f,f.name));const result=await busy('追加文档并重新扫描',()=>api(`/api/projects/${workspace.id}/documents`,{method:'POST',body:form}));if(result){workspace=result;render();await refreshProjects();closeModal();const rejected=result.batch_results?.rejected||[];const detail=rejected.map(x=>`${x.name}：${x.reason}`).join('；');if(result.batch.status==='done')toast(`已追加 ${result.batch.count} 份文档`);else if(result.batch.status==='partial')toast(`已追加 ${result.batch.count} 份，${result.batch.rejected} 份失败：${detail}`,true);else toast(`本批文件均未追加：${detail}`,true);}};
 }
 function renderGraph(){
   const w=workspace,cs=graphFact?w.claims.filter(c=>c.refs.includes(graphFact)):w.claims;
   $('graphView').innerHTML=`<p class="graph-note">选择左侧事实，查看依赖它的论断。虚线含义的候选关系须经人工确认，才可用于自动修复。</p><div class="graph-columns"><div class="graph-column"><h3>来源事实 · ${w.facts.length}</h3><button class="link-button" id="clearGraph" style="margin-bottom:15px">显示全部关联</button>${w.facts.map(f=>`<button class="graph-node ${graphFact===f.id?'selected':''}" style="width:100%;text-align:left" data-graph-fact="${esc(f.id)}">${esc(factName(f))}<small>${esc(f.value)} ${esc(f.unit)} · ${esc(f.scope)}</small></button>`).join('')}</div><div class="graph-arrow">→</div><div class="graph-column"><h3>依赖论断 · ${cs.length}</h3>${cs.map(c=>`<div class="graph-node"><div style="display:flex;justify-content:space-between;gap:10px"><span>${esc(c.original)}</span><span class="badge ${classNames[resultOf(c).status]}">${statusNames[resultOf(c).status]}</span></div><small>${esc(fileOf(c).name)} · ${esc(c.label)}</small><div class="graph-ref">${c.confirmed?'已确认':'候选'} · ${esc(c.refs.join(' + '))}</div><button class="link-button" data-claim="${c.id}" style="margin-top:8px">查看计算与依据 →</button></div>`).join('')||'<div class="empty-list">没有关联论断</div>'}</div></div>`;
 }
 function renderHistory(){
-  $('historyView').innerHTML=`<section class="panel"><h2>变更与核验记录</h2><p class="hint">文件变更创建新版本；确认来源和模型建议也会留下记录。</p>${workspace.audit.slice().reverse().map(a=>`<div class="history-row"><time>${esc(localTime(a.time))}</time><div><h3>${esc(a.event)}</h3><p>${esc(a.detail)}</p></div></div>`).join('')}</section>`;
+  const audit = (workspace.audit || []).slice().reverse();
+  const auditRow = a => `<div class="history-row compact"><time>${esc(localTime(a.time))}</time><div class="history-main"><h3>${esc(a.event)}</h3><p title="${esc(a.detail || '')}">${esc(a.detail || '已记录')}</p></div></div>`;
+  const recentAudit = audit.slice(0, 6), olderAudit = audit.slice(6);
+  const auditMore = olderAudit.length ? `<details class="history-details"><summary>查看更早的 ${olderAudit.length} 条记录</summary>${olderAudit.map(auditRow).join('')}</details>` : '';
+  $('historyView').innerHTML=`<section class="panel history-panel"><div class="panel-top"><div><h2>变更记录</h2><p class="hint">只显示关键动作；完整审计信息可展开查看。</p></div><span class="badge neutral">共 ${audit.length} 条</span></div><div class="history-highlight"><strong>${workspace.last_repair ? `最近一次修复：${workspace.last_repair.count} 项` : '尚未生成修复版本'}</strong><span>当前版本 ${esc(workspace.revision)}</span></div>${recentAudit.map(auditRow).join('')||'<p class="hint">暂无变更记录。</p>'}${auditMore}</section>`;
   const agent=workspace.agent;
   if(agent){
-    const nodes={run:'启动任务',prepare:'准备',list_facts:'读取事实',list_claims:'读取论断',propose_links:'规则候选',suggest_links_llm:'DeepSeek 关联建议',model_skipped:'跳过模型',link:'整理关联',check_claim:'核验论断',diagnose:'汇总诊断',ask:'等待人工',decide:'人工批准',confirm_links:'确认来源',repair:'修复文件',verify:'复核',done:'完成'};
+  const nodes={run:'启动任务',prepare:'准备',list_facts:'事实智能体 · 读取事实',list_claims:'抽取智能体 · 读取论断',propose_links:'规则候选',suggest_semantic_claims:'抽取智能体 · 语义候选召回',suggest_links_llm:'关联智能体 · DeepSeek 建议',suggest_links_local:'关联智能体 · 本地语义模型',cross_document_audit:'跨文档审计智能体',plan_repair:'修复规划智能体 · 生成计划',model_skipped:'跳过模型',link:'整理关联',check_claim:'核验论断',diagnose:'核验智能体 · 汇总诊断',ask:'等待人工',decide:'人工批准',confirm_links:'确认来源',repair:'修复智能体 · 修复文件',verify:'复核智能体 · 结果复核',done:'完成'};
     const phases={idle:'执行未完成',running:'执行中',awaiting_decision:'等待人工决定',done:'已完成'};
-    $('historyView').insertAdjacentHTML('afterbegin',`<section class="panel"><h2>智能体执行轨迹 · ${esc(phases[agent.phase])}</h2><p class="hint">任务 ${esc(agent.run_id)}${agent.revision!==workspace.revision?' · 数据已更新，请重新运行':''}</p>${agent.trace.map(t=>`<div class="history-row"><time>${esc(localTime(t.at))}</time><div><h3>${esc(nodes[t.node]||t.node)}</h3><p>${esc(t.summary)}</p><small>${t.model?'模型请求：'+esc(t.model):'未调用模型'} · ${esc(t.duration_ms)} ms</small></div></div>`).join('')}</section>`);
+    const calls=workspace.model_call_summary||{};
+    const callHint=`模型台账：${calls.total||0} 次 · 远程 ${calls.remote||0} · 本地 ${calls.local||0} · token ${(calls.prompt_tokens||0)+(calls.completion_tokens||0)}${calls.estimated_cost_cny==null?' · 费用按服务端价格配置后估算':` · 估算 ${calls.estimated_cost_cny} 元`}`;
+    const trace = agent.trace || [], traceRow = t => `<div class="history-row compact"><time>${esc(localTime(t.at))}</time><div class="history-main"><h3>${esc(nodes[t.node]||t.node)}</h3><p title="${esc(t.summary || '')}">${esc(t.summary || '已完成')}</p><small>${t.model?'模型请求：'+esc(t.model):'确定性处理'} · ${esc(t.duration_ms ?? '')} ms</small></div></div>`;
+    const recentTrace = trace.slice(-4), olderTrace = trace.slice(0, -4);
+    const traceMore = olderTrace.length ? `<details class="history-details"><summary>查看完整执行轨迹（${trace.length} 个节点）</summary>${olderTrace.map(traceRow).join('')}</details>` : '';
+    $('historyView').insertAdjacentHTML('afterbegin',`<section class="panel history-panel agent-history"><div class="panel-top"><div><h2>智能体进度 · ${esc(phases[agent.phase])}</h2><p class="hint">${esc(agent.run_id)}${agent.revision!==workspace.revision?' · 数据已更新，请重新运行':''}</p></div><span class="badge neutral">${trace.length} 个节点</span></div><p class="history-call-summary">${esc(callHint)}</p>${recentTrace.map(traceRow).join('')}${traceMore}</section>`);
   }
+}
+function renderModelLedger(){
+  const calls=workspace.model_calls||[], s=workspace.model_call_summary||{}, agent=workspace.agent||{}, routes=agent.claim_routes||{};
+  const rows=Object.entries(routes), totalMs=calls.reduce((n,c)=>n+(c.duration_ms||0),0);
+  const routeNames={rules:'规则候选',local:'本地模型候选',api:'API 候选',human:'转人工'};
+  const nodes={link_agent:'关联',extraction_agent:'抽取',diagnosis_agent:'解释',audit_agent:'跨文档审计',planning_agent:'修复规划'};
+  const outcomes={succeeded:'成功',failed:'失败',invalid_response:'无效响应'};
+  const raw=v=>v==null?'—':Number(v).toFixed(3);
+  const fresh=agent.revision===workspace.revision;
+  $('modelsView').innerHTML=`<div class="view-toolbar"><div><h2>模型调用</h2><p class="hint">本项目累计 ${calls.length} 次调用 · 今日访客剩余 ${quota?.client_remaining??'—'} 次</p></div><button class="button secondary small" id="refreshModelQuota">刷新额度</button></div><div class="ledger-metrics"><div><strong>${s.remote||0} / ${s.local||0}</strong><span>远程 / 本地调用</span></div><div><strong>${(s.prompt_tokens||0)+(s.completion_tokens||0)}</strong><span>累计 token</span></div><div><strong>${(totalMs/1000).toFixed(2)} s</strong><span>调用耗时累计（非总运行时间）</span></div><div><strong>${s.estimated_cost_cny==null?'未配置价格':Number(s.estimated_cost_cny).toFixed(6)+' 元'}</strong><span>已知调用费用估算</span></div></div><section class="source-section"><h3>最近任务的候选路由 ${rows.length?`· ${fresh?'当前结果':'历史结果，需重新运行'}`:''}</h3><div class="routing-strip">${Object.entries(routeNames).map(([key,label])=>`<span><b>${rows.filter(([,r])=>r.source===key).length}</b> ${label}</span>`).join('')}</div><details><summary>查看逐条分数与弃答原因</summary><p class="hint">模型原始分数与分差用于阈值判断，不代表正确概率。候选来源必须人工确认。</p><div class="table-scroll"><table class="data-table"><thead><tr><th>论断</th><th>候选来源</th><th>原始分数</th><th>分差</th><th>本地耗时</th><th>说明</th></tr></thead><tbody>${rows.map(([id,r])=>`<tr><td>${esc(workspace.claims.find(c=>c.id===id)?.original||id)}</td><td>${routeNames[r.source]||'历史记录'}</td><td>${raw(r.top_raw_score)}</td><td>${raw(r.margin)}</td><td>${r.local_duration_ms??'—'} ms</td><td>${esc(r.reason||'')}</td></tr>`).join('')}</tbody></table></div></details></section><details class="source-section"><summary>完整调用台账 <span>${calls.length} 条</span></summary><div class="table-scroll"><table class="data-table"><thead><tr><th>时间</th><th>节点</th><th>模型</th><th>结果</th><th>输入 / 输出 token</th><th>耗时</th><th>估算费用</th></tr></thead><tbody>${calls.slice().reverse().map(c=>`<tr><td>${esc(localTime(c.at))}</td><td>${nodes[c.node]||esc(c.node)}</td><td>${esc(c.model)}</td><td>${outcomes[c.outcome]||esc(c.outcome)}</td><td>${c.prompt_tokens||0} / ${c.completion_tokens||0}</td><td>${c.duration_ms||0} ms</td><td>${c.estimated_cost_cny==null?'未配置':Number(c.estimated_cost_cny).toFixed(6)+' 元'}</td></tr>`).join('')}</tbody></table></div></details>`;
+  $('refreshModelQuota').onclick=async()=>{await refreshQuota();renderModelLedger();};
 }
 const ocrDrafts=new Map();
 function renderOcr(){
-  const images=workspace.images||[], enabled=health?.ocr?.enabled;
+  const images=workspace.images||[], enabled=(workspace.ocr_enabled??health?.ocr?.enabled)&&remoteModelAllowed();
   const names={pending:'待识别',done:'待核对',failed:'识别失败',confirmed:'文字已确认'};
   $('ocrView').innerHTML=`<section class="panel"><h2>图片文字</h2><p class="hint">${enabled?'OCR 已启用，需当前 DeepSeek 模型支持图片输入。点击运行会将这张图片发送至 DeepSeek，可能产生调用费用。':'OCR 未启用。管理员可配置 DEEPSEEK_API_KEY，并将 ZHILIAN_OCR_BACKEND 设为 auto 或 deepseek。'} 核对并确认文字后才参与验证，图片不会自动修复。</p>
     ${images.map(i=>`<article class="evidence-block"><h3>${esc(fileOf(i)?.name)} · ${esc(i.label)} <span class="badge ${i.ocr_status==='confirmed'?'green':'amber'}">${names[i.ocr_status]}</span></h3>
@@ -288,38 +479,38 @@ function renderDiagnosis(){
   const records=workspace.diagnosis||[], summary=workspace.diagnosis_summary||{};
   const explanations=workspace.diagnosis_explanations||{};
   const facts=new Map(workspace.facts.map(f=>[f.id,f]));
-  const card=r=>`<article class="claim-card ${r.code==='inconsistent'?'problem':''}">
-    <div class="claim-top"><span class="badge ${categoryClasses[r.category]||'amber'}">${esc(r.category)}</span><span class="file-tag">${esc(r.file_name)} · ${esc(r.label)}</span><span class="badge ${r.confirmed?'neutral':'amber'}">${r.source==='ocr'?'图片文字已核对 · 来源为候选':r.confirmed?'来源已确认':'来源待确认'}</span></div>
-    <div class="claim-text">${r.source==='ocr'?'<span class="badge neutral">OCR · 只读</span> ':''}${esc(r.original)}</div>
-    <p class="hint">${r.kind==='chart'?'原生图表对象，无正文字符区间':`文本区间：[${esc(r.start)}, ${esc(r.end)})（从 0 起，右端不含）`}</p>
-    <details><summary class="link-button">查看定位锚点与诊断码</summary><p class="hint">${esc(r.location)} · ${esc(r.code)}</p></details>
-    <p><strong>技术原因：</strong>${esc(r.reason||'无')}</p>
-    <p><strong>确定性解释：</strong>${esc(r.explanation)}</p>
-    ${explanations[r.claim_id]?`<p><strong>DeepSeek 润色（仅供参考）：</strong>${esc(explanations[r.claim_id])}</p>`:''}
-    <p><strong>修复建议：</strong>${esc(r.fix_hint)}</p>
-    ${r.expected&&r.code==='inconsistent'?`<div class="suggested"><span>程序计算的建议文本</span>${esc(r.expected)}</div>`:''}
-    ${(r.evidence||[]).length?`<div class="evidence-block"><strong>Excel 证据</strong>${r.evidence.map(f=>`<p>${esc(f.sheet)}!${esc(f.cell)} · 事实 ID：${esc(f.id)}<br>主体：${esc(f.subject)} · 指标：${esc(f.metric)} · 期间：${esc(f.period)}<br>数值：${esc(facts.get(f.id)?.value??'缺失')} · 单位：${esc(f.unit)} · 口径：${esc(f.scope)}</p>`).join('')}</div>`:'<p class="hint">暂无可用 Excel 单元格证据，请先审阅来源。</p>'}
-    <button class="link-button" data-claim="${esc(r.claim_id)}">审阅来源与依据 →</button></article>`;
+  const card=r=>`<article class="diagnosis-card ${r.code==='inconsistent'?'problem':''}">
+    <div class="claim-top"><span class="badge ${categoryClasses[r.category]||'amber'}">${esc(r.category)}</span><span class="file-tag">${esc(r.file_name)} · ${esc(r.label)}</span><span class="badge ${r.confirmed?'neutral':'amber'}">${r.source==='ocr'?'图片候选':r.confirmed?'来源已确认':'来源待确认'}</span></div>
+    <div class="claim-text">${r.source==='ocr'?'<span class="badge neutral">OCR</span> ':''}${esc(r.original)}</div>
+    ${r.expected&&r.code==='inconsistent'?`<div class="suggested"><span>建议更新为</span>${esc(r.expected)}</div>`:''}
+    <div class="diagnosis-action"><span>${esc(r.fix_hint||'请查看证据后决定下一步')}</span><button class="link-button" data-claim="${esc(r.claim_id)}">审阅来源 →</button></div>
+    <details class="diagnosis-details"><summary>查看完整诊断与证据</summary><p class="hint">${r.kind==='chart'?'原生图表对象，无正文字符区间':`文本区间：[${esc(r.start)}, ${esc(r.end)})（从 0 起，右端不含）`}</p><p><strong>技术原因：</strong>${esc(r.reason||'无')}</p><p><strong>确定性解释：</strong>${esc(r.explanation)}</p>${explanations[r.claim_id]?`<p><strong>模型润色（仅供参考）：</strong>${esc(explanations[r.claim_id])}</p>`:''}<p><strong>定位：</strong>${esc(r.location)} · ${esc(r.code)}</p>${(r.evidence||[]).length?`<div class="evidence-block"><strong>Excel 证据</strong>${r.evidence.map(f=>`<p>${esc(f.sheet)}!${esc(f.cell)} · ${esc(f.subject)} · ${esc(f.metric)} · ${esc(f.period)}<br>数值：${esc(facts.get(f.id)?.value??'缺失')} ${esc(f.unit)} · 口径：${esc(f.scope)}</p>`).join('')}</div>`:'<p class="hint">暂无可用 Excel 单元格证据，请先审阅来源。</p>'}</details>
+  </article>`;
   const anomalies=records.filter(r=>r.code!=='consistent'), passed=records.filter(r=>r.code==='consistent');
-  const groups=['结论失效','数据缺失','来源冲突','口径不一致','需人工复核'].map(category=>{
+  const categories=['结论失效','数据缺失','来源冲突','口径不一致','需人工复核'];
+  const groups=categories.map(category=>{
     const items=anomalies.filter(r=>r.category===category);
     return items.length?`<h3 class="section-heading">${category} · ${items.length} 项</h3>${items.map(card).join('')}`:'';
   }).join('');
-  $('diagnosisView').innerHTML=`<section class="panel"><div class="panel-top"><div><h2>异常诊断</h2><p class="hint">共 ${summary.total??records.length} 条已识别论断 · ${anomalies.length} 项异常</p></div><button class="button primary small" id="explainDiagnosis">生成诊断解释</button></div>
-    <p class="hint">${health?.model.enabled?'点击后将论断、诊断原因、期望文本及事实元数据发送给 DeepSeek 润色。':'未配置 DeepSeek，当前使用确定性模板解释，不会发送模型请求。'} 来源确认和文件修复仍需人工批准。</p>
+  const categorySummary=categories.map(category=>{const count=anomalies.filter(r=>r.category===category).length;return `<div class="diagnosis-stat"><span class="badge ${categoryClasses[category]||'amber'}">${esc(category)}</span><strong>${count}</strong><small>项</small></div>`}).join('');
+  $('diagnosisView').innerHTML=`<section class="panel diagnosis-panel"><div class="panel-top"><div><h2>异常诊断</h2><p class="hint">共 ${summary.total??records.length} 条已识别论断 · ${anomalies.length} 项需要关注</p></div><button class="button primary small" id="explainDiagnosis">生成诊断解释</button></div><div class="diagnosis-summary">${categorySummary}</div>
+    <p class="hint">${health?.model.enabled&&remoteModelAllowed()?'点击后将论断、诊断原因、期望文本及事实元数据发送给 DeepSeek 润色。':'当前使用确定性模板解释，不会发送模型请求。'} 来源确认和文件修复仍需人工批准。</p>
     ${groups||'<p class="hint">未发现异常。仅覆盖已识别的论断，候选来源仍需确认。</p>'}
-    ${passed.length?`<details><summary class="link-button">查看计算通过的论断与证据（${passed.length} 项）</summary>${passed.map(card).join('')}</details>`:''}</section>`;
+    ${passed.length?`<details class="passed-diagnosis"><summary class="link-button">查看计算通过的论断与证据（${passed.length} 项）</summary>${passed.map(card).join('')}</details>`:''}</section>`;
   const button=$('explainDiagnosis');
   button.onclick=async()=>{
-    if(!health?.model.enabled){toast('未配置 DeepSeek，继续使用确定性模板解释，未发送请求');return;}
+    if(!health?.model.enabled||!remoteModelAllowed()){toast('当前使用确定性模板解释，未发送请求');return;}
     const result=await post('diagnosis/explain',{},'DeepSeek 正在润色解释，最长约60秒');
+    await refreshQuota();
     if(result)toast(Object.keys(result.diagnosis_explanations||{}).length?'诊断解释已生成；未返回的项继续使用模板':'未收到可用模型解释，继续使用确定性模板');
   };
 }
 function agentModal(){
   if(workspace.agent?.phase==='awaiting_decision'&&workspace.agent.revision===workspace.revision){showAgentResult();return;}
   const projectId=workspace.id, revision=workspace.revision;
-  modal('运行证据链验证智能体',`<p class="modal-intro">按准备、关联、诊断、人工决定、修复、复核的顺序处理当前已保存的数据。来源确认和文件修复分别等待你批准。</p><p class="hint">${health?.local_reranker?.enabled?'本地 BGE 会先处理规则多候选和零候选语义改写；低置信样本再升级 API。':health?.model.enabled?'关联阶段会把最多40条未确认文本论断及事实元数据发送给 DeepSeek，可能产生调用费用；模型只提出候选。':'无模型时使用规则候选，功能仍可运行。'} 图表使用规则来源。关闭待办窗口后可继续。${quota&&typeof quota.client_remaining==='number'?` 今日剩余额度：本访客 ${quota.client_remaining} 次，全局 ${quota.global_remaining} 次。`:''}</p>${drafts().size?'<p class="hint">右侧还有未应用的数值。若要核验这些变更，请先关闭窗口并点击“更新数据并验证”。</p>':''}<div class="modal-actions"><button class="button primary" id="startAgent">开始运行</button></div>`);
+  const mode=currentModelMode();
+  const modeLabel=modelModes[mode];
+  modal('运行证据链验证智能体',`<p class="modal-intro">当前模式：<b>${esc(mode)}</b>（${esc(modeLabel)}）。按准备、关联、诊断、人工决定、修复、复核的顺序处理当前已保存的数据。来源确认和文件修复分别等待你批准。</p><p class="hint">${mode==='rules'?'仅使用确定性规则，不调用模型。':mode==='local'?'规则无法确定时使用本地语义模型，不调用远程 API。':mode==='api'?'规则无法确定时调用 API，跳过本地模型。':mode==='api_only'?'所有已识别正文论断交给 API，用于对照实验。':health?.local_reranker?.enabled?'本地语义模型 会先处理规则多候选和零候选语义改写；低置信样本再升级 API。':health?.model.enabled?'关联阶段会把困难论断及事实元数据发送给 DeepSeek，可能产生调用费用；模型只提出候选。':'无模型时使用规则候选，功能仍可运行。'} 图表使用规则来源。关闭待办窗口后可继续。${quota&&typeof quota.client_remaining==='number'?` 今日剩余额度：本访客 ${quota.client_remaining} 次，全局 ${quota.global_remaining} 次。`:''}</p>${drafts().size?'<p class="hint">右侧还有未应用的数值。若要核验这些变更，请先关闭窗口并点击“更新数据并验证”。</p>':''}<div class="modal-actions"><button class="button primary" id="startAgent">开始运行</button></div>`);
   $('startAgent').onclick=async()=>{
     if(workspace.id!==projectId||workspace.revision!==revision){toast('项目已更新，请关闭窗口重新运行',true);return;}
     const result=await post('agent/run',{},'智能体正在关联与诊断，模型请求最长约60秒');
@@ -347,7 +538,7 @@ function showAgentResult(){
   const titles={confirm_links:'智能体 · 审阅来源关联',resolve_ambiguity:'智能体 · 选择有歧义的来源',approve_repair:'智能体 · 预览并批准修复'};
   const sources=refs=>refs.map(id=>{const f=workspace.facts.find(f=>f.id===id);return f?`${factName(f)}：${f.value??'缺失'}${f.unit} · ${f.scope} · ${f.sheet}!${f.cell} [${id}]`:id;}).join('；');
   const route=agent.model_routing||{};
-  const routeHint=route.zero_candidate_claims!=null?`<p class="hint">本次路由：规则零候选 ${route.zero_candidate_claims} 项 · 本地零候选召回 ${route.local_zero_recall_claims||0} 项 · API 难例 ${route.api_candidate_claims||0} 项。</p>`:'';
+  const routeHint=route.zero_candidate_claims!=null?`<p class="hint">本次模式：${esc(route.mode||health?.model?.mode||'hybrid')} · 规则零候选 ${route.zero_candidate_claims} 项 · 本地零候选召回 ${route.local_zero_recall_claims||0} 项 · API 难例 ${route.api_candidate_claims||0} 项。</p>`:'';
   modal(titles[pending.kind],`<p class="modal-intro">${repair?'只有勾选并批准的内容才写入文件，随后重新读取复核。':'请核对主体、期间、单位及统计口径。选择候选还不代表批准，需要勾选该项并提交。'} 共 ${pending.items.length} 项，可分批处理。</p>${routeHint}${canSelectAll?`<div class="claim-toolbar" style="margin-bottom:12px"><button type="button" class="button secondary small" id="agentSelectAll">全选</button><span id="agentSelectedCount" class="hint">已选 0 / ${pending.items.length} 项</span></div>`:''}<form id="agentForm">${pending.items.map((item,index)=>`<div class="diff-row"><label><input type="checkbox" data-agent-approve="${index}"> 批准此项 · ${esc(workspace.documents.find(d=>d.id===item.file_id)?.name)} · ${esc(item.label)}</label><div class="evidence-block">${esc(item.original)}</div><p class="hint">${esc(item.reason)}</p>${repair?`<div class="diff-new">修复为：${esc(item.expected)}</div><p class="hint">来源：${esc(sources(item.refs))}</p>`:`<label class="field-label" for="agentOption${index}">来源候选</label><select class="text-input" id="agentOption${index}">${pending.kind==='resolve_ambiguity'?'<option value="">请选择一个候选，或手动指定</option>':''}${item.options.map((o,n)=>`<option value="${n}" ${o.remembered?'selected ':''}${o.status==='unverifiable'?'disabled':''}>${esc(sources(o.refs))} · ${esc(o.reason)}${o.remembered?'（已记住）':''}${o.status==='unverifiable'?'（无法计算）':''}</option>`).join('')}<option value="manual">手动指定事实 ID</option></select><div id="agentManualGroup${index}" class="hidden"><label class="field-label" for="agentManual${index}">事实 ID（以逗号分隔，增长率按上期、本期；预算判断按支出、预算）</label><input class="text-input" id="agentManual${index}" value="${esc(item.refs.join(','))}"></div>`}</div>`).join('')}${repair?'':`<details><summary>查看事实 ID 与单元格</summary>${workspace.facts.map(f=>`<p class="hint">${esc(sources([f.id]))}</p>`).join('')}</details>`}<p class="hint">未勾选的条目保持待办。可关闭窗口稍后处理。</p><div class="modal-actions"><button class="button secondary" type="button" id="agentLater">稍后处理</button><button class="button primary" type="submit">${repair?'批准所选修复并复核':'确认所选来源并继续'}</button></div></form>`);
   $('agentLater').onclick=closeModal;
   if(canSelectAll){
@@ -389,8 +580,9 @@ function showAgentResult(){
 function uploadModal(autoWritable=false){
   pendingUploads = [];
   pendingFileHandles = new Map();
-  modal('导入文件，建立项目',`<p class="modal-intro">支持的浏览器会自动打开可写文件选择器。选择后，修复完成时可直接覆盖本机原文件，无需额外勾选；也可继续使用普通上传。</p><p class="hint">一份 Excel 事实表，加一份或多份 Word / PPT。可以分多次选择，后续选择会加入列表，不会替换之前的文件。</p><form id="uploadForm"><label class="field-label" for="uploadName">项目名称</label><input id="uploadName" class="text-input" name="name" value="我的数据分析项目" maxlength="100" required><label class="dropzone"><h3>选择并加入文件</h3><p>可重复打开文件选择器；最多10份，合计不超过30MB</p><input id="uploadFiles" type="file" accept=".xlsx,.docx,.pptx" multiple></label>${window.showOpenFilePicker?'<button type="button" class="button secondary full" id="pickWritableFiles">选择文件（支持修改后写回原文件）</button><p class="hint">导入后可显式点击“直接修改本地文件”覆盖所选原文件，浏览器可能请求写入权限。刷新页面后需重新选择并导入；同名文件以最后一次选择为准。</p>':'<p class="hint">当前浏览器不支持原文件写回，请使用浏览器下载。</p>'}<div id="uploadFileList" class="upload-file-list"></div><div id="uploadFileStatus" class="upload-file-status">尚未加入文件</div><a class="link-button" href="/api/template">↓ 下载 Excel 事实表模板</a><p class="hint">需要一份 .xlsx 和至少一份 .docx / .pptx。Excel 首行包含：事实ID、主体、指标、期间、数值、单位、统计口径。</p><div class="modal-actions"><button type="button" class="button secondary" id="modalDemo">先体验演示</button><button class="button primary" id="uploadSubmit" type="submit" disabled>导入并识别</button></div></form>`);
+  modal('导入文件，建立项目',`<p class="modal-intro">支持的浏览器会自动打开可写文件选择器。选择后，修复完成时可直接覆盖本机原文件，无需额外勾选；也可继续使用普通上传。</p><p class="hint">一份 Excel 事实表，加一份或多份 Word / PPT。可以分多次选择，后续选择会加入列表，不会替换之前的文件。</p><form id="uploadForm"><label class="field-label" for="uploadName">项目名称</label><input id="uploadName" class="text-input" name="name" value="我的数据分析项目" maxlength="100" required><label class="dropzone"><h3>选择并加入文件</h3><p>可重复打开文件选择器；最多10份，合计不超过30MB</p><input id="uploadFiles" type="file" accept=".xlsx,.docx,.pptx" multiple></label>${window.showOpenFilePicker?'<button type="button" class="button secondary full" id="pickWritableFiles">选择文件（支持修改后写回原文件）</button><p class="hint">导入后可显式点击“直接修改本地文件”覆盖所选原文件，浏览器可能请求写入权限。刷新页面后需重新选择并导入；同名文件以最后一次选择为准。</p>':'<p class="hint">当前浏览器不支持原文件写回，请使用浏览器下载。</p>'}<div id="uploadFileList" class="upload-file-list"></div><div id="uploadFileStatus" class="upload-file-status">尚未加入文件</div><a class="link-button" href="/api/template">↓ 下载 Excel 事实表模板</a><p class="hint">需要一份 .xlsx 和至少一份 .docx / .pptx。Excel 首行包含：事实ID、主体、指标、期间、数值、单位、统计口径。</p><div class="modal-actions"><button type="button" class="button secondary" id="pdfProjectButton">从 PDF 导入并生成 Word / Excel</button><button type="button" class="button secondary" id="modalDemo">先体验演示</button><button class="button primary" id="uploadSubmit" type="submit" disabled>导入并识别</button></div></form>`);
   $('modalDemo').onclick=demo;
+  $('pdfProjectButton').onclick=pdfImportModal;
   const formElement=$('uploadForm'), handles=pendingFileHandles;
   const addFile=(file,handle)=>{
     const ext=file.name.split('.').pop().toLowerCase();
@@ -445,6 +637,13 @@ function uploadModal(autoWritable=false){
   };
   renderUploadFiles();
 }
+function pdfImportModal(){
+  modal('从 PDF 导入项目',`<p class="modal-intro">知链不会修改 PDF。系统会提取正文生成 Word，提取并校验表格生成 Excel，再自动把两份文件加入项目；原 PDF 作为只读溯源文件保留。</p><form id="pdfProjectForm"><label class="field-label" for="pdfProjectName">项目名称</label><input id="pdfProjectName" class="text-input" name="name" value="PDF 年报项目" maxlength="100" required><label class="field-label" for="pdfSubject">主体（可选）</label><input id="pdfSubject" class="text-input" name="subject" placeholder="例如：某公司"><label class="dropzone"><h3>选择 PDF</h3><p>单份不超过100MB；没有可用结构化表格时会要求先整理中间文件</p><input id="pdfProjectFile" name="file" type="file" accept=".pdf" required></label><div id="pdfProjectStatus" class="upload-file-status">尚未选择文件</div><div class="modal-actions"><button type="button" class="button secondary" id="pdfBack">返回 Office 导入</button><button class="button primary" type="submit" id="pdfProjectSubmit" disabled>提取并建立项目</button></div></form>`);
+  const form=$('pdfProjectForm'), input=$('pdfProjectFile'), submit=$('pdfProjectSubmit'), status=$('pdfProjectStatus');
+  input.onchange=()=>{const file=input.files[0];status.textContent=file?`${file.name} · ${(file.size/1024/1024).toFixed(2)} MB`:'尚未选择文件';submit.disabled=!file||file.size>100*1024*1024;};
+  $('pdfBack').onclick=()=>uploadModal();
+  form.onsubmit=async event=>{event.preventDefault();const data=new FormData(form);const result=await busy('提取 PDF 正文与表格',()=>api('/api/projects/from-pdf',{method:'POST',body:data}));if(result){workspace=result;filter='all';graphFact=null;switchView('overview');localStorage.setItem('zhilian-project',result.id);await refreshProjects();const c=result.pdf_conversion||{};modal('PDF 导入完成',`<p class="modal-intro">已生成并加入正文 Word 与事实表 Excel。</p><p class="hint">提取 ${c.facts||0} 条事实，识别 ${c.tables||0} 张表格，原 PDF 已作为只读溯源文件保留。</p><div class="modal-actions"><button class="button secondary" id="reviewImported">查看项目</button><button class="button primary" id="runImportedAgent">运行智能体</button></div>`);$('reviewImported').onclick=closeModal;$('runImportedAgent').onclick=agentModal;}};
+}
 function importSourceModal(){
   const projectId=workspace.id, revision=workspace.revision;
   modal('导入更新后的 Excel',`<p class="modal-intro">在 Excel / WPS 中保存后选择文件。先查看数值差异和受影响结论，确认后建立新版本。</p><form id="sourceForm"><label class="dropzone"><h3>选择更新后的源表</h3><p>一份 .xlsx，最大 30MB</p><input type="file" name="file" accept=".xlsx" required></label><p class="hint">事实ID、主体、指标、期间、单位和统计口径需保持一致；支持调整行顺序。若增删事实或改变含义，请建立新项目。</p><div class="modal-actions"><button class="button primary" type="submit">查看变更与影响 →</button></div></form>`);
@@ -497,29 +696,39 @@ function helpModal(){
   modal('使用知链',`<div class="help-section"><h3>1 导入或体验演示</h3><p>准备一份符合模板的 Excel，以及结构清晰的 Word 或 PPT。演示项目会创建包含真实文本、不同文字格式和原生图表的文件。</p></div><div class="help-section"><h3>2 审阅来源关联</h3><p>规则识别会给出候选来源。查看依据，确认主体、指标、期间、单位和口径；支持手动纠正关联。</p></div><div class="help-section"><h3>3 修改并重新验证</h3><p>在右侧修改数值。系统检查原有论断是仍成立、已失效，还是无法判断。依赖变化不会直接触发改写。</p></div><div class="help-section"><h3>4 修复与导出</h3><p>预览修改前后内容，确认后写入新版本。导出包含Excel、Word/PPT、核验记录JSON和报告。可撤销上一次文件变更。</p></div><div class="help-section"><h3>识别范围</h3><p>支持明确表达的数值引用、较上期/环比增长率、最高排名和阈值。语义歧义、因果解释、主观结论、未识别文本不会被当作验证通过。完整范围见项目 README。</p></div>`);
 }
 function settingsModal(){
-  modal('模型与运行方式',`<p class="modal-intro">当前模式：${health?.model.enabled?esc(health.model.provider)+' · '+esc(health.model.model):'规则识别与人工确认，无模型调用'}</p><div class="help-section"><h3>DeepSeek 辅助关联</h3><p>服务由管理员统一开通，你无需提供 API Key。点击“DeepSeek 关联建议”获取候选来源，在“查看依据”中审阅并确认。服务未开通时，请联系管理员或继续人工确认。</p></div><div class="help-section"><h3>模型做什么</h3><p>关联接口为已识别的待确认正文论断提出来源建议；诊断接口可润色解释，不会自动确认、改文件或执行代码。计算、口径校验与文件复核始终由程序完成。任意自然语言论断抽取尚未实现。</p></div><div class="help-section"><h3>本地与公网</h3><p>本机使用不需要服务器。公网部署需要设置访问密码与HTTPS，并配置模型额度。当前系统是共享工作空间，尚未实现团队成员分级权限。</p></div><div class="help-section"><h3>发送给模型的内容</h3><p>点击“DeepSeek 关联建议”，或在启用模型时确认“开始运行”智能体，会发送待确认正文论断及事实元数据。原文件不会直接上传到模型服务。返回建议必须由你核对。</p></div>`);
+  const mode=currentModelMode();
+  modal('模型与运行方式',`<p class="modal-intro">当前${workspace?'项目':'服务端默认'}模式：<b>${esc(mode)}</b>（${esc(modelModes[mode])}）。</p>
+    <div class="help-section"><label class="field-label" for="settingsModelMode">选择项目处理模式</label><select class="text-input" id="settingsModelMode" ${workspace?'':'disabled'}>${modelModeOptions()}</select><p class="hint" id="settingsModeHint">${esc(modelModeHint(mode))}</p><p class="hint">${workspace?'保存后下次运行生效，旧候选待办失效；不会重置已确认来源或自动发起模型请求。':'打开项目后可切换；服务端默认值由 ZHILIAN_LLM_MODE 设置。'} 做对照实验请使用分别新建且尚未确认来源的相同资料。</p><button class="button primary small" id="saveModelMode" ${workspace?'':'disabled'}>保存处理模式</button></div>
+    <div class="help-section"><h3>使用边界</h3><p>模型只提出来源候选，仍需人工确认，不计算、不裁决、不直接写文件。图表继续使用确定性路径；未识别或已确认的论断不进入 API 对照。</p></div>
+    <div class="help-section"><h3>联网与费用</h3><p>hybrid、api、api_only 在实际调用时使用部署方配置的密钥，消耗每日额度；发送已识别的论断文本及事实元数据，原始 Office 文件不会直接上传到模型服务。论断文本可能含业务数值。rules 和 local 禁止远程关联、解释和 OCR 请求；local 需要先安装模型。</p></div>
+    <div class="help-section"><h3>本地与公网</h3><p>本机可独立运行。公网部署需访问密码、HTTPS 和调用额度。项目模式是共享项目设置，尚未实现团队成员分级权限。</p></div>`);
+  $('settingsModelMode').onchange=e=>{$('settingsModeHint').textContent=modelModeHint(e.target.value);};
+  $('saveModelMode').onclick=async()=>{if(await switchModelMode($('settingsModelMode').value))settingsModal();};
   $('modalContent').insertAdjacentHTML('beforeend',`<div class="help-section"><h3>OCR 图片文字</h3><p>在“图片文字”中逐张运行 OCR，会发送抽取的图片给 DeepSeek，需要模型支持多模态输入。识别完成后必须人工核对，确认后的文字只读验证，不支持关联确认或修复图片。关闭 OCR 可设置 ZHILIAN_OCR_BACKEND=off。</p></div><div class="help-section"><h3>修复完成后自动落盘</h3><label><input type="checkbox" id="autoExportSetting" ${localStorage.getItem('zhilian-auto-export')==='1'?'checked':''}> 智能体完成时自动把当前 Excel、Word、PPT 和变更报告写入本地输出目录</label><p class="hint">默认关闭。此设置只影响当前浏览器；服务器端也可用 ZHILIAN_AUTO_EXPORT=1 开启。</p></div>`);
   $('autoExportSetting').onchange=e=>{if(e.target.checked)localStorage.setItem('zhilian-auto-export','1');else localStorage.removeItem('zhilian-auto-export');};
 }
 
 document.addEventListener('click',e=>{
+  const pager=e.target.closest('[data-source-page]');if(pager){sourcePages[pager.dataset.sourcePage]=Math.max(0,sourcePages[pager.dataset.sourcePage]+Number(pager.dataset.offset));renderSourcePage(pager.dataset.sourcePage);}
   const nav=e.target.closest('[data-view]');if(nav)switchView(nav.dataset.view);
   const project=e.target.closest('[data-project]');if(project)loadProject(project.dataset.project);
   const claim=e.target.closest('[data-claim]');if(claim)claimModal(claim.dataset.claim);
   const graph=e.target.closest('[data-graph-fact]');if(graph){graphFact=graph.dataset.graphFact;renderGraph();}
   if(e.target.closest('#clearGraph')){graphFact=null;renderGraph();}
 });
+document.querySelector('.sidebar-tools').insertAdjacentHTML('beforeend','<button class="nav-item" data-view="models"><span>◇</span> 模型调用</button>');
 $('filters').onclick=e=>{const b=e.target.closest('[data-filter]');if(b){filter=b.dataset.filter;render();}};
 $('closeModal').onclick=closeModal;
 $('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal();});
 $('newProject').onclick=()=>uploadModal(true);$('welcomeUpload').onclick=()=>uploadModal(true);$('loadDemo').onclick=demo;
 $('helpButton').onclick=helpModal;$('scopeButton').onclick=helpModal;$('settingsButton').onclick=settingsModal;
+$('modelModeSelect').onchange=e=>switchModelMode(e.target.value);
 $('confirmAll').onclick=confirmAllModal;$('reviewRepairs').onclick=repairModal;
 $('agentButton').onclick=agentModal;
 $('demoChange').insertAdjacentHTML('afterend','<button class="button secondary full" id="importSource">导入更新后的 Excel</button>');
 $('importSource').onclick=importSourceModal;
   $('saveFacts').onclick=async()=>{
-  const values={};for(const input of document.querySelectorAll('[data-fact]')){const old=workspace.facts.find(f=>f.id===input.dataset.fact);if(input.value.trim()===''){toast('数值不能为空',true);return;}const value=Number(input.value);if(!Number.isFinite(value)){toast('请输入有效数字',true);return;}if(value!==old.value)values[old.id]=value;}
+  const values={};for(const [id,text] of drafts()){const old=workspace.facts.find(f=>f.id===id);if(!old)continue;if(text.trim()===''){toast('数值不能为空',true);return;}const value=Number(text);if(!Number.isFinite(value)){toast('请输入有效数字',true);return;}if(value!==old.value)values[id]=value;}
   if(!Object.keys(values).length){toast('数值没有变化');return;}
   const result=await post('facts',{values},'写入数据新版本并重新验证');
   if(result){factDrafts.delete(result.id);render();afterDataUpdate();}
@@ -540,11 +749,7 @@ function quotaTitle(q){
 }
 async function refreshQuota(){
   try{ quota=await api('/api/quota'); }catch(e){ quota=null; }
-  const badge=$('modelBadge');
-  if(badge){
-    badge.textContent=(health&&health.model.enabled?'DeepSeek 已配置':'规则模式 · 无需 API')+quotaLabel(quota);
-    badge.title=quotaTitle(quota);
-  }
+  renderModelMode();
   return quota;
 }
 async function init(){

@@ -15,8 +15,8 @@
       "system": "local-only",
       "claims": 72,
       "linked": 72,
-      "top1_accuracy": 0.875,
-      "error_association_rate": 0.125,
+      "top1_accuracy": 0.847222,
+      "error_association_rate": 0.152778,
       "coverage": 1.0,
       "abstain_rate": 0.0,
       "label_basis": "programmatic semantic rewrite; evaluation-only"
@@ -25,8 +25,8 @@
       "system": "rule-local",
       "claims": 72,
       "linked": 72,
-      "top1_accuracy": 0.875,
-      "error_association_rate": 0.125,
+      "top1_accuracy": 0.847222,
+      "error_association_rate": 0.152778,
       "coverage": 1.0,
       "abstain_rate": 0.0,
       "label_basis": "programmatic semantic rewrite; evaluation-only"
@@ -34,11 +34,11 @@
     {
       "system": "rule-local-api",
       "claims": 72,
-      "linked": 70,
-      "top1_accuracy": 0.930556,
-      "error_association_rate": 0.041667,
-      "coverage": 0.972222,
-      "abstain_rate": 0.027778,
+      "linked": 69,
+      "top1_accuracy": 0.902778,
+      "error_association_rate": 0.055556,
+      "coverage": 0.958333,
+      "abstain_rate": 0.041667,
       "label_basis": "programmatic semantic rewrite; evaluation-only"
     }
   ],

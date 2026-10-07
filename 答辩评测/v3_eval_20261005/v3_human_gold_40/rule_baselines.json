@@ -1,0 +1,26 @@
+{
+  "dataset": "答辩评测\\v3_eval_20261005\\v3_human_gold_40\\human_gold.jsonl",
+  "claims": 37,
+  "programmatic_labels": false,
+  "human_gold": true,
+  "baselines": {
+    "metric_only": {
+      "quote_claims": 19,
+      "quote_answered": 6,
+      "quote_coverage": 0.3157894736842105,
+      "quote_correct_over_all": 0.3157894736842105,
+      "growth_claims": 18,
+      "growth_exact_match": 0.5
+    },
+    "metric_plus_numeric_value_and_unit": {
+      "quote_claims": 19,
+      "quote_answered": 7,
+      "quote_coverage": 0.3684210526315789,
+      "quote_correct_over_all": 0.3157894736842105,
+      "growth_claims": 18,
+      "growth_exact_match": 0.05555555555555555,
+      "growth_precision": 0.4444444444444444,
+      "growth_recall": 0.25
+    }
+  }
+}

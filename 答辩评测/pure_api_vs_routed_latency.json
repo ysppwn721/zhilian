@@ -1,0 +1,45 @@
+{
+  "dataset_claims": 72,
+  "local_model": {
+    "enabled": true,
+    "configured": true,
+    "path": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\models\\bge-reranker-v2-m3-onnx-int8",
+    "model": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\models\\bge-reranker-v2-m3-onnx-int8\\onnx\\model_int8.onnx",
+    "dependencies": true
+  },
+  "pure_api_real_replay": {
+    "batches": 2,
+    "claims": 72,
+    "batch_latencies_ms": [
+      5245.1,
+      4484.3
+    ],
+    "total_ms": 9729.4,
+    "total_seconds": 9.729
+  },
+  "routed": {
+    "route_counts": {
+      "rule_unique": 15,
+      "local_confident": 43,
+      "api_fallback": 14,
+      "abstain": 0
+    },
+    "rule_and_local_ms": 9087.0,
+    "rule_and_local_seconds": 9.087,
+    "api_calls": [
+      {
+        "claims": 14,
+        "source": "replay-baseline",
+        "latency_ms": null
+      }
+    ],
+    "api_ms": 0,
+    "total_seconds": null,
+    "api_timing_status": "not_measured_local_key_missing"
+  },
+  "caveats": [
+    "纯 API 时间来自已完成的真实 DeepSeek 72 条回放。",
+    "无本地 API Key 时，路由 API 部分不重复联网；只测量规则 + 本地 BGE，保留实际纯 API 网络基线。",
+    "端到端路由总耗时只有在 --live-api 下才是同机同次实测。"
+  ]
+}

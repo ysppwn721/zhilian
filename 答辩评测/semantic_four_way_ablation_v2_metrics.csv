@@ -1,5 +1,5 @@
 ﻿system,claims,linked,top1_accuracy,error_association_rate,coverage,abstain_rate,label_basis
 rule-only,72,15,0.194444,0.013889,0.208333,0.791667,programmatic semantic rewrite; evaluation-only
-local-only,72,72,0.875,0.125,1.0,0.0,programmatic semantic rewrite; evaluation-only
-rule-local,72,72,0.875,0.125,1.0,0.0,programmatic semantic rewrite; evaluation-only
-rule-local-api,72,70,0.930556,0.041667,0.972222,0.027778,programmatic semantic rewrite; evaluation-only
+local-only,72,72,0.847222,0.152778,1.0,0.0,programmatic semantic rewrite; evaluation-only
+rule-local,72,72,0.847222,0.152778,1.0,0.0,programmatic semantic rewrite; evaluation-only
+rule-local-api,72,69,0.902778,0.055556,0.958333,0.041667,programmatic semantic rewrite; evaluation-only

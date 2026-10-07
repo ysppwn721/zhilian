@@ -38,6 +38,16 @@ def audit_splits(train: list[dict], dev: list[dict], test: list[dict]) -> None:
         raise ValueError("train/dev/test 均必须有数据；不能用冻结评测集替代训练集")
 
 
+def audit_manifests(paths: list[Path]) -> None:
+    for directory in {path.parent for path in paths}:
+        manifest = directory / "manifest.json"
+        if not manifest.is_file():
+            continue
+        payload = json.loads(manifest.read_text(encoding="utf-8"))
+        if payload.get("ready_for_training") is False:
+            raise ValueError(f"Dataset is not approved for training: {directory}")
+
+
 def report(name: str, rows: list[dict]) -> None:
     positives = sum(int(row["label"]) == 1 for row in rows)
     groups = len({row["group_id"] for row in rows})
@@ -68,6 +78,7 @@ def main() -> None:
     parser.add_argument("--max-length", type=int, default=256)
     args = parser.parse_args()
 
+    audit_manifests([args.train, args.dev, args.test])
     train = read_rows(args.train)
     dev = read_rows(args.dev)
     test = read_rows(args.test)

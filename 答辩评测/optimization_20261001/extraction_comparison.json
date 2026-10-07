@@ -1,0 +1,42 @@
+{
+  "denominator": "PDF numeric text fragments (including table fragments), not eligible assertions",
+  "extractor": "PyMuPDF text layer; page 10-45; fixed cached text",
+  "corpus_sha256": "3a4e285dbee8886f2c7e54b99044d8200d9b5780ca3bc94155d51076b6f1c8c9",
+  "source_hashes": {
+    "baseline": "1d39c40f2f5cc9baf01017777b02b0239d4ef51f5d1032ae6a83bf57734d68a9",
+    "after": "57fa8778845708bee0a88a7d26a4c927d1fd98f0ec986c513d4a85f20b808974"
+  },
+  "metrics": [
+    {
+      "system": "before",
+      "numeric_fragments": 46402,
+      "recognized": 1089,
+      "claims": 1462,
+      "kinds": {
+        "growth": 233,
+        "quote": 1148,
+        "threshold": 81
+      },
+      "evaluation_seconds": 0.868,
+      "fragment_hit_rate": 0.023468815999310375
+    },
+    {
+      "system": "after",
+      "numeric_fragments": 46402,
+      "recognized": 1268,
+      "claims": 1710,
+      "kinds": {
+        "growth": 481,
+        "quote": 1148,
+        "threshold": 81
+      },
+      "evaluation_seconds": 1.743,
+      "fragment_hit_rate": 0.027326408344467912
+    }
+  ],
+  "new_candidate_fragments": 250,
+  "warnings": [
+    "This is fragment coverage, not precision/recall or human truth.",
+    "After evaluation time also includes baseline comparison; not a latency comparison."
+  ]
+}

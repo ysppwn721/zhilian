@@ -7,13 +7,14 @@ import re
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 KINDS = {'quote': '数值引用', 'growth': '增长率', 'ranking': '排名', 'threshold': '阈值', 'chart': '图表'}
-EXTRACTION_VERSION = 4
+EXTRACTION_VERSION = 7
 UNITS = {'元': ('currency', Decimal(1)), '万元': ('currency', Decimal(10000)),
          '亿元': ('currency', Decimal(100000000)), '件': ('count', Decimal(1)),
-         '人': ('people', Decimal(1)), '%': ('percentage', Decimal(1))}
+         '人': ('people', Decimal(1)), 'CNY': ('currency', Decimal(1)),
+         '%': ('percentage', Decimal(1))}
 # 允许千分位逗号：真实年报普遍写作 3,379.37 万元，旧规则只认连续数字。
 NUM = r'-?\d{1,3}(?:,\d{3})+(?:\.\d+)?|-?\d+(?:\.\d+)?'
-UNIT = r'亿元|万元|元|件|人|%'
+UNIT = r'亿元|万元|元|件|人|CNY|%'
 
 
 def number(value) -> Decimal:
@@ -75,6 +76,26 @@ PERIOD_SYNONYMS = {
     '上期': ('上期', '上年度同期', '上年同期', '去年同期', '上年度', '上年', '去年'),
 }
 
+# 只扩充定义相同的名称。营业总收入、主营收入、现金等价物、研发投入
+# 均有独立会计口径，不能因词面相似合并；这些仍交给语义候选与用户确认。
+METRIC_ALIASES_BY_CANONICAL = {
+    '营业收入': ('营业收入', '营收'),
+    '资产总计': ('资产总计', '总资产'),
+    '总资产': ('资产总计', '总资产'),
+    '负债总计': ('负债总计', '总负债'),
+    '总负债': ('负债总计', '总负债'),
+    '员工人数': ('员工人数', '员工总数'),
+    '员工总数': ('员工人数', '员工总数'),
+}
+
+
+def metric_aliases(metric):
+    """Return the closed lexical alias set for one fact metric."""
+    metric = str(metric or '')
+    if metric in METRIC_ALIASES_BY_CANONICAL:
+        return METRIC_ALIASES_BY_CANONICAL[metric]
+    return (metric,) if metric else ()
+
 
 def period_in_text(period, text):
     """事实的期间是否在文本中以任意同义写法出现。"""
@@ -107,6 +128,8 @@ def build_index(facts):
     for fact in facts:
         for key in _descriptors(fact):
             token_ids.setdefault(key, set()).add(fact['id'])
+        for alias in metric_aliases(fact.get('metric')):
+            token_ids.setdefault(alias, set()).add(fact['id'])
     return {'token_ids': token_ids}
 
 
@@ -158,14 +181,14 @@ def best_facts(text, facts, *, period=None, index=None):
     scored = []
     for fact in candidates:
         keys = _descriptors(fact)
-        if not keys or fact['metric'] not in text:
+        if not keys or not any(alias in text for alias in metric_aliases(fact.get('metric'))):
             continue
-        if any(key not in text for key in keys):
+        if fact.get('subject') and fact['subject'] not in GENERIC_SUBJECTS and fact['subject'] not in text:
             continue
         if period and fact['period'] != period:
             continue
         score = 5
-        if fact['subject'] not in GENERIC_SUBJECTS:
+        if fact.get('subject', '') not in GENERIC_SUBJECTS:
             score += 4
         if fact['period'] and period_in_text(fact['period'], text):
             score += 3
@@ -226,15 +249,20 @@ def extract_claims(block, facts, index=None):
     patterns = [
         # 真实年报用「较上年/同比/比上年」，且动词常用「增加/减少」而非「增长/下降」。
         # 旧规则只认「较上期|环比」+「增长|下降|持平」，导致年报语料识别率为 0。
-        ('growth', r'(?:较上期|环比|较上年|比上年|同比)(增长|下降|持平|增加|减少|上升)(?:(' + NUM + r')%)?'),
+        # 年报有两种稳定写法：带比较期间（同比增长25%），以及在同一
+        # 句子中直接写“产量增加179.79%”。后者只有在动词后紧跟百分比
+        # 时才启用，避免把普通叙述中的“增加”误识别成增长率论断。
+        ('growth', r'(?:(?:较上期|环比|较上年|比上年|同比)\s*|'
+                  r'(?=(?:增长|下降|持平|增加|减少|上升)(?!率)\s*(?:' + NUM + r')\s*%))'
+                  r'(增长|下降|持平|增加|减少|上升)(?!率)(?:\s*(' + NUM + r')\s*%)?(?!\s*\d)'),
         ('ranking', r'(.+?)(销售额|销量|收入|支出|得分)(?:并列)?最高'),
         ('threshold', r'(未超过|不超过|超过|不少于|低于|高于)\s*(' + NUM + r')\s*(' + UNIT + r')'),
         ('budget', r'支出(未超过|不超过|超过)预算'),
         # 年报中的数值引用连接词远多于“为/是/达到”。连接词允许和数字之间
         # 有少量空白；末尾的“无连接词”分支覆盖“营业收入125万元”这类
         # 标题式写法。阈值模式排在前面，因此“超过120万元”仍优先识别为阈值。
-        ('quote', r'(?:(?:约为|实现了|录得了|增至|高达|实现|录得|共计|合计|完成|累计|近|为|是|达到|达)\s*|'
-                  r'(?=(?:' + NUM + r')\s*(?:亿元|万元|元|件|人)(?!\w)))('
+        ('quote', r'(?:(?:约为|实现了|录得了|增至|高达|实现|录得|共计|合计|完成|累计|近|为|是|达到|达|is)\s*|'
+                  r'(?=(?:' + NUM + r')\s*(?:亿元|万元|元|件|人|CNY)(?!\w)))('
                   + NUM + r')\s*(' + UNIT + r')'),
     ]
     candidate_matches = []
@@ -302,10 +330,13 @@ def extract_claims(block, facts, index=None):
 
     for sentence_index, start, end, text, marker_kind, match in candidate_matches:
         refs, spec, kind, issue = [], {}, None, ''
-        source_text = text if resolve(text) else context
+        # Only an elided predicate can inherit a metric from preceding context.
+        # A newly named, uncovered metric must not borrow the preceding source.
+        source_text = text if resolve(text) or match.start() > 0 else context
         if marker_kind == 'growth':
             growth = match
             kind = 'growth'
+            comparison_explicit = bool(re.match(r'(?:较上期|环比|较上年|比上年|同比)', growth.group()))
             curr = resolve(source_text, '本期')
             prev = resolve(source_text, '上期')
             suggested = []
@@ -325,6 +356,12 @@ def extract_claims(block, facts, index=None):
             spec = {'span': [growth.start(1), growth.end()],
                     'reported': float(number(growth[2])) if growth[2] else 0.0,
                     'qualitative': growth[2] is None, 'direction': direction_word}
+            if not comparison_explicit:
+                # “增加25%”没有明说相对哪一期，不能静默假设上期。
+                # 保留抽取锚点，但必须由用户补全比较基准与两侧事实。
+                spec['comparison_period_explicit'] = False
+                refs = []
+                issue = '增长率的比较基准未明确，请确认同口径的两期来源'
             if suggested:
                 spec['suggested_refs'] = suggested
             if direction_word < 0:
@@ -359,7 +396,7 @@ def extract_claims(block, facts, index=None):
         elif marker_kind == 'quote':
             quote = match
             kind = 'quote'
-            fs = resolve(source_text)
+            fs = resolve(text)
             refs = [fs[0]['id']] if len(fs) == 1 else []
             spec = {'reported': float(number(quote[1])), 'unit': quote[2], 'span': [quote.start(1), quote.end(1)]}
         if kind:
@@ -415,9 +452,16 @@ def check(claim, facts):
             if len(refs) != 1:
                 raise CheckError(None, '数值引用必须关联一个事实')
             value = convert(refs[0]['value'], refs[0]['unit'], s['unit'])
-            ok = value.quantize(Decimal('.01'), rounding=ROUND_HALF_UP) == number(s['reported']).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)
-            expected = replace_span(old, s['span'], fmt(value))
-            calculation = f"{refs[0]['value']} {refs[0]['unit']} = {fmt(value)} {s['unit']}"
+            raw = old[s['span'][0]:s['span'][1]]
+            numeric_span = bool(re.fullmatch(r'(?:' + NUM + r')', raw))
+            decimals = len(raw.split('.', 1)[1]) if numeric_span and '.' in raw else 0 if numeric_span else 2
+            precision = Decimal(1).scaleb(-decimals)
+            displayed = value.quantize(precision, rounding=ROUND_HALF_UP)
+            reported = number(raw) if numeric_span else number(s['reported'])
+            ok = displayed == reported
+            replacement = format(displayed, 'f')
+            expected = replace_span(old, s['span'], replacement)
+            calculation = f"按原文 {decimals} 位小数四舍五入：{refs[0]['value']} {refs[0]['unit']} = {replacement} {s['unit']}"
         elif k == 'growth':
             if len(refs) != 2:
                 raise CheckError(None, '增长率需要上期、本期两个事实')

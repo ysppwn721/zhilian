@@ -1,0 +1,37 @@
+{
+  "model": "annual_repaired_v1",
+  "device": "cpu",
+  "elapsed_seconds": 30.652,
+  "metrics": {
+    "by_task": {
+      "quote_current": {
+        "claims": 19,
+        "top1_accuracy": 0.9473684210526315,
+        "error_association_rate": 0.052631578947368474,
+        "ambiguous_top1": 0
+      },
+      "growth_set": {
+        "claims": 18,
+        "source_set_exact_match": 0.8888888888888888,
+        "source_set_completeness_recall": 0.9444444444444444,
+        "source_set_precision": 0.9444444444444444,
+        "ambiguous_at_top2_boundary": 0,
+        "source_set_f1": 0.9444444444444444
+      }
+    },
+    "by_variant": {
+      "literal": {
+        "quote_claims": 19,
+        "quote_top1_accuracy": 0.9473684210526315,
+        "growth_claims": 18,
+        "growth_set_exact_match": 0.8888888888888888
+      }
+    }
+  },
+  "candidate_order_invariance": {
+    "seed": 20261005,
+    "claims": 37,
+    "changed_claims": 0,
+    "prediction_set_consistency": 1.0
+  }
+}

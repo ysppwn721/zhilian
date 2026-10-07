@@ -1,0 +1,72 @@
+{
+  "title": "纯 API 与三层路由对比（72 条同集回放）",
+  "dataset": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\semantic_rewrite_eval_v2.jsonl",
+  "dataset_claims": 72,
+  "label_basis": "programmatic semantic rewrite; evaluation-only",
+  "route_counts": {
+    "rule_unique": 15,
+    "local": 43,
+    "api": 14,
+    "abstain": 3
+  },
+  "metrics": [
+    {
+      "system": "pure-api",
+      "claims": 72,
+      "linked": 60,
+      "top1_accuracy": 0.833333,
+      "error_association_rate": 0.0,
+      "coverage": 0.833333,
+      "abstain_rate": 0.166667,
+      "label_basis": "programmatic semantic rewrite; evaluation-only"
+    },
+    {
+      "system": "rule-local-api",
+      "claims": 72,
+      "linked": 69,
+      "top1_accuracy": 0.902778,
+      "error_association_rate": 0.055556,
+      "coverage": 0.958333,
+      "abstain_rate": 0.041667,
+      "label_basis": "programmatic semantic rewrite; evaluation-only"
+    }
+  ],
+  "latency": {
+    "pure_api_seconds": 9.729,
+    "routed_rule_local_seconds": 9.087,
+    "routed_api_fallback_claims": 14,
+    "api_fallback_timing_status": "not_measured_local_key_missing"
+  },
+  "cost": [
+    {
+      "mode": "pure_api",
+      "claims": 280,
+      "api_calls": 7,
+      "input_tokens": 12303,
+      "output_tokens": 10288,
+      "estimated_cost_yuan": 0.053455,
+      "measurement": "token estimate"
+    },
+    {
+      "mode": "three_route_api_fallback",
+      "claims": 280,
+      "api_calls": 2,
+      "input_tokens": 2115,
+      "output_tokens": 1584,
+      "estimated_cost_yuan": 0.008451,
+      "measurement": "token estimate"
+    }
+  ],
+  "current_v3_human_gold": {
+    "claims_scored": 37,
+    "abstained_claims": 3,
+    "pure_api_status": "not_measured_same_set",
+    "note": "当前人工 Gold 不能直接填入纯 API 柱；需在同一 37 条上实测后再更新主结论。"
+  },
+  "caveats": [
+    "效果数据来自已完成的 72 条程序化语义改写 API 回放，不是人工 Gold。",
+    "时间图的三层路由只实测规则+本地模型，API 兜底网络延迟未测。",
+    "费用按同一 DeepSeek 单价（输入 1 元/M、输出 4 元/M）和 40 条/批估算，不代表产品售价。",
+    "当前 v3 人工 Gold 的纯 API 尚未在同一环境完成，不能与本回放结果混合。"
+  ]
+}

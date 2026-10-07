@@ -1,0 +1,21 @@
+{
+  "experiment": "human_gold_pure_api_20261004",
+  "status": "request_failed",
+  "batch": 1,
+  "claims": 40,
+  "facts": 102,
+  "error_type": "ValueError",
+  "message": "DeepSeek 连接失败或返回结构无效，原关联未改变，可继续人工确认",
+  "call_metrics": {
+    "provider": "DeepSeek",
+    "model": "deepseek-flash",
+    "duration_ms": 256,
+    "outcome": "failed",
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "response_status": null,
+    "estimated_cost_cny": 0.0
+  },
+  "api_key_written": false
+}

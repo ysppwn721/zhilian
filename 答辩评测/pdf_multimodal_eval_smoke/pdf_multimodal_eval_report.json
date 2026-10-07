@@ -1,0 +1,64 @@
+{
+  "summary": {
+    "documents": 3,
+    "processed": 3,
+    "errors": 0,
+    "pages": 642,
+    "facts": 80,
+    "tables": 21,
+    "chart_candidates": 155,
+    "docs_with_facts": 3,
+    "mean_text_layer_ratio": 1.0,
+    "change_checks": 7,
+    "change_check_pass": 7,
+    "change_check_pass_rate": 1.0,
+    "mean_time_ms": 8831.997,
+    "p50_time_ms": 10128.85,
+    "label_basis": "PDF table reported change column cross-check; structural/programmatic, not human truth",
+    "chart_basis": "page-level candidate detection; values are not claimed without OCR/chart parser"
+  },
+  "files": [
+    {
+      "file": "000506_2023年年度报告更正后.pdf",
+      "pages": 183,
+      "chars": 297160,
+      "text_layer_ratio": 1.0,
+      "candidate_table_pages": 54,
+      "tables": 14,
+      "facts": 50,
+      "chart_candidates": 30,
+      "change_checks": 7,
+      "change_check_pass": 7,
+      "time_ms": 5956.1,
+      "status": "ok"
+    },
+    {
+      "file": "000615_奥园美谷科技股份有限公司2023年年度报告更正后.pdf",
+      "pages": 216,
+      "chars": 507256,
+      "text_layer_ratio": 1.0,
+      "candidate_table_pages": 63,
+      "tables": 4,
+      "facts": 14,
+      "chart_candidates": 65,
+      "change_checks": 0,
+      "change_check_pass": 0,
+      "time_ms": 10411.041,
+      "status": "ok"
+    },
+    {
+      "file": "000930_2023年年度报告更正后.pdf",
+      "pages": 243,
+      "chars": 522343,
+      "text_layer_ratio": 1.0,
+      "candidate_table_pages": 58,
+      "tables": 3,
+      "facts": 16,
+      "chart_candidates": 60,
+      "change_checks": 0,
+      "change_check_pass": 0,
+      "time_ms": 10128.85,
+      "status": "ok"
+    }
+  ]
+}

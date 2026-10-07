@@ -1,0 +1,3 @@
+﻿mode,claims,linked,correct_association_rate,coverage,abstain_rate,error_association_rate,label_basis
+pure-api,72,60,0.833333,0.833333,0.166667,0.0,programmatic semantic rewrite; evaluation-only
+rule-local-api,72,69,0.902778,0.958333,0.041667,0.055556,programmatic semantic rewrite; evaluation-only

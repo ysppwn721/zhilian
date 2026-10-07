@@ -22,7 +22,7 @@ ROWS = [
 ]
 
 
-def create_demo(folder):
+def create_demo(folder, *, semantic_demo=False):
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
     wb = Workbook()
@@ -65,6 +65,10 @@ def create_demo(folder):
     para.add_run('本期销售额为').bold = True
     para.add_run('125').italic = True
     para.add_run('万元。较上期增长25%。本期销售额超过120万元。')
+    if semantic_demo:
+        # 事实表写“销售额”，正文故意改写成“营收”，用于展示规则零候选
+        # → 本地语义召回 → 人工确认的智能体链路。
+        doc.add_paragraph('公司本期实现营收125万元。')
     doc.add_heading('产品与预算', 1)
     doc.add_paragraph('A产品销量最高。支出未超过预算。')
     doc.add_paragraph('本段是人工撰写的背景说明，修复时应保持原样。')

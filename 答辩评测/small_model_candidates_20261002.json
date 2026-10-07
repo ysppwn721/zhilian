@@ -1,0 +1,60 @@
+{
+  "checked_date": "2026-10-02",
+  "size_unit": "decimal MB; 1000000 bytes",
+  "target": "lightweight optional offline reranker, model bundle on the order of 20-60 MB",
+  "training_started": false,
+  "pretrained_weights_downloaded": true,
+  "download_scope": "primary candidate only; fallback and control not downloaded",
+  "candidates": [
+    {
+      "role": "primary",
+      "id": "uer/roberta-mini-wwm-chinese-cluecorpussmall",
+      "revision": "5e567169018f5cf84cf1d85a2b391c8d51211eda",
+      "api_url": "https://huggingface.co/api/models/uer/roberta-mini-wwm-chinese-cluecorpussmall?blobs=true",
+      "weights": "pytorch_model.bin",
+      "weights_bytes": 35184327,
+      "local_directory": "models/chinese_roberta_mini_wwm_base",
+      "weights_downloaded": true,
+      "sha256": "47727c489bfa5c57b53149c83b85a35655b5e49f7355202e272ec50c9c4467d6",
+      "official_lfs_sha256_verified": true,
+      "offline_pretrained_load_verified": true,
+      "layers": 4,
+      "hidden_size": 256,
+      "sequence_classification_parameter_count_from_config": 8766210,
+      "weight_license": "not specified in model card; redistribution verification pending",
+      "cpu_latency_measured": false,
+      "onnx_export_measured": false
+    },
+    {
+      "role": "fallback_experiment",
+      "id": "uer/chinese_roberta_L-6_H-256",
+      "revision": "f4ff4b2f64c4763eeff07d5792502660756b2a0d",
+      "api_url": "https://huggingface.co/api/models/uer/chinese_roberta_L-6_H-256?blobs=true",
+      "weights": "pytorch_model.bin",
+      "weights_bytes": 41515079,
+      "weights_downloaded": false,
+      "layers": 6,
+      "hidden_size": 256,
+      "sequence_classification_parameter_count_from_config": 10345730,
+      "weight_license": "not specified in model card; redistribution verification pending",
+      "cpu_latency_measured": false,
+      "onnx_export_measured": false
+    },
+    {
+      "role": "optional_small_capacity_control",
+      "id": "uer/chinese_roberta_L-2_H-128",
+      "revision": "151f4204cbb5784c4126a89a94ef0bb044273ac0",
+      "api_url": "https://huggingface.co/api/models/uer/chinese_roberta_L-2_H-128?blobs=true",
+      "weights": "pytorch_model.bin",
+      "weights_bytes": 12840967,
+      "weights_downloaded": false,
+      "layers": 2,
+      "hidden_size": 128,
+      "sequence_classification_parameter_count_from_config": 3183746,
+      "weight_license": "not specified in model card; redistribution verification pending",
+      "cpu_latency_measured": false,
+      "onnx_export_measured": false
+    }
+  ],
+  "deployment_gate": "both independent capability improvement and measured model-size/CPU-cost advantage must pass; all four data blocking reasons remain enforced"
+}

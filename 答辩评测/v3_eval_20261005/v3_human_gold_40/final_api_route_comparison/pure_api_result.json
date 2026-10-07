@@ -3,512 +3,513 @@
   "mode": "api_only",
   "model": "deepseek-flash",
   "provider": "DeepSeek",
-  "status": "partial",
+  "status": "ok",
   "dataset": "答辩评测\\v3_eval_20261005\\v3_human_gold_40\\human_gold.jsonl",
   "human_gold": true,
   "note": "全部 37 条论断一次性交给 API，不使用规则答案与本地模型答案。fact_id 由 zhilian.llm.suggest_links 内的 allowed_facts 做本地候选集合校验。",
   "batching": {
     "max_claims_per_batch": 1,
     "max_facts_per_batch": 60,
+    "max_attempts": 2,
     "batches": 37,
     "batch_log": [
       {
         "batch": 1,
         "claims": 1,
         "facts": 7,
-        "elapsed_seconds": 1.106,
+        "elapsed_seconds": 1.3,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 561,
-        "completion_tokens": 95,
-        "total_tokens": 656,
+        "prompt_tokens": 715,
+        "completion_tokens": 126,
+        "total_tokens": 841,
         "response_status": 200
       },
       {
         "batch": 2,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 0.991,
+        "elapsed_seconds": 1.077,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 582,
-        "completion_tokens": 109,
-        "total_tokens": 691,
+        "prompt_tokens": 751,
+        "completion_tokens": 128,
+        "total_tokens": 879,
         "response_status": 200
       },
       {
         "batch": 3,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 5.874,
-        "outcome": "empty_after_retry",
+        "elapsed_seconds": 1.219,
+        "outcome": "succeeded",
         "error": null,
-        "attempts": 3,
-        "prompt_tokens": 1869,
-        "completion_tokens": 21,
-        "total_tokens": 1890,
+        "attempts": 1,
+        "prompt_tokens": 784,
+        "completion_tokens": 100,
+        "total_tokens": 884,
         "response_status": 200
       },
       {
         "batch": 4,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 1.248,
+        "elapsed_seconds": 1.188,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 586,
-        "completion_tokens": 102,
-        "total_tokens": 688,
+        "prompt_tokens": 747,
+        "completion_tokens": 126,
+        "total_tokens": 873,
         "response_status": 200
       },
       {
         "batch": 5,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 1.345,
+        "elapsed_seconds": 1.18,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 584,
-        "completion_tokens": 75,
-        "total_tokens": 659,
+        "prompt_tokens": 756,
+        "completion_tokens": 139,
+        "total_tokens": 895,
         "response_status": 200
       },
       {
         "batch": 6,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 1.241,
+        "elapsed_seconds": 1.125,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 595,
-        "completion_tokens": 105,
-        "total_tokens": 700,
+        "prompt_tokens": 757,
+        "completion_tokens": 111,
+        "total_tokens": 868,
         "response_status": 200
       },
       {
         "batch": 7,
         "claims": 1,
         "facts": 5,
-        "elapsed_seconds": 0.819,
+        "elapsed_seconds": 1.101,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 442,
-        "completion_tokens": 86,
-        "total_tokens": 528,
+        "prompt_tokens": 582,
+        "completion_tokens": 121,
+        "total_tokens": 703,
         "response_status": 200
       },
       {
         "batch": 8,
         "claims": 1,
         "facts": 6,
-        "elapsed_seconds": 1.038,
+        "elapsed_seconds": 0.868,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 508,
-        "completion_tokens": 93,
-        "total_tokens": 601,
+        "prompt_tokens": 650,
+        "completion_tokens": 89,
+        "total_tokens": 739,
         "response_status": 200
       },
       {
         "batch": 9,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 0.954,
+        "elapsed_seconds": 1.123,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 580,
-        "completion_tokens": 79,
-        "total_tokens": 659,
+        "prompt_tokens": 743,
+        "completion_tokens": 103,
+        "total_tokens": 846,
         "response_status": 200
       },
       {
         "batch": 10,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 0.9,
+        "elapsed_seconds": 1.463,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 591,
-        "completion_tokens": 88,
-        "total_tokens": 679,
+        "prompt_tokens": 750,
+        "completion_tokens": 105,
+        "total_tokens": 855,
         "response_status": 200
       },
       {
         "batch": 11,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 5.362,
-        "outcome": "empty_after_retry",
+        "elapsed_seconds": 1.226,
+        "outcome": "succeeded",
         "error": null,
-        "attempts": 3,
-        "prompt_tokens": 1893,
-        "completion_tokens": 21,
-        "total_tokens": 1914,
+        "attempts": 1,
+        "prompt_tokens": 793,
+        "completion_tokens": 96,
+        "total_tokens": 889,
         "response_status": 200
       },
       {
         "batch": 12,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 1.293,
+        "elapsed_seconds": 1.555,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 593,
-        "completion_tokens": 129,
-        "total_tokens": 722,
+        "prompt_tokens": 753,
+        "completion_tokens": 127,
+        "total_tokens": 880,
         "response_status": 200
       },
       {
         "batch": 13,
         "claims": 1,
         "facts": 6,
-        "elapsed_seconds": 1.193,
+        "elapsed_seconds": 1.004,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 498,
-        "completion_tokens": 85,
-        "total_tokens": 583,
+        "prompt_tokens": 640,
+        "completion_tokens": 101,
+        "total_tokens": 741,
         "response_status": 200
       },
       {
         "batch": 14,
         "claims": 1,
         "facts": 7,
-        "elapsed_seconds": 5.697,
-        "outcome": "empty_after_retry",
+        "elapsed_seconds": 0.959,
+        "outcome": "succeeded",
         "error": null,
-        "attempts": 3,
-        "prompt_tokens": 1632,
-        "completion_tokens": 21,
-        "total_tokens": 1653,
+        "attempts": 1,
+        "prompt_tokens": 696,
+        "completion_tokens": 90,
+        "total_tokens": 786,
         "response_status": 200
       },
       {
         "batch": 15,
         "claims": 1,
         "facts": 7,
-        "elapsed_seconds": 1.274,
+        "elapsed_seconds": 1.312,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 520,
-        "completion_tokens": 93,
-        "total_tokens": 613,
+        "prompt_tokens": 680,
+        "completion_tokens": 115,
+        "total_tokens": 795,
         "response_status": 200
       },
       {
         "batch": 16,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 1.257,
+        "elapsed_seconds": 1.218,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 605,
-        "completion_tokens": 85,
-        "total_tokens": 690,
+        "prompt_tokens": 767,
+        "completion_tokens": 99,
+        "total_tokens": 866,
         "response_status": 200
       },
       {
         "batch": 17,
         "claims": 1,
         "facts": 9,
-        "elapsed_seconds": 5.014,
-        "outcome": "empty_after_retry",
+        "elapsed_seconds": 1.122,
+        "outcome": "succeeded",
         "error": null,
-        "attempts": 3,
-        "prompt_tokens": 2007,
-        "completion_tokens": 21,
-        "total_tokens": 2028,
+        "attempts": 1,
+        "prompt_tokens": 843,
+        "completion_tokens": 106,
+        "total_tokens": 949,
         "response_status": 200
       },
       {
         "batch": 18,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 1.19,
+        "elapsed_seconds": 1.208,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 570,
-        "completion_tokens": 110,
-        "total_tokens": 680,
+        "prompt_tokens": 732,
+        "completion_tokens": 124,
+        "total_tokens": 856,
         "response_status": 200
       },
       {
         "batch": 19,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 1.018,
+        "elapsed_seconds": 1.236,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 592,
-        "completion_tokens": 78,
-        "total_tokens": 670,
+        "prompt_tokens": 755,
+        "completion_tokens": 107,
+        "total_tokens": 862,
         "response_status": 200
       },
       {
         "batch": 20,
         "claims": 1,
         "facts": 6,
-        "elapsed_seconds": 0.951,
+        "elapsed_seconds": 1.347,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 486,
-        "completion_tokens": 71,
-        "total_tokens": 557,
+        "prompt_tokens": 628,
+        "completion_tokens": 89,
+        "total_tokens": 717,
         "response_status": 200
       },
       {
         "batch": 21,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 1.521,
+        "elapsed_seconds": 1.037,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 596,
-        "completion_tokens": 111,
-        "total_tokens": 707,
+        "prompt_tokens": 753,
+        "completion_tokens": 109,
+        "total_tokens": 862,
         "response_status": 200
       },
       {
         "batch": 22,
         "claims": 1,
         "facts": 9,
-        "elapsed_seconds": 1.26,
+        "elapsed_seconds": 1.338,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 650,
-        "completion_tokens": 77,
-        "total_tokens": 727,
+        "prompt_tokens": 821,
+        "completion_tokens": 143,
+        "total_tokens": 964,
         "response_status": 200
       },
       {
         "batch": 23,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 0.962,
+        "elapsed_seconds": 1.072,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 534,
-        "completion_tokens": 87,
-        "total_tokens": 621,
+        "prompt_tokens": 701,
+        "completion_tokens": 95,
+        "total_tokens": 796,
         "response_status": 200
       },
       {
         "batch": 24,
         "claims": 1,
         "facts": 7,
-        "elapsed_seconds": 0.901,
+        "elapsed_seconds": 1.104,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 546,
-        "completion_tokens": 89,
-        "total_tokens": 635,
+        "prompt_tokens": 704,
+        "completion_tokens": 86,
+        "total_tokens": 790,
         "response_status": 200
       },
       {
         "batch": 25,
         "claims": 1,
         "facts": 9,
-        "elapsed_seconds": 0.873,
+        "elapsed_seconds": 1.032,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 670,
-        "completion_tokens": 101,
-        "total_tokens": 771,
+        "prompt_tokens": 838,
+        "completion_tokens": 106,
+        "total_tokens": 944,
         "response_status": 200
       },
       {
         "batch": 26,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 1.289,
+        "elapsed_seconds": 1.486,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 592,
-        "completion_tokens": 76,
-        "total_tokens": 668,
+        "prompt_tokens": 754,
+        "completion_tokens": 100,
+        "total_tokens": 854,
         "response_status": 200
       },
       {
         "batch": 27,
         "claims": 1,
         "facts": 9,
-        "elapsed_seconds": 1.395,
+        "elapsed_seconds": 1.163,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 667,
-        "completion_tokens": 95,
-        "total_tokens": 762,
+        "prompt_tokens": 834,
+        "completion_tokens": 100,
+        "total_tokens": 934,
         "response_status": 200
       },
       {
         "batch": 28,
         "claims": 1,
         "facts": 9,
-        "elapsed_seconds": 1.018,
+        "elapsed_seconds": 0.974,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 645,
-        "completion_tokens": 83,
-        "total_tokens": 728,
+        "prompt_tokens": 818,
+        "completion_tokens": 109,
+        "total_tokens": 927,
         "response_status": 200
       },
       {
         "batch": 29,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 1.166,
+        "elapsed_seconds": 1.108,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 593,
-        "completion_tokens": 90,
-        "total_tokens": 683,
+        "prompt_tokens": 751,
+        "completion_tokens": 101,
+        "total_tokens": 852,
         "response_status": 200
       },
       {
         "batch": 30,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 0.838,
+        "elapsed_seconds": 1.128,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 580,
-        "completion_tokens": 79,
-        "total_tokens": 659,
+        "prompt_tokens": 742,
+        "completion_tokens": 122,
+        "total_tokens": 864,
         "response_status": 200
       },
       {
         "batch": 31,
         "claims": 1,
         "facts": 6,
-        "elapsed_seconds": 5.954,
-        "outcome": "empty_after_retry",
+        "elapsed_seconds": 0.806,
+        "outcome": "succeeded",
         "error": null,
-        "attempts": 3,
-        "prompt_tokens": 1371,
-        "completion_tokens": 21,
-        "total_tokens": 1392,
+        "attempts": 1,
+        "prompt_tokens": 607,
+        "completion_tokens": 91,
+        "total_tokens": 698,
         "response_status": 200
       },
       {
         "batch": 32,
         "claims": 1,
         "facts": 7,
-        "elapsed_seconds": 2.834,
+        "elapsed_seconds": 1.137,
         "outcome": "succeeded",
         "error": null,
-        "attempts": 2,
-        "prompt_tokens": 1046,
-        "completion_tokens": 80,
-        "total_tokens": 1126,
+        "attempts": 1,
+        "prompt_tokens": 675,
+        "completion_tokens": 84,
+        "total_tokens": 759,
         "response_status": 200
       },
       {
         "batch": 33,
         "claims": 1,
         "facts": 4,
-        "elapsed_seconds": 1.192,
+        "elapsed_seconds": 1.088,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 371,
-        "completion_tokens": 85,
-        "total_tokens": 456,
+        "prompt_tokens": 496,
+        "completion_tokens": 103,
+        "total_tokens": 599,
         "response_status": 200
       },
       {
         "batch": 34,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 1.473,
+        "elapsed_seconds": 1.018,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 600,
-        "completion_tokens": 157,
-        "total_tokens": 757,
+        "prompt_tokens": 762,
+        "completion_tokens": 109,
+        "total_tokens": 871,
         "response_status": 200
       },
       {
         "batch": 35,
         "claims": 1,
         "facts": 7,
-        "elapsed_seconds": 1.26,
+        "elapsed_seconds": 1.218,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 526,
-        "completion_tokens": 60,
-        "total_tokens": 586,
+        "prompt_tokens": 681,
+        "completion_tokens": 98,
+        "total_tokens": 779,
         "response_status": 200
       },
       {
         "batch": 36,
         "claims": 1,
         "facts": 7,
-        "elapsed_seconds": 1.193,
+        "elapsed_seconds": 1.321,
         "outcome": "succeeded",
         "error": null,
         "attempts": 1,
-        "prompt_tokens": 546,
-        "completion_tokens": 57,
-        "total_tokens": 603,
+        "prompt_tokens": 698,
+        "completion_tokens": 88,
+        "total_tokens": 786,
         "response_status": 200
       },
       {
         "batch": 37,
         "claims": 1,
         "facts": 8,
-        "elapsed_seconds": 6.581,
-        "outcome": "empty_after_retry",
+        "elapsed_seconds": 0.74,
+        "outcome": "succeeded",
         "error": null,
-        "attempts": 3,
-        "prompt_tokens": 1914,
-        "completion_tokens": 21,
-        "total_tokens": 1935,
+        "attempts": 1,
+        "prompt_tokens": 799,
+        "completion_tokens": 82,
+        "total_tokens": 881,
         "response_status": 200
       }
     ]
   },
   "tokens": {
-    "prompt_tokens": 28741,
-    "completion_tokens": 2936,
-    "total_tokens": 31677
+    "prompt_tokens": 26956,
+    "completion_tokens": 3928,
+    "total_tokens": 30884
   },
   "cost": {
     "input_rate_cny_per_million": 1.0,
     "output_rate_cny_per_million": 4.0,
-    "estimated_cost_cny": 0.040485,
+    "estimated_cost_cny": 0.042668,
     "basis": "本次实测 token 数 × 配置单价；不是产品定价"
   },
   "timing": {
-    "total_seconds": 71.478,
-    "mean_batch_seconds": 1.932
+    "total_seconds": 42.615,
+    "mean_batch_seconds": 1.151
   },
   "validity": {
     "checked_claims": 37,
@@ -518,20 +519,20 @@
   "metrics": {
     "claims_scored": 37,
     "quote_claims": 19,
-    "quote_top1": 0.631579,
-    "quote_error_association_rate": 0.368421,
+    "quote_top1": 0.947368,
+    "quote_error_association_rate": 0.052632,
     "growth_claims": 18,
     "growth_exact_match": 0.944444,
-    "growth_precision": 0.944444,
-    "growth_recall": 0.944444,
-    "growth_f1": 0.944444,
-    "coverage": 0.837838,
-    "abstain_rate": 0.162162,
+    "growth_precision": 1.0,
+    "growth_recall": 0.972222,
+    "growth_f1": 0.985915,
+    "coverage": 0.972973,
+    "abstain_rate": 0.027027,
     "by_route": {
       "unknown": {
         "claims": 37,
-        "correct": 29,
-        "accuracy": 0.783784
+        "correct": 35,
+        "accuracy": 0.945946
       }
     }
   },
@@ -555,8 +556,10 @@
       "gold_fact_ids": [
         "归属于上市公司股东的净利润（元）@本期@合并"
       ],
-      "pred_fact_ids": [],
-      "exact_match": false
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润（元）@本期@合并"
+      ],
+      "exact_match": true
     },
     {
       "claim_id": "v3-000736-0184",
@@ -589,8 +592,10 @@
       "gold_fact_ids": [
         "归属于上市公司股东的净利润(元)@本期@合并"
       ],
-      "pred_fact_ids": [],
-      "exact_match": false
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润(元)@本期@合并"
+      ],
+      "exact_match": true
     },
     {
       "claim_id": "v3-000916-0201",
@@ -599,9 +604,7 @@
       "gold_fact_ids": [
         "经营活动产生的现金流量净额@本期@合并"
       ],
-      "pred_fact_ids": [
-        "加权平均净资产收益率@本期@合并"
-      ],
+      "pred_fact_ids": [],
       "exact_match": false
     },
     {
@@ -623,8 +626,10 @@
       "gold_fact_ids": [
         "归属于上市公司股东的净利润@本期@合并"
       ],
-      "pred_fact_ids": [],
-      "exact_match": false
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "exact_match": true
     },
     {
       "claim_id": "v3-002166-0173",
@@ -681,8 +686,10 @@
       "gold_fact_ids": [
         "营业收入@本期@合并"
       ],
-      "pred_fact_ids": [],
-      "exact_match": false
+      "pred_fact_ids": [
+        "营业收入@本期@合并"
+      ],
+      "exact_match": true
     },
     {
       "claim_id": "v3-300165-0167",
@@ -716,9 +723,9 @@
         "营业收入（元）@本期@合并"
       ],
       "pred_fact_ids": [
-        "归属于上市公司股东的净利润@本期@合并"
+        "营业收入（元）@本期@合并"
       ],
-      "exact_match": false
+      "exact_match": true
     },
     {
       "claim_id": "v3-300482-0083",
@@ -751,8 +758,10 @@
       "gold_fact_ids": [
         "归属于上市公司股东的净利润（元）@本期@合并"
       ],
-      "pred_fact_ids": [],
-      "exact_match": false
+      "pred_fact_ids": [
+        "归属于上市公司股东的净利润（元）@本期@合并"
+      ],
+      "exact_match": true
     },
     {
       "claim_id": "v3-000543-0252",
@@ -860,8 +869,11 @@
         "总资产（元）@上期@合并",
         "总资产（元）@本期@合并"
       ],
-      "pred_fact_ids": [],
-      "exact_match": false
+      "pred_fact_ids": [
+        "总资产（元）@上期@合并",
+        "总资产（元）@本期@合并"
+      ],
+      "exact_match": true
     },
     {
       "claim_id": "v3-002198-0182",
@@ -942,10 +954,9 @@
         "基本每股收益（元/股）@本期@合并"
       ],
       "pred_fact_ids": [
-        "基本每股收益（元/股）@上期@合并",
-        "基本每股收益（元/股）@本期@合并"
+        "基本每股收益（元/股）@上期@合并"
       ],
-      "exact_match": true
+      "exact_match": false
     },
     {
       "claim_id": "v3-002880-0087",

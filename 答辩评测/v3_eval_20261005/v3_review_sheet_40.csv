@@ -1,0 +1,302 @@
+﻿"review_id","company","source_file","source_page","layer","task_type","claim_text","candidates","review_selected_fact_ids","review_abstain","review_notes"
+"v3-000543-0089","000543","000543_2018_皖能电力.pdf","7","synonym","quote_current","报告期内公司经营活动产生的现金流量净额为1,367,348,095.07元，本年度净利润为639,663,726.67元，差异727,684,368.40元","1. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=未标明；scope=合并 | value=556267729.59
+2. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=5.58
+3. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=13416456919.36
+4. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=未标明；scope=合并 | value=28899887221.01
+5. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.31
+6. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=元；scope=合并 | value=1367348095.07
+7. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.31","经营活动产生的现金流量净额@本期@合并","0","Current operating cash flow value matches the claim and source page 7."
+"v3-000586-0194","000586","000586_2018_修订版_汇源通信.pdf","6","sameperiod","quote_current","度归属于上市公司股东的净利润-2,896,982.79元，2018年度末累计可供股东分配利润为-39,798,380.04元","1. 经营活动产生的现金流量净额（元）@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额（元）；period=本期；unit=未标明；scope=合并 | value=-3957017.32
+2. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=-1.23
+3. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=-0.01
+4. 归属于上市公司股东的净利润（元）@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润（元）；period=本期；unit=元；scope=合并 | value=-2896982.79
+5. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=未标明；scope=合并 | value=599392755.83
+6. 归属于上市公司股东的净利润（元）@2016年@合并 | subject=公司；metric=归属于上市公司股东的净利润（元）；period=2016年；unit=未标明；scope=合并 | value=3019495.56
+7. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=426707264.12
+8. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=-0.01","归属于上市公司股东的净利润（元）@本期@合并","0","Current attributable net profit matches value, unit and consolidated scope on page 6."
+"v3-000736-0184","000736","000736_2015_修订版_中房地产.pdf","7","sameperiod","quote_current","截止2015年12月31日，公司总资产812,693.80万元，归属于上市公司股东的净资产170,902.03万元","1. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=元；scope=合并 | value=1.68
+2. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=元；scope=合并 | value=-581700401.37
+3. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.1
+4. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=万元；scope=合并 | value=812693.8
+5. 总资产（元）@2013年@合并 | subject=公司；metric=总资产（元）；period=2013年；unit=元；scope=合并 | value=4645423119.02
+6. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=元；scope=合并 | value=1112269246.23
+7. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=元；scope=合并 | value=28424001.41
+8. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.1","总资产（元）@本期@合并","0","Total assets 812,693.80 ten-thousand yuan matches the claim on page 7."
+"v3-000806-0189","000806","000806_2017_修订版_银河生物.pdf","6","sameperiod","quote_current","公司本报告期净利润为10,227,612.25元，经营活动产生的现金净额为-67,105,063.04元，两者相差较大的主要原因系本期公司","1. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=0.49
+2. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=未标明；scope=合并 | value=-67105063.04
+3. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=元；scope=合并 | value=10227612.25
+4. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.01
+5. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=1045716011.73
+6. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.01","归属于上市公司股东的净利润@本期@合并","0","Current attributable net profit value matches the claim on page 6."
+"v3-000889-0179","000889","000889_2017_茂业通信.pdf","6","sameperiod","quote_current","经中兴华会计师事务所(特殊普通合伙)审计，报告期公司实现净利润为228,581,216.75 元，按照公司章程规定提取","1. 营业收入(元)@本期@合并 | subject=公司；metric=营业收入(元)；period=本期；unit=未标明；scope=合并 | value=2107385087.61
+2. 归属于上市公司股东的净利润(元)@2015年@合并 | subject=公司；metric=归属于上市公司股东的净利润(元)；period=2015年；unit=未标明；scope=合并 | value=153603203.01
+3. 经营活动产生的现金流量净额(元)@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额(元)；period=本期；unit=未标明；scope=合并 | value=43163323.32
+4. 归属于上市公司股东的净利润(元)@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润(元)；period=本期；unit=元；scope=合并 | value=228581216.75
+5. 基本每股收益(元/股)@本期@合并 | subject=公司；metric=基本每股收益(元/股)；period=本期；unit=未标明；scope=合并 | value=0.37
+6. 归属于上市公司股东的扣除非经常性损益的净利润(元)@本期@合并 | subject=公司；metric=归属于上市公司股东的扣除非经常性损益的净利润(元)；period=本期；unit=未标明；scope=合并 | value=226636787.19
+7. 加权平均净资产收益率(%)@本期@合并 | subject=公司；metric=加权平均净资产收益率(%)；period=本期；unit=未标明；scope=合并 | value=8.93
+8. 稀释每股收益(元/股)@本期@合并 | subject=公司；metric=稀释每股收益(元/股)；period=本期；unit=未标明；scope=合并 | value=0.37","归属于上市公司股东的净利润(元)@本期@合并","0","Current net profit value matches the claim on page 6."
+"v3-000916-0201","000916","000916_2015_华北高速.pdf","6","sameperiod","quote_current","元，经营活动产生的现金流净额31,676.19万元，加权平均净资产收益率3.09%","1. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=未标明；scope=合并 | value=316311870.96
+2. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=元；scope=合并 | value=3.09
+3. 加权平均净资产收益率@2013年@合并 | subject=公司；metric=加权平均净资产收益率；period=2013年；unit=未标明；scope=合并 | value=6.74
+4. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.12
+5. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.12
+6. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=未标明；scope=合并 | value=135802898.45
+7. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=未标明；scope=合并 | value=6227532377.6
+8. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=932665351.39","经营活动产生的现金流量净额@本期@合并","0","Current operating cash flow matches 31,676.19 ten-thousand yuan on page 6."
+"v3-000950-0199","000950","000950_2015_建峰化工.pdf","6","sameperiod","quote_current","（三）2015年度，公司实现归属于母公司所有者的净利润-367,224,861.85元，根据《公司","1. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=未标明；scope=合并 | value=190114550.36
+2. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=-0.61
+3. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=3326469748.52
+4. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=元；scope=合并 | value=-367224861.85
+5. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=-0.61
+6. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=-19.48","归属于上市公司股东的净利润@本期@合并","0","Current parent-company net profit value matches the claim on page 6."
+"v3-000993-0198","000993","000993_2016_闽东电力.pdf","6","sameperiod","quote_current","26,330,546.69元,2016年度母公司实现净利润为249,285,769.19元","1. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=1.74
+2. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.07
+3. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.07
+4. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=未标明；scope=合并 | value=360646530.76
+5. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=未标明；scope=合并 | value=3864565691.58
+6. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=元；scope=合并 | value=26330546.69
+7. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=645414443.3","归属于上市公司股东的净利润@本期@合并","0","Current attributable net profit value matches the claim on page 6."
+"v3-002166-0173","002166","002166_2018_莱茵生物.pdf","7","sameperiod","quote_current","实现归属于上市公司股东的净利润为81,664,313.65元，较","1. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.19
+2. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=未标明；scope=合并 | value=2122029854.59
+3. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.19
+4. 经营活动产生的现金流量净额（元）@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额（元）；period=本期；unit=未标明；scope=合并 | value=-84258785.79
+5. 归属于上市公司股东的净利润（元）@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润（元）；period=本期；unit=元；scope=合并 | value=81664313.65
+6. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=619556202.78
+7. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=7.57
+8. 归属于上市公司股东的净利润（元）@2016年@合并 | subject=公司；metric=归属于上市公司股东的净利润（元）；period=2016年；unit=未标明；scope=合并 | value=69663399.33","归属于上市公司股东的净利润（元）@本期@合并","0","Current attributable net profit value matches the claim on page 7."
+"v3-002390-0181","002390","002390_2015_信邦制药.pdf","9","sameperiod","quote_current","其中归属于母公司所有者的净利润174,379,440.52 元","1. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=4179756099.15
+2. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.14
+3. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.14
+4. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=7.07
+5. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=元；scope=合并 | value=174379440.52
+6. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=未标明；scope=合并 | value=217402165.77","归属于上市公司股东的净利润@本期@合并","0","Current parent-company net profit value matches the claim on page 9."
+"v3-002529-0186","002529","002529_2017_海源机械.pdf","6","sameperiod","quote_current","列示持续经营净利润本年金额7,008,487.81","1. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=元；scope=合并 | value=7008487.81
+2. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=未标明；scope=合并 | value=-39184840.66
+3. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.03
+4. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=0.45
+5. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.03
+6. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=272244174.03","","1","Candidate only has attributable net profit, not the claimed continuing-operations net profit."
+"v3-002663-0123","002663","002663_2015_普邦园林.pdf","22","synonym","quote_current","2015 年度公司经营活动产生的现金流量净额为-40,055.93 万元，实现的净利润为19,941.69 万元，","1. 筹资活动现金流入小计@本期@合并 | subject=公司；metric=筹资活动现金流入小计；period=本期；unit=元；scope=合并 | value=286063427.79
+2. 经营活动现金流入小计@本期@合并 | subject=公司；metric=经营活动现金流入小计；period=本期；unit=元；scope=合并 | value=2189106043.19
+3. 经营活动现金流出小计@本期@合并 | subject=公司；metric=经营活动现金流出小计；period=本期；unit=元；scope=合并 | value=2589665374.25
+4. 投资活动现金流出小计@本期@合并 | subject=公司；metric=投资活动现金流出小计；period=本期；unit=元；scope=合并 | value=191050499.23
+5. 投资活动产生的现金流量净额@本期@合并 | subject=公司；metric=投资活动产生的现金流量净额；period=本期；unit=元；scope=合并 | value=-135101179.85
+6. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=万元；scope=合并 | value=-40055.93
+7. 投资活动现金流入小计@本期@合并 | subject=公司；metric=投资活动现金流入小计；period=本期；unit=元；scope=合并 | value=55949319.38","经营活动产生的现金流量净额@本期@合并","0","Current operating cash flow -40,055.93 ten-thousand yuan matches page 22."
+"v3-300093-0193","300093","300093_2018_金刚玻璃.pdf","20","sameperiod","quote_current","报告期内，公司研发投入金额2,556.37万元，占公司营业总收入的10.51%","1. 经营活动现金流入小计@本期@合并 | subject=公司；metric=经营活动现金流入小计；period=本期；unit=元；scope=合并 | value=689022042.66
+2. 研发投入金额（元）@2016年@合并 | subject=公司；metric=研发投入金额（元）；period=2016年；unit=元；scope=合并 | value=16139615.24
+3. 研发支出资本化的金额（元）@本期@合并 | subject=公司；metric=研发支出资本化的金额（元）；period=本期；unit=元；scope=合并 | value=0.0
+4. 研发投入金额（元）@本期@合并 | subject=公司；metric=研发投入金额（元）；period=本期；unit=万元；scope=合并 | value=2556.37
+5. 研发人员数量占比@本期@合并 | subject=公司；metric=研发人员数量占比；period=本期；unit=元；scope=合并 | value=19.82
+6. 经营活动现金流出小计@本期@合并 | subject=公司；metric=经营活动现金流出小计；period=本期；unit=元；scope=合并 | value=895926703.26
+7. 研发投入占营业收入比例@本期@合并 | subject=公司；metric=研发投入占营业收入比例；period=本期；unit=元；scope=合并 | value=3.42
+8. 研发人员数量（人）@本期@合并 | subject=公司；metric=研发人员数量（人）；period=本期；unit=元；scope=合并 | value=233.0","研发投入金额（元）@本期@合并","0","Current R&D investment 2,556.37 ten-thousand yuan matches page 20."
+"v3-300147-0027","300147","300147_2014_香雪制药.pdf","16","synonym","quote_current","公司营业收入和营业成本2014年度发生数分别为1,523,980,138.10元、888,856,243.53元，比上年数分别","1. 软饮料@本期@合并 | subject=公司；metric=软饮料；period=本期；unit=未标明；scope=合并 | value=3580380.0
+2. 医药流通@本期@合并 | subject=公司；metric=医药流通；period=本期；unit=未标明；scope=合并 | value=41729690.0
+3. 医疗器械@本期@合并 | subject=公司；metric=医疗器械；period=本期；unit=未标明；scope=合并 | value=623582.0
+4. 营业收入@本期@合并 | subject=公司；metric=营业收入；period=本期；unit=元；scope=合并 | value=1523980138.1
+5. 医药制造@本期@合并 | subject=公司；metric=医药制造；period=本期；unit=未标明；scope=合并 | value=64770209.0
+6. 中药材@本期@合并 | subject=公司；metric=中药材；period=本期；unit=未标明；scope=合并 | value=18481974.0","营业收入@本期@合并","0","Current revenue 1,523,980,138.10 yuan matches page 16."
+"v3-300165-0167","300165","300165_2018_天瑞仪器.pdf","8","sameperiod","quote_current","者的净利润3,617.73 万元","1. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=元；scope=合并 | value=2.24
+2. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=万元；scope=合并 | value=3617.73
+3. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.08
+4. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=元；scope=合并 | value=1024121245.36
+5. 资产总额（元）@本期@合并 | subject=公司；metric=资产总额（元）；period=本期；unit=元；scope=合并 | value=2229188925.77
+6. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.08
+7. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=元；scope=合并 | value=-36431574.74","归属于上市公司股东的净利润@本期@合并","0","Current net profit 3,617.73 ten-thousand yuan matches page 8."
+"v3-300313-0077","300313","300313_2018_天山生物.pdf","27","synonym","quote_current","报告期内公司研发费用支出128.81万元，占营业收入的1.22%，主要用于公司种公牛后裔测定体系以及后裔测定数据库的建","1. 财务费用@本期@合并 | subject=公司；metric=财务费用；period=本期；unit=元；scope=合并 | value=20974717.49
+2. 管理费用@本期@合并 | subject=公司；metric=管理费用；period=本期；unit=元；scope=合并 | value=44832650.73
+3. 销售费用@本期@合并 | subject=公司；metric=销售费用；period=本期；unit=元；scope=合并 | value=5999850.47
+4. 研发费用@本期@合并 | subject=公司；metric=研发费用；period=本期；unit=万元；scope=合并 | value=128.81","研发费用@本期@合并","0","Current R&D expense 128.81 ten-thousand yuan matches page 27."
+"v3-300341-0166","300341","300341_2017_麦迪电气.pdf","8","sameperiod","quote_current","度实现营业收入795,534,210.47 元，归属于母公司所有者净利润130,324,230.52 元，在无以往年度亏损未弥补的情况下，","1. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=元；scope=合并 | value=795534210.47
+2. 资产总额（元）@本期@合并 | subject=公司；metric=资产总额（元）；period=本期；unit=元；scope=合并 | value=1294659207.07
+3. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=元；scope=合并 | value=12.27
+4. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=元；scope=合并 | value=161469559.43
+5. 营业收入（元）@2015年@合并 | subject=公司；metric=营业收入（元）；period=2015年；unit=元；scope=合并 | value=714032572.36
+6. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.26
+7. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.26
+8. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=元；scope=合并 | value=130324230.52","营业收入（元）@本期@合并","0","Current revenue value matches the claim on page 8."
+"v3-300482-0083","300482","300482_2018_万孚生物.pdf","9","synonym","quote_current","归属于上市公司股东的净利润30,774.45万元，比上年","1. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=万元；scope=合并 | value=30774.45
+2. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.92
+3. 资产总额（元）@本期@合并 | subject=公司；metric=资产总额（元）；period=本期；unit=元；scope=合并 | value=2691461368.16
+4. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=元；scope=合并 | value=19.29
+5. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=元；scope=合并 | value=247609248.55
+6. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=元；scope=合并 | value=1650059430.26
+7. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.92","归属于上市公司股东的净利润@本期@合并","0","Current net profit 30,774.45 ten-thousand yuan matches page 9."
+"v3-300529-0113","300529","300529_2016_健帆生物.pdf","7","synonym","quote_current","经瑞华会计师事务所（特殊普通合伙）审计，公司2016 年度实现归属于上市公司股东的净利润202,118,491.17 元，母公司","1. 资产总额（元）@本期@合并 | subject=公司；metric=资产总额（元）；period=本期；unit=元；scope=合并 | value=1299866854.64
+2. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.52
+3. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.52
+4. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=元；scope=合并 | value=202118491.17
+5. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=元；scope=合并 | value=178635457.29
+6. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=元；scope=合并 | value=543640521.23
+7. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=元；scope=合并 | value=24.08","归属于上市公司股东的净利润@本期@合并","0","Current attributable net profit value matches the claim on page 7."
+"v3-300539-0191","300539","300539_2018_横河模具.pdf","8","sameperiod","quote_current","1、经中汇会计师事务所（特殊普通合伙）审计，公司2018 年度实现归属于上市公司股东的净利润10,115,063.73 元，","1. 归属于上市公司股东的净利润（元）@2016年@合并 | subject=公司；metric=归属于上市公司股东的净利润（元）；period=2016年；unit=未标明；scope=合并 | value=37536922.66
+2. 归属于上市公司股东的净利润（元）@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润（元）；period=本期；unit=元；scope=合并 | value=10115063.73
+3. 归属于上市公司股东的扣除非经常性损益的净利润（元）@本期@合并 | subject=公司；metric=归属于上市公司股东的扣除非经常性损益的净利润（元）；period=本期；unit=未标明；scope=合并 | value=8417142.66
+4. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=2.61
+5. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.05
+6. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=554199007.25
+7. 经营活动产生的现金流量净额（元）@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额（元）；period=本期；unit=未标明；scope=合并 | value=6732418.82
+8. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.05","归属于上市公司股东的净利润（元）@本期@合并","0","Current attributable net profit value matches the claim on page 8."
+"v3-000543-0252","000543","000543_2018_皖能电力.pdf","16","implicit","growth_set","金流出同比增加9.17亿元，增幅7.05%，导致经营活动产生的现金流量净额13.67亿元，较去年同期增加3.78亿元","1. 经营活动现金流入小计@本期@合并 | subject=公司；metric=经营活动现金流入小计；period=本期；unit=元；scope=合并 | value=15300265349.79
+2. 投资活动现金流出小计@本期@合并 | subject=公司；metric=投资活动现金流出小计；period=本期；unit=元；scope=合并 | value=1263480595.38
+3. 投资活动产生的现金流量净@本期@合并 | subject=公司；metric=投资活动产生的现金流量净；period=本期；unit=元；scope=合并 | value=-1003790512.22
+4. 经营活动产生的现金流量净@上期@合并 | subject=公司；metric=经营活动产生的现金流量净；period=上期；unit=元；scope=合并 | value=989442166.46
+5. 经营活动现金流出小计@本期@合并 | subject=公司；metric=经营活动现金流出小计；period=本期；unit=元；scope=合并 | value=13932917254.72
+6. 经营活动产生的现金流量净@本期@合并 | subject=公司；metric=经营活动产生的现金流量净；period=本期；unit=亿元；scope=合并 | value=13.67
+7. 投资活动现金流入小计@本期@合并 | subject=公司；metric=投资活动现金流入小计；period=本期；unit=元；scope=合并 | value=259690083.16
+8. 管理费用@本期@合并 | subject=公司；metric=管理费用；period=本期；unit=元；scope=合并 | value=49385609.84","经营活动产生的现金流量净@本期@合并;经营活动产生的现金流量净@上期@合并","0","Current 13.67 billion yuan and prior 989,442,166.46 yuan correspond after unit conversion."
+"v3-000595-0125","000595","000595_2014_修订版_西北轴承.pdf","8","synonym","growth_set","利润总额2,136.92万元，归属于上市公司股东的净利润2,058.65万元，较上年同期增加","1. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=元；scope=合并 | value=-40739450.69
+2. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.08
+3. 归属于上市公司股东的净利润@上期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=上期；unit=元；scope=合并 | value=-118977230.56
+4. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=元；scope=合并 | value=7.31
+5. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=元；scope=合并 | value=1046030568.24
+6. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=万元；scope=合并 | value=2058.65
+7. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.08
+8. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=元；scope=合并 | value=444995823.34","归属于上市公司股东的净利润@本期@合并;归属于上市公司股东的净利润@上期@合并","0","Current 2,058.65 ten-thousand yuan and prior -118,977,230.56 yuan correspond."
+"v3-000597-0170","000597","000597_2016_东北制药.pdf","17","sameperiod","growth_set","经营活动产生的现金流量净额为38,451万元，较上年同期增加285.67%，其主要原因是本期销售收入增加，","1. 经营活动产生的现金流量净@本期@合并 | subject=公司；metric=经营活动产生的现金流量净；period=本期；unit=元；scope=合并 | value=384514553.13
+2. 筹资活动现金流入小计@本期@合并 | subject=公司；metric=筹资活动现金流入小计；period=本期；unit=元；scope=合并 | value=5328470283.5
+3. 投资活动产生的现金流量净@本期@合并 | subject=公司；metric=投资活动产生的现金流量净；period=本期；unit=元；scope=合并 | value=-535031612.44
+4. 投资活动现金流入小计@本期@合并 | subject=公司；metric=投资活动现金流入小计；period=本期；unit=元；scope=合并 | value=1309876065.49
+5. 经营活动现金流出小计@本期@合并 | subject=公司；metric=经营活动现金流出小计；period=本期；unit=元；scope=合并 | value=4198071377.13
+6. 经营活动现金流入小计@本期@合并 | subject=公司；metric=经营活动现金流入小计；period=本期；unit=元；scope=合并 | value=4582585930.26
+7. 投资活动现金流出小计@本期@合并 | subject=公司；metric=投资活动现金流出小计；period=本期；unit=元；scope=合并 | value=1844907677.93
+8. 经营活动产生的现金流量净@上期@合并 | subject=公司；metric=经营活动产生的现金流量净；period=上期；unit=元；scope=合并 | value=99700460.11","经营活动产生的现金流量净@本期@合并;经营活动产生的现金流量净@上期@合并","0","Current 38,451 ten-thousand yuan and prior 99,700,460.11 yuan give 285.67 percent growth."
+"v3-000678-0101","000678","000678_2018_襄阳轴承.pdf","7","synonym","growth_set","万元，同比下降2.07%，归属于上市公司股东的净利润-5968.42万元","1. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=元；scope=合并 | value=92485253.79
+2. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=元；scope=合并 | value=-0.13
+3. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=元；scope=合并 | value=1490778671.37
+4. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=元；scope=合并 | value=-4.9
+5. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=元；scope=合并 | value=-0.13
+6. 归属于上市公司股东的净利润@上期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=上期；unit=元；scope=合并 | value=11572817.08
+7. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=元；scope=合并 | value=2755753715.83
+8. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=万元；scope=合并 | value=-5968.42","","1","No complete same-metric current/prior pair supports the claimed 2.07 percent decline."
+"v3-000737-0183","000737","000737_2016_南风化工.pdf","6","sameperiod","growth_set","2016 年，公司全年实现营业收入2,135,197,330.09 元，比上年同期减少0.77%","1. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=未标明；scope=合并 | value=46572269.72
+2. 营业收入（元）@2014年@合并 | subject=公司；metric=营业收入（元）；period=2014年；unit=未标明；scope=合并 | value=2518914771.0
+3. 营业收入（元）@上期@合并 | subject=公司；metric=营业收入（元）；period=上期；unit=未标明；scope=合并 | value=2151795747.55
+4. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=元；scope=合并 | value=2135197330.09
+5. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=未标明；scope=合并 | value=20942261.05","营业收入（元）@本期@合并;营业收入（元）@上期@合并","0","Current and prior revenue correspond; computed decline is about 0.77 percent."
+"v3-000818-0200","000818","000818_2016_方大化工.pdf","7","sameperiod","growth_set","定增长的情况下，全年公司实现盈利11,208万元，净利润同比去年基本持平","1. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=元；scope=合并 | value=2605603503.4
+2. 归属于上市公司股东的净利润@上期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=上期；unit=元；scope=合并 | value=121486702.47
+3. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=元；scope=合并 | value=5.16
+4. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=元；scope=合并 | value=2665714183.49
+5. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.16
+6. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=元；scope=合并 | value=154727926.02
+7. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.16
+8. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=元；scope=合并 | value=112076593.94","归属于上市公司股东的净利润@本期@合并;归属于上市公司股东的净利润@上期@合并","0","Current and prior net profit correspond; the text describes it as basically flat."
+"v3-000889-0109","000889","000889_2017_茂业通信.pdf","21","synonym","growth_set","6、报告期公司经营活动产生的现金流量净额为4,316.33 万元，较上年14,844.91 万元减少","1. 研发投入资本化的金额(元)@本期@合并 | subject=公司；metric=研发投入资本化的金额(元)；period=本期；unit=元；scope=合并 | value=0.0
+2. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=万元；scope=合并 | value=4316.33
+3. 研发人员数量(人)@本期@合并 | subject=公司；metric=研发人员数量(人)；period=本期；unit=元；scope=合并 | value=1134.0
+4. 研发人员数量占比@本期@合并 | subject=公司；metric=研发人员数量占比；period=本期；unit=元；scope=合并 | value=13.52
+5. 研发投入占营业收入比例@本期@合并 | subject=公司；metric=研发投入占营业收入比例；period=本期；unit=元；scope=合并 | value=3.81
+6. 研发投入金额(元)@本期@合并 | subject=公司；metric=研发投入金额(元)；period=本期；unit=元；scope=合并 | value=80223811.0
+7. 经营活动现金流入小计@本期@合并 | subject=公司；metric=经营活动现金流入小计；period=本期；unit=元；scope=合并 | value=1987689618.42
+8. 经营活动产生的现金流量净额@上期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=上期；unit=万元；scope=合并 | value=14844.91","经营活动产生的现金流量净额@本期@合并;经营活动产生的现金流量净额@上期@合并","0","Current 4,316.33 and prior 14,844.91 ten-thousand yuan correspond."
+"v3-002100-0188","002100","002100_2018_天康生物.pdf","83","sameperiod","growth_set","报告期内，公司实现营业总收入527,303.24万元，比上年同期增长13.89%，营业利润33,322.84万元，","1. 二、营业总成本@本期@合并 | subject=公司；metric=二、营业总成本；period=本期；unit=元；scope=合并 | value=4964801023.96
+2. 其中：营业收入@本期@合并 | subject=公司；metric=其中：营业收入；period=本期；unit=元；scope=合并 | value=5273032350.33
+3. 其中：营业成本@本期@合并 | subject=公司；metric=其中：营业成本；period=本期；unit=元；scope=合并 | value=4163433587.26
+4. 一、营业总收入@本期@合并 | subject=公司；metric=一、营业总收入；period=本期；unit=万元；scope=合并 | value=527303.24
+5. 税金及附加@本期@合并 | subject=公司；metric=税金及附加；period=本期；unit=元；scope=合并 | value=20864106.82
+6. 销售费用@本期@合并 | subject=公司；metric=销售费用；period=本期；unit=元；scope=合并 | value=312936029.31
+7. 一、营业总收入@上期@合并 | subject=公司；metric=一、营业总收入；period=上期；unit=元；scope=合并 | value=4630025738.72","一、营业总收入@本期@合并;一、营业总收入@上期@合并","0","Current 527,303.24 and prior 4,630,025,738.72 yuan correspond; growth about 13.89 percent."
+"v3-002166-0287","002166","002166_2018_莱茵生物.pdf","7","growth","growth_set","2018年末，公司总资产2,122,029,854.59元，较2017年末减少26.75%，归属于上市公司股东的所有者权","1. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=7.57
+2. 总资产（元）@2016年@合并 | subject=公司；metric=总资产（元）；period=2016年；unit=未标明；scope=合并 | value=2431269694.87
+3. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=元；scope=合并 | value=2122029854.59
+4. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.19
+5. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=619556202.78
+6. 归属于上市公司股东的净利润（元）@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润（元）；period=本期；unit=未标明；scope=合并 | value=81664313.65
+7. 总资产（元）@上期@合并 | subject=公司；metric=总资产（元）；period=上期；unit=未标明；scope=合并 | value=2896950513.93
+8. 经营活动产生的现金流量净额（元）@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额（元）；period=本期；unit=未标明；scope=合并 | value=-84258785.79
+9. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.19","总资产（元）@本期@合并;总资产（元）@上期@合并","0","Current and prior total assets correspond; computed decline about 26.75 percent."
+"v3-002198-0182","002198","002198_2015_嘉应制药.pdf","17","sameperiod","growth_set","（1）本期经营活动产生的现金流量净额4,231.29万元，较上年同期减少6,104.99万元，降幅59.06%，主要","1. 销售费用@本期@合并 | subject=公司；metric=销售费用；period=本期；unit=元；scope=合并 | value=210349439.99
+2. 经营活动产生的现金流量净@本期@合并 | subject=公司；metric=经营活动产生的现金流量净；period=本期；unit=万元；scope=合并 | value=4231.29
+3. 研发人员数量（人）@本期@合并 | subject=公司；metric=研发人员数量（人）；period=本期；unit=元；scope=合并 | value=91.0
+4. 研发投入金额（元）@本期@合并 | subject=公司；metric=研发投入金额（元）；period=本期；unit=元；scope=合并 | value=12229515.83
+5. 管理费用@本期@合并 | subject=公司；metric=管理费用；period=本期；unit=元；scope=合并 | value=56488626.11
+6. 财务费用@本期@合并 | subject=公司；metric=财务费用；period=本期；unit=元；scope=合并 | value=2321520.32
+7. 研发人员数量占比@本期@合并 | subject=公司；metric=研发人员数量占比；period=本期；unit=元；scope=合并 | value=7.14
+8. 经营活动产生的现金流量净@上期@合并 | subject=公司；metric=经营活动产生的现金流量净；period=上期；unit=元；scope=合并 | value=103362813.35","经营活动产生的现金流量净@本期@合并;经营活动产生的现金流量净@上期@合并","0","Current 4,231.29 ten-thousand yuan and prior 103,362,813.35 yuan correspond; decline about 59.06 percent."
+"v3-002220-0075","002220","002220_2018_天宝食品.pdf","6","synonym","growth_set","实现归属于上市公司股东的净利润-165,238,051.42元，比去年同期下降-223.49%","1. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=-0.22
+2. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=1038975516.88
+3. 归属于上市公司股东的净利润@上期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=上期；unit=未标明；scope=合并 | value=133805684.41
+4. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=-0.22
+5. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=-6.19
+6. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=未标明；scope=合并 | value=4970392606.14
+7. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=元；scope=合并 | value=-165238051.42
+8. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=未标明；scope=合并 | value=101095844.84","归属于上市公司股东的净利润@本期@合并;归属于上市公司股东的净利润@上期@合并","0","Current and prior attributable net profit correspond; negative-value comparison matches the text."
+"v3-002390-0232","002390","002390_2015_信邦制药.pdf","9","implicit","growth_set","基本每股收益为0.14元，比去年同期的0.13元上升7.69%","1. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.14
+2. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=未标明；scope=合并 | value=174379440.52
+3. 基本每股收益（元/股）@上期@合并 | subject=公司；metric=基本每股收益（元/股）；period=上期；unit=元；scope=合并 | value=0.14
+4. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.14
+5. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=7.07
+6. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=未标明；scope=合并 | value=217402165.77
+7. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=4179756099.15
+8. 基本每股收益（元/股）@2013年@合并 | subject=公司；metric=基本每股收益（元/股）；period=2013年；unit=未标明；scope=合并 | value=0.05","","1","Claim says prior EPS 0.13, but the only prior candidate is 0.14."
+"v3-002412-0196","002412","002412_2015_汉森制药.pdf","17","sameperiod","growth_set","研发投入资本化的金额增加275万元，变动比例为100%，主要原因是报告期子公司云南永孜堂制药有","1. 研发人员数量占比@本期@合并 | subject=公司；metric=研发人员数量占比；period=本期；unit=元；scope=合并 | value=10.78
+2. 经营活动现金流出小计@本期@合并 | subject=公司；metric=经营活动现金流出小计；period=本期；unit=元；scope=合并 | value=802104746.13
+3. 研发投入资本化的金额（元）@本期@合并 | subject=公司；metric=研发投入资本化的金额（元）；period=本期；unit=万元；scope=合并 | value=275.0
+4. 研发投入金额（元）@本期@合并 | subject=公司；metric=研发投入金额（元）；period=本期；unit=元；scope=合并 | value=28956891.95
+5. 研发投入占营业收入比例@本期@合并 | subject=公司；metric=研发投入占营业收入比例；period=本期；unit=元；scope=合并 | value=3.71
+6. 经营活动现金流入小计@本期@合并 | subject=公司；metric=经营活动现金流入小计；period=本期；unit=元；scope=合并 | value=872240566.29
+7. 研发投入资本化的金额（元）@上期@合并 | subject=公司；metric=研发投入资本化的金额（元）；period=上期；unit=元；scope=合并 | value=0.0
+8. 研发人员数量（人）@本期@合并 | subject=公司；metric=研发人员数量（人）；period=本期；unit=元；scope=合并 | value=239.0","研发投入资本化的金额（元）@本期@合并;研发投入资本化的金额（元）@上期@合并","0","Current 275 ten-thousand yuan and prior 0 yuan support a 100 percent change."
+"v3-002553-0192","002553","002553_2018_南方轴承.pdf","6","sameperiod","growth_set","发展，实现营业收入393,062,821.80，同比增长0.95%，实现归属于上市公司股东的净利润90,227,119.82，","1. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.26
+2. 营业收入（元）@上期@合并 | subject=公司；metric=营业收入（元）；period=上期；unit=未标明；scope=合并 | value=389347225.41
+3. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=未标明；scope=合并 | value=803005088.6
+4. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=未标明；scope=合并 | value=44828279.89
+5. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=未标明；scope=合并 | value=90160928.46
+6. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=元；scope=合并 | value=393062821.8
+7. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.26
+8. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=12.66
+9. 营业收入（元）@2016年@合并 | subject=公司；metric=营业收入（元）；period=2016年；unit=未标明；scope=合并 | value=320036398.3","营业收入（元）@本期@合并;营业收入（元）@上期@合并","0","Current and prior revenue correspond; growth about 0.95 percent."
+"v3-002644-0063","002644","002644_2014_佛慈制药.pdf","10","synonym","growth_set","2014年，公司实现营业收入399,071,335.83元，比上年同期增加36.89%","1. 营业收入@上期@合并 | subject=公司；metric=营业收入；period=上期；unit=未标明；scope=合并 | value=291528279.91
+2. 营业收入@本期@合并 | subject=公司；metric=营业收入；period=本期；unit=元；scope=合并 | value=399071335.83
+3. 销售费用@本期@合并 | subject=公司；metric=销售费用；period=本期；unit=未标明；scope=合并 | value=31663086.61
+4. 利润总额@本期@合并 | subject=公司；metric=利润总额；period=本期；unit=未标明；scope=合并 | value=39347149.3
+5. 财务费用@本期@合并 | subject=公司；metric=财务费用；period=本期；unit=未标明；scope=合并 | value=-6601668.99
+6. 营业利润@本期@合并 | subject=公司；metric=营业利润；period=本期；unit=未标明；scope=合并 | value=28435995.01
+7. 营业成本@本期@合并 | subject=公司；metric=营业成本；period=本期；unit=未标明；scope=合并 | value=310705610.84
+8. 管理费用@本期@合并 | subject=公司；metric=管理费用；period=本期；unit=未标明；scope=合并 | value=32193932.55","营业收入@本期@合并;营业收入@上期@合并","0","Current and prior revenue correspond; growth about 36.89 percent."
+"v3-002663-0233","002663","002663_2015_普邦园林.pdf","9","implicit","growth_set","润19,941.69 万元，较上年同期下降了49.88%，基本每股收益0.12 元/股，较上年同期下降了57.14%","1. 基本每股收益（元/股）@上期@合并 | subject=公司；metric=基本每股收益（元/股）；period=上期；unit=未标明；scope=合并 | value=0.28
+2. 除非经常性损益的净利润@本期@合并 | subject=公司；metric=除非经常性损益的净利润；period=本期；unit=未标明；scope=合并 | value=175910461.87
+3. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=0.12
+4. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.12
+5. 基本每股收益（元/股）@2013年@合并 | subject=公司；metric=基本每股收益（元/股）；period=2013年；unit=未标明；scope=合并 | value=0.22
+6. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=2432631636.39
+7. 归属于上市公司股东的净@本期@合并 | subject=公司；metric=归属于上市公司股东的净；period=本期；unit=未标明；scope=合并 | value=199416871.12
+8. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=5.22
+9. 经营活动产生的现金流量@本期@合并 | subject=公司；metric=经营活动产生的现金流量；period=本期；unit=未标明；scope=合并 | value=-400559331.06","基本每股收益（元/股）@本期@合并;基本每股收益（元/股）@上期@合并","0","Current and prior EPS correspond; decline about 57.14 percent."
+"v3-002880-0087","002880","002880_2018_卫光生物.pdf","6","synonym","growth_set","归属于上市公司股东的净利润为156,636,847.60 元，较上年同期增长1.22%","1. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=未标明；scope=合并 | value=1459319731.47
+2. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=687949170.73
+3. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=1.45
+4. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=12.58
+5. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=未标明；scope=合并 | value=99540259.35
+6. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=元；scope=合并 | value=156636847.6
+7. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=1.45
+8. 归属于上市公司股东的净利润@上期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=上期；unit=未标明；scope=合并 | value=154749234.61","归属于上市公司股东的净利润@本期@合并;归属于上市公司股东的净利润@上期@合并","0","Current and prior net profit correspond; growth about 1.22 percent."
+"v3-002932-0151","002932","002932_2018_明德生物.pdf","9","sameperiod","growth_set","（1）基本每股收益：本报告期基本每股收益及稀释每股收益为1.08元，较上年同期下降17.56%","1. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=元；scope=合并 | value=1.08
+2. 基本每股收益（元/股）@上期@合并 | subject=公司；metric=基本每股收益（元/股）；period=上期；unit=未标明；scope=合并 | value=1.31
+3. 基本每股收益（元/股）@2016年@合并 | subject=公司；metric=基本每股收益（元/股）；period=2016年；unit=未标明；scope=合并 | value=1.2
+4. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=未标明；scope=合并 | value=61419875.14
+5. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=未标明；scope=合并 | value=176381394.08
+6. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=未标明；scope=合并 | value=15.55
+7. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=未标明；scope=合并 | value=1.08
+8. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=未标明；scope=合并 | value=53671446.05
+9. 总资产（元）@本期@合并 | subject=公司；metric=总资产（元）；period=本期；unit=未标明；scope=合并 | value=617146993.75","基本每股收益（元/股）@本期@合并;基本每股收益（元/股）@上期@合并","0","Current and prior EPS correspond; decline about 17.56 percent."
+"v3-300040-0156","300040","300040_2018_九洲电气.pdf","7","sameperiod","growth_set","2018年，公司实现营业收入102,378.67万元，比上年同期减少28.32%","1. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.13
+2. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=元；scope=合并 | value=2.38
+3. 营业收入（元）@2016年@合并 | subject=公司；metric=营业收入（元）；period=2016年；unit=元；scope=合并 | value=1319491445.24
+4. 经营活动产生的现金流量净额（元）@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额（元）；period=本期；unit=元；scope=合并 | value=618070979.42
+5. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.13
+6. 营业收入（元）@上期@合并 | subject=公司；metric=营业收入（元）；period=上期；unit=元；scope=合并 | value=1428214706.47
+7. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=万元；scope=合并 | value=102378.67
+8. 归属于上市公司股东的净利润（元）@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润（元）；period=本期；unit=元；scope=合并 | value=45122291.52
+9. 资产总额（元）@本期@合并 | subject=公司；metric=资产总额（元）；period=本期；unit=元；scope=合并 | value=3728798371.84","营业收入（元）@本期@合并;营业收入（元）@上期@合并","0","Current 102,378.67 ten-thousand yuan and prior 1,428,214,706.47 yuan correspond; decline about 28.32 percent."
+"v3-300119-0033","300119","300119_2018_瑞普生物.pdf","7","synonym","growth_set","归属于上市公司股东的净利润11,897.89万元，较上年上升13.43%","1. 营业收入（元）@本期@合并 | subject=公司；metric=营业收入（元）；period=本期；unit=元；scope=合并 | value=1189866012.4
+2. 归属于上市公司股东的净利润@本期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=本期；unit=万元；scope=合并 | value=11897.89
+3. 资产总额（元）@本期@合并 | subject=公司；metric=资产总额（元）；period=本期；unit=元；scope=合并 | value=2998445848.76
+4. 稀释每股收益（元/股）@本期@合并 | subject=公司；metric=稀释每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.29
+5. 经营活动产生的现金流量净额@本期@合并 | subject=公司；metric=经营活动产生的现金流量净额；period=本期；unit=元；scope=合并 | value=174881770.06
+6. 加权平均净资产收益率@本期@合并 | subject=公司；metric=加权平均净资产收益率；period=本期；unit=元；scope=合并 | value=6.02
+7. 归属于上市公司股东的净利润@上期@合并 | subject=公司；metric=归属于上市公司股东的净利润；period=上期；unit=元；scope=合并 | value=104895236.66
+8. 基本每股收益（元/股）@本期@合并 | subject=公司；metric=基本每股收益（元/股）；period=本期；unit=元；scope=合并 | value=0.29","归属于上市公司股东的净利润@本期@合并;归属于上市公司股东的净利润@上期@合并","0","Current 11,897.89 ten-thousand yuan and prior 104,895,236.66 yuan correspond; growth about 13.43 percent."

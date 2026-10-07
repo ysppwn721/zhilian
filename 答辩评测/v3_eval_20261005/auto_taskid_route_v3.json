@@ -1,0 +1,24 @@
+{
+  "dataset": "答辩评测\\v3_real_value_20261005\\benchmark_v3.jsonl",
+  "auto_taskid_accuracy": 0.9088,
+  "auto_taskid_confusion": {
+    "quote->quote": 14,
+    "growth->growth": 295,
+    "quote->unclear": 21,
+    "quote->growth": 10
+  },
+  "quote_tasks_detected": 14,
+  "rule_status": {
+    "rule": 6,
+    "abstain": 8
+  },
+  "rule_direct_accuracy": 0.4286,
+  "growth_tasks_detected": 305,
+  "growth_model_top2": 0.7869,
+  "growth_after_verification": 0.3115,
+  "growth_verification_rejects": {
+    "reject": 210
+  },
+  "auto_route_overall": 0.8294,
+  "note": "不读 task_type；自动任务识别 + 规则优先路由。"
+}

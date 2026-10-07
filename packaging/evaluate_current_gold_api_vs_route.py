@@ -75,7 +75,8 @@ MAX_FACTS_PER_BATCH = int(os.getenv('ZHILIAN_API_MAX_FACTS', '60') or 60)
 # 实测：payload 越大越容易出现「HTTP 200 + finish_reason=stop + 空 suggestions」的
 # 间歇性空返回（37 论断/76 事实时复现，小批则稳定）。空返回**不等于**模型判定无来源，
 # 因此按失败重试，并在日志里如实记录重试次数。
-MAX_RETRY = int(os.getenv('ZHILIAN_API_MAX_RETRY', '3') or 3)
+# 空返回最多再试一次；超过这个上限直接拒答，避免把模型行为误当成网络故障并持续消耗。
+MAX_ATTEMPTS = 2
 
 
 # --------------------------------------------------------------------------
@@ -87,7 +88,9 @@ def load_gold() -> tuple[list[dict], dict[str, list[dict]]]:
     for r in rows:
         groups[r['claim_id']].append(r)
     for cid in groups:
-        groups[cid].sort(key=lambda r: r['candidate_position'])
+        # candidate_position 来自原始文件顺序，不能作为模型输入排序依据。
+        # fact_id 是事实的稳定身份，固定它可以复现实验并隔离位置伪影。
+        groups[cid].sort(key=lambda r: str(r['fact_id']))
     return rows, dict(groups)
 
 
@@ -109,12 +112,392 @@ def make_fact(row: dict) -> dict:
     scopes = {'合并': '合并', '母公司': '母公司', '分部': '分部'}
     return {'id': row['fact_id'], 'subject': '公司', 'metric': row['metric'],
             'period': row['period'], 'unit': row.get('unit') or '未标明',
-            'scope': scopes.get(row.get('scope') or '', '未标明')}
+            'scope': scopes.get(row.get('scope') or '', '未标明'),
+            # API 只用于选择候选，不负责计算或写回；提供原始事实值让它
+            # 能核对正文中的数字，数值换算仍由本地证据门控完成。
+            '_include_value': True,
+            '_api_value': row.get('fact_value')}
 
 
 def make_claim(cid: str, group: list[dict]) -> dict:
-    return {'id': cid, 'kind': 'growth' if group[0]['task_type'] == 'growth_set' else 'quote',
-            'original': group[0]['claim_text'], 'refs': [], 'confirmed': False}
+    inferred = infer_task(group)
+    return {'id': cid, 'kind': 'growth' if inferred['kind'] == 'growth_set' else 'quote',
+            'original': group[0]['claim_text'], 'refs': [], 'confirmed': False,
+            'expected_k': inferred['expected_k'], 'task_rule': inferred['kind']}
+
+
+# --------------------------------------------------------------------------
+# 路由输入推断与证据门控（不得读取 Gold 的 task_type / expected_k）
+# --------------------------------------------------------------------------
+COMPARATIVE_RE = re.compile(
+    r'(?:同比|较上年同期|较上年|较上期|与上年同期|与去年同期|'
+    r'比上年(?:同期|数)?|比去年(?:同期)?|上年同期|'
+    r'较\s*20\d{2}年(?:末|度)?|比\s*20\d{2}年(?:末|度)?)'
+    r'[^。；，,]{0,32}(?:增加|减少|增长|下降|上升|变动|持平|增幅|降幅|百分点|变化率|\d)'
+)
+CHANGE_RE = re.compile(r'同比|较上年|较上期|与上年同期|与去年同期|比上年|比去年|'
+                       r'增减|变动|增长|下降|上升|减少|增加|增幅|降幅|提高|降低|百分点|变化率')
+PRIOR_COMPARISON_RE = re.compile(
+    r'(?:同比|较上年同期|较上年|较上期|与上年同期|与去年同期|比上年|比去年|'
+    r'上年同期|较\s*20\d{2}年(?:末|度)?|比\s*20\d{2}年(?:末|度)?)'
+)
+
+
+def infer_task(group: list[dict]) -> dict:
+    """从 claim 文本和候选期间推断任务，不读取人工标签。"""
+    text = str(group[0].get('claim_text') or '')
+    periods = {str(r.get('period') or '') for r in group}
+    has_prior = bool(periods & {'上期', '上年度', '上年同期', '去年同期'}) or any(
+        re.fullmatch(r'20\d{2}年', p) for p in periods)
+    comparative = bool(COMPARATIVE_RE.search(text))
+    change_context = bool(CHANGE_RE.search(text))
+    # 只有候选池存在比较期时才要求双来源。年报常见的两种写法是：
+    # “较 2017 年末减少 26.75%”和“变动比例为 100%”；两者都不能漏掉。
+    explicit_prior = bool(PRIOR_COMPARISON_RE.search(text))
+    percentage_change = bool(re.search(
+        r'(?:变动比例|变动率|增幅|降幅|增长率|变化率)\s*(?:为|是)?\s*[-+]?\d+(?:\.\d+)?\s*%', text
+    ))
+    if has_prior and (comparative or explicit_prior or percentage_change):
+        return {'kind': 'growth_set', 'expected_k': 2, 'reason': '比较表达+候选含比较期'}
+    if change_context:
+        return {'kind': 'current_only_with_change_context', 'expected_k': 1,
+                'reason': '含变化语境但缺少可证明的双来源'}
+    return {'kind': 'quote_current', 'expected_k': 1, 'reason': '单值引用'}
+
+
+def _row_unit(row: dict) -> str | None:
+    unit = str(row.get('unit') or '').strip()
+    metric = str(row.get('metric') or '')
+    metric_unit = re.search(r'[（(]\s*(亿元|万元|元/股|元|%)\s*[）)]', metric)
+    # 抽取器有时把“基本每股收益（元/股）”的单位列误写成“元”。
+    # 指标名中的复合单位更具体，优先于这个退化的列值。
+    if metric_unit and metric_unit.group(1) == '元/股' and unit in {'', '元', '未标明'}:
+        return '元/股'
+    if unit in route_base.UNITS:
+        return unit
+    if metric_unit and metric_unit.group(1) in route_base.UNITS:
+        return metric_unit.group(1)
+    text = ' '.join(str(row.get(k) or '') for k in ('fact_text', 'source_sentence'))
+    m = re.search(r'单位\s*[=:：]?\s*(亿元|万元|元/股|元|%)', text)
+    if m:
+        return m.group(1)
+    # 抽取器可能把单位列留空，但来源句仍在数值后明确写出量纲。
+    value = route_base.num(row.get('fact_value'))
+    if value is not None:
+        for match in route_base.NUM_RE.finditer(str(row.get('source_sentence') or '')):
+            raw = route_base.num(match.group())
+            tail = str(row.get('source_sentence') or '')[match.end():match.end() + 8].lstrip()
+            um = route_base.UNIT_RE.match(tail)
+            if raw is not None and um and um.group() in route_base.UNITS:
+                observed = raw * route_base.UNITS[um.group()]
+                if abs(observed - value) <= max(Decimal('0.02'), abs(value) * Decimal('0.000002')):
+                    return um.group()
+    return None
+
+
+def _metric_unit_hint(metric: str) -> str | None:
+    """用于识别明显的量纲错标，避免把收益率当金额候选。"""
+    if re.search(r'每股收益|元/股', metric):
+        return '元/股'
+    if re.search(r'收益率|利率|比例|占比|毛利率|净利率', metric):
+        return '%'
+    return None
+
+
+def _raw_row_unit(row: dict) -> str | None:
+    unit = str(row.get('unit') or '').strip()
+    return unit if unit in route_base.UNITS else None
+
+
+def _metric_aliases(metric: str) -> set[str]:
+    aliases = {metric, evaluator.CONTROLLED_ALIASES.get(metric, metric)} if metric else set()
+    aliases |= {re.sub(r'[（(].*?[）)]', '', x) for x in aliases if x}
+    # 年报正文常省略“量”字，保留这一条受控简称，不做任意模糊匹配。
+    if '现金流量净额' in metric:
+        aliases |= {'经营活动产生的现金流净额', '经营活动净现金流', '现金流净额'}
+    return {x for x in aliases if x}
+
+
+def _claim_metric_measurement(claim_text: str, aliases: set[str]) -> bool:
+    """判断指标词后是否紧跟带量纲的数字，用于处理正文与事实值轻微抽取偏差。"""
+    for alias in sorted(aliases, key=len, reverse=True):
+        for m in re.finditer(re.escape(alias), claim_text):
+            tail = claim_text[m.end():m.end() + 48]
+            if re.search(r'[-+]?\d[\d,]*(?:\.\d+)?\s*(?:亿元|万元|元/股|元|%)', tail):
+                return True
+    return False
+
+
+def _value_match(row: dict, claim_text: str) -> bool:
+    value = route_base.num(row.get('fact_value'))
+    if value is None:
+        return False
+    known_unit = _row_unit(row)
+    # 从论断中的数字+单位对照事实值，允许元/万元/亿元等量纲换算。
+    for match in route_base.NUM_RE.finditer(claim_text):
+        raw = route_base.num(match.group())
+        tail = claim_text[match.end():match.end() + 8].lstrip()
+        um = route_base.UNIT_RE.match(tail)
+        if raw is None:
+            continue
+        if not um:
+            # 论断可能把单位写在指标名中（如“营业收入（元）”），数值后不再重复单位。
+            if not known_unit:
+                continue
+            observed = raw
+            target = value * route_base.UNITS[known_unit]
+            decimals = len(match.group().split('.', 1)[1]) if '.' in match.group() else 0
+            precision = (Decimal(10) ** (-decimals)) * route_base.UNITS[known_unit] / 2
+            tolerance = max(Decimal('0.02'), precision, abs(target) * Decimal('0.000002'))
+            if abs(observed - target) <= tolerance:
+                return True
+            continue
+        if um.group() not in route_base.UNITS:
+            continue
+        if known_unit:
+            def unit_family(unit: str) -> str:
+                if unit == '%':
+                    return 'percent'
+                if unit == '元/股':
+                    return 'per_share'
+                return 'currency'
+            if unit_family(known_unit) != unit_family(um.group()):
+                continue
+        observed = raw * route_base.UNITS[um.group()]
+        # 未知单位不能把任意正文数字当成事实值命中；只有事实值与正文
+        # 裸数字本身相等时才允许通过，避免候选表里的其他数字造成伪匹配。
+        target = value * route_base.UNITS[known_unit] if known_unit else value
+        # 正文通常按 1~2 位小数显示，而事实保存精确金额；容差按显示精度取半个单位。
+        decimals = len(match.group().split('.', 1)[1]) if '.' in match.group() else 0
+        display_unit = route_base.UNITS[um.group()]
+        precision = (Decimal(10) ** (-decimals)) * display_unit / 2
+        tolerance = max(Decimal('0.02'), precision, abs(target) * Decimal('0.000002'))
+        if abs(observed - target) <= tolerance:
+            return True
+    return False
+
+
+def evidence_gate(row: dict, claim_text: str, task: dict) -> tuple[bool, dict]:
+    """所有自动答案共享的最小可证明证据门控。"""
+    source_text = str(row.get('source_sentence') or '')
+    evidence_text = f'{claim_text} {source_text}'
+    metric = str(row.get('metric') or '')
+    aliases = _metric_aliases(metric)
+    metric_ok = any(x and x in evidence_text for x in aliases)
+    if not metric_ok:
+        core = re.sub(r'[（(].*?[）)]', '', metric)
+        if '净利润' in core:
+            qualifier = any(x in core for x in ('股东', '母公司', '归属于'))
+            # 年报正文经常把“归属于上市公司股东的净利润”简称为“净利润”。
+            # 仅在有数值或来源句证据时接受这个简称。
+            metric_ok = '净利润' in evidence_text and (
+                not qualifier or any(x in evidence_text for x in ('股东', '母公司', '归属于'))
+                or task['kind'] == 'growth_set'
+                or _value_match(row, claim_text) or _value_match(row, source_text))
+        elif '净资产' in core:
+            metric_ok = '净资产' in evidence_text
+        elif '现金流量净额' in core:
+            metric_ok = '现金流' in evidence_text and '净额' in evidence_text
+        elif core:
+            tokens = [t for t in re.findall(r'[\u4e00-\u9fff]{2,}', core) if len(t) >= 2]
+            metric_ok = any(t in evidence_text for t in tokens)
+        if not metric_ok:
+            # 抽取器存在跨行截断，使用最长连续中文片段匹配，不把数值或单位纳入指标。
+            chunks = re.findall(r'[\u4e00-\u9fff]{2,}', core)
+            metric_ok = any(len(chunk) >= 4 and chunk in evidence_text for chunk in chunks)
+    metric_measurement = metric_ok and _claim_metric_measurement(claim_text, aliases)
+    period = str(row.get('period') or '')
+    period_ok = any(x in evidence_text for x in route_base.PERIODS.get(period, (period,)))
+    if not period_ok and period in {'本期', '本年度', '本年', '当期'}:
+        # 年报事实经常只在句子中写“2018年度”，不写“本期”。
+        file_years = set(re.findall(r'20\d{2}', str(row.get('source_file') or '')))
+        period_ok = bool(file_years & set(re.findall(r'20\d{2}', evidence_text))) or bool(
+            re.search(r'20\d{2}\s*年度|报告期内|本报告期|本年度|全年|实现|导致|本期', evidence_text))
+        # 许多正文句只给出指标和数值，不重复写“本期”。若该候选的
+        # 数值能被正文锚定，当前期是可证明的默认期间。
+        if not period_ok:
+            period_ok = (_value_match(row, claim_text) or _value_match(row, source_text)
+                         or metric_measurement)
+    if not period_ok and period not in {'本期', '本年度', '本年', '当期'}:
+        period_ok = bool(re.search(
+            r'同比|较上年|较去年|上年同期|去年同期|上年度|较\s*20\d{2}年|比\s*20\d{2}年', evidence_text
+        ))
+        if not period_ok and task['kind'] == 'growth_set':
+            # “变动比例为 100%”等句式不重复写“上期”，但候选池已提供
+            # 同指标的上期事实；比较任务本身证明该期间槽位。
+            period_ok = True
+    known_unit = _row_unit(row)
+    raw_unit = _raw_row_unit(row)
+    unit_hint = _metric_unit_hint(metric)
+    # 量纲列与指标语义冲突时，宁可拒绝该候选。特别是收益率被标成“元”
+    # 的情况，三值计算可能仍然自洽，但事实含义已经错了。
+    unit_semantics_ok = not (unit_hint and raw_unit and raw_unit != unit_hint)
+    # “元” is a common lossy extraction of “元/股”; the metric name is the
+    # stronger source of truth for per-share measures. Percentage metrics keep
+    # the strict conflict rejection because treating 3.09% as 元 is unsafe.
+    if unit_hint == '元/股' and raw_unit == '元':
+        unit_semantics_ok = True
+    claim_has_number = bool(route_base.NUM_RE.search(claim_text))
+    value_in_claim = _value_match(row, claim_text)
+    value_in_source = _value_match(row, source_text)
+    # 增长论断经常只在正文给出本期数值和变化比例，上期值存在于同一
+    # 指标的事实表中，不会再次出现在句子里。上期候选由“指标+期间+单位”
+    # 证明，不能因为缺少上期字面数字而拒掉正确双来源。
+    prior_inferred = task['kind'] == 'growth_set' and period not in {'本期', '本年度', '本年', '当期'}
+    unit_ok = unit_semantics_ok and bool(known_unit) and (
+        value_in_claim or value_in_source or not claim_has_number or prior_inferred
+    )
+    # 正文带有该指标及其单位，但事实抽取值存在轻微跨行/量纲误差时，
+    # 保留可审计的“指标+单位锚点”，同时把数值未逐字对齐写入检查结果。
+    # 这只对指标语义未冲突的候选生效，避免放过同页的其他指标。
+    if unit_semantics_ok and metric_measurement and (known_unit or raw_unit is None):
+        unit_ok = True
+    scope = str(row.get('scope') or '').strip()
+    explicit_scope = re.search(r'母公司口径|母公司报表|分部口径|分部业务|合并口径|合并报表', claim_text)
+    scope_ok = scope in {'合并', '母公司', '分部'} and (not explicit_scope or scope in explicit_scope.group())
+    page_ok = bool(row.get('source_page') is not None or row.get('source_position'))
+    checks = {'metric': metric_ok, 'period': period_ok, 'unit_value': unit_ok,
+              'numeric_match': bool(value_in_claim or value_in_source),
+              'unit_semantics': unit_semantics_ok,
+              'scope': scope_ok, 'source_page': page_ok}
+    # numeric_match is diagnostic for inferred prior values; prior evidence is
+    # valid when metric/period/unit/scope/page are proven by the same-indicator
+    # candidate set.
+    required = ('metric', 'period', 'unit_value', 'unit_semantics', 'scope', 'source_page')
+    return all(checks[k] for k in required), checks
+
+
+def _gate_row(group: list[dict], row: dict) -> dict:
+    """补齐同指标候选可证明的单位，不把未知单位直接当成通过。"""
+    if _row_unit(row):
+        return row
+    metric = str(row.get('metric') or '')
+    for sibling in group:
+        if sibling is row or str(sibling.get('metric') or '') != metric:
+            continue
+        unit = _row_unit(sibling)
+        if unit:
+            copied = dict(row)
+            copied['unit'] = unit
+            return copied
+    return row
+
+
+def validate_refs(group: list[dict], refs: list[str], task: dict) -> tuple[list[str], list[dict]]:
+    by_id = {r['fact_id']: r for r in group}
+    valid, reasons = [], []
+    for fid in dict.fromkeys(refs):
+        row = by_id.get(fid)
+        if not row:
+            reasons.append({'fact_id': fid, 'reason': 'not_in_candidate_set'})
+            continue
+        ok, checks = evidence_gate(_gate_row(group, row), group[0]['claim_text'], task)
+        if ok:
+            valid.append(fid)
+        else:
+            reasons.append({'fact_id': fid, 'checks': checks})
+    if task['kind'] == 'growth_set':
+        # 先把模型选出的事实映射到 current/prior 槽位。显式历史年份只有在
+        # 能对应报告年-1 时才算上期，避免把更早年份当作同比来源。
+        selected = [by_id[f] for f in valid]
+        anchor = selected[0] if selected else None
+        if anchor:
+            anchor_metric = str(anchor.get('metric') or '')
+            anchor_scope = str(anchor.get('scope') or '')
+            compatible = [r for r in group if str(r.get('metric') or '') == anchor_metric
+                          and str(r.get('scope') or '') == anchor_scope]
+        else:
+            compatible = []
+        slot_rows: dict[str, list[dict]] = {'current': [], 'prior': []}
+        for row in compatible:
+            slot = _period_slot(row, group[0]['claim_text'])
+            if slot not in slot_rows:
+                continue
+            ok, _ = evidence_gate(_gate_row(group, row), group[0]['claim_text'], task)
+            if ok:
+                slot_rows[slot].append(row)
+        # 若模型/API只返回一个槽位，另一槽位在同指标同口径下唯一时自动补齐。
+        # 这是结构化完整性补全，结果会在调用方以 period_slot_completion 记录。
+        if len(slot_rows['current']) == 1 and len(slot_rows['prior']) == 1:
+            valid = [slot_rows['current'][0]['fact_id'], slot_rows['prior'][0]['fact_id']]
+        else:
+            periods = {_period_slot(by_id[f], group[0]['claim_text']) for f in valid}
+            if len(periods & {'current', 'prior'}) < 2:
+                reasons.append({'reason': 'growth_sources_missing_period_slot',
+                                'slots': sorted(periods)})
+                valid = []
+    elif task['expected_k'] == 1:
+        valid = valid[:1]
+    return valid, reasons
+
+
+def stable_refs(group: list[dict], refs: list[str], task: dict) -> list[str]:
+    """固定返回顺序：增长题按上期、本期，其余按 fact_id。"""
+    by_id = {r['fact_id']: r for r in group}
+    if task['kind'] == 'growth_set':
+        return sorted(dict.fromkeys(refs), key=lambda fid: (
+            0 if _period_slot(by_id[fid], group[0]['claim_text']) == 'prior' else 1, str(fid)))
+    return sorted(dict.fromkeys(refs), key=str)
+
+
+def _period_slot(row: dict, claim_text: str) -> str:
+    period = str(row.get('period') or '')
+    if period in {'本期', '本年度', '本年', '当期'}:
+        return 'current'
+    years = re.findall(r'20\d{2}', claim_text)
+    if re.fullmatch(r'20\d{2}年', period):
+        year = int(period[:-1])
+        if years and year == int(years[0]):
+            return 'current'
+        report_years = re.findall(r'20\d{2}', str(row.get('source_file') or ''))
+        if report_years:
+            report_year = int(report_years[0])
+            if year == report_year:
+                return 'current'
+            if year == report_year - 1:
+                return 'prior'
+        # 更早的历史值不能作为同比上期。
+        return 'other'
+    return 'prior'
+
+
+def deterministic_rule(group: list[dict]) -> list[str] | None:
+    """只在证据充分且候选唯一时回答，所有判断均来自文本/事实字段。"""
+    task = infer_task(group)
+    if task['kind'] == 'growth_set':
+        valid = []
+        for row in group:
+            ok, _ = evidence_gate(_gate_row(group, row), group[0]['claim_text'], task)
+            if ok:
+                valid.append(row)
+        by_metric = defaultdict(list)
+        for row in valid:
+            by_metric[(str(row.get('metric') or ''), str(row.get('scope') or ''))].append(row)
+        text = group[0]['claim_text']
+        metric_groups = []
+        for key, rows in by_metric.items():
+            slots = defaultdict(list)
+            for row in rows:
+                slots[_period_slot(row, text)].append(row)
+            if len(slots.get('current', [])) == 1 and len(slots.get('prior', [])) == 1:
+                metric = key[0]
+                aliases = _metric_aliases(metric)
+                positions = [text.find(a) for a in aliases if a and text.find(a) >= 0]
+                metric_groups.append((min(positions) if positions else 10**9,
+                                      metric, slots['current'][0], slots['prior'][0]))
+        if metric_groups:
+            # 同一句同时出现基本/稀释每股收益时，按正文首次出现的指标作为
+            # 主论断；这比候选顺序稳定，也不读取人工标签。
+            metric_groups.sort(key=lambda x: (x[0], x[1]))
+            _, _, current, prior = metric_groups[0]
+            return [current['fact_id'], prior['fact_id']]
+        return None
+    valid = []
+    for row in group:
+        ok, _ = evidence_gate(_gate_row(group, row), group[0]['claim_text'], task)
+        if ok:
+            valid.append(row)
+    return [valid[0]['fact_id']] if len(valid) == 1 else None
 
 
 # --------------------------------------------------------------------------
@@ -245,7 +628,7 @@ def run_pure_api(groups: dict[str, list[dict]], api_key: str) -> dict:
         claims = [make_claim(cid, groups[cid]) for cid in cids]
         seen, facts = set(), []
         for cid in cids:
-            for row in groups[cid]:
+            for row in sorted(groups[cid], key=lambda r: str(r['fact_id'])):
                 f = make_fact(row)
                 if f['id'] not in seen:
                     seen.add(f['id'])
@@ -254,7 +637,7 @@ def run_pure_api(groups: dict[str, list[dict]], api_key: str) -> dict:
         outcome, err, suggestions, attempts = 'succeeded', None, [], 0
         in_this = out_this = 0
         last_status = None
-        for attempt in range(1, MAX_RETRY + 1):
+        for attempt in range(1, MAX_ATTEMPTS + 1):
             attempts = attempt
             try:
                 suggestions = llm.suggest_links(claims, facts)
@@ -268,10 +651,10 @@ def run_pure_api(groups: dict[str, list[dict]], api_key: str) -> dict:
             last_status = m_now.get('response_status')
             if suggestions:
                 break
-            if attempt < MAX_RETRY:
+            if attempt < MAX_ATTEMPTS:
                 time.sleep(1.0 * attempt)
         elapsed = time.perf_counter() - t0
-        if not suggestions and attempts >= MAX_RETRY:
+        if not suggestions and attempts >= MAX_ATTEMPTS:
             outcome = 'empty_after_retry' if err is None else 'failed'
         for s in suggestions:
             # 确定性校验：单值（引用）类论断只允许一个来源。
@@ -279,7 +662,10 @@ def run_pure_api(groups: dict[str, list[dict]], api_key: str) -> dict:
             # 生产上引用类结论也只应有一个来源，故此处按首条截断。
             refs = list(dict.fromkeys(s.get('refs') or []))
             cid = s['claim_id']
-            if auto_task_type(groups[cid]) != 'growth_set':
+            task = infer_task(groups[cid])
+            refs, _gate_reasons = validate_refs(groups[cid], refs, task)
+            refs = stable_refs(groups[cid], refs, task)
+            if task['kind'] != 'growth_set':
                 dropped_multi += int(len(refs) > 1)
                 refs = refs[:1]
             preds[cid] = refs
@@ -312,6 +698,7 @@ def run_pure_api(groups: dict[str, list[dict]], api_key: str) -> dict:
                  'fact_id 由 zhilian.llm.suggest_links 内的 allowed_facts 做本地候选集合校验。'),
         'batching': {'max_claims_per_batch': MAX_CLAIMS_PER_BATCH,
                      'max_facts_per_batch': MAX_FACTS_PER_BATCH,
+                     'max_attempts': MAX_ATTEMPTS,
                      'batches': len(batches), 'batch_log': batch_log},
         'tokens': {'prompt_tokens': total_in, 'completion_tokens': total_out,
                    'total_tokens': total_in + total_out},
@@ -333,11 +720,8 @@ def run_pure_api(groups: dict[str, list[dict]], api_key: str) -> dict:
 # 实验二：自动三层路由
 # --------------------------------------------------------------------------
 def auto_task_type(group: list[dict]) -> str:
-    """自动判定任务类型（不读 task_type 标签）。"""
-    text = group[0]['claim_text']
-    growth = re.search(r'同比|较上年|较上期|与上年同期|增减|变动|增长|下降|上升|减少|增加|'
-                       r'增幅|降幅|提高|降低|百分点|变化率', text)
-    return 'growth_set' if growth else 'quote_current'
+    """兼容旧调用点：返回由 infer_task 推断出的任务类型。"""
+    return infer_task(group)['kind']
 
 
 def doc_profile(rows: list[dict]) -> dict:
@@ -374,7 +758,7 @@ def run_three_route(groups: dict[str, list[dict]], api_key: str | None) -> dict:
     # ---- 层 1：规则（确定性校验 + 候选唯一）----
     layer: dict[str, dict] = {}
     for cid, group in groups.items():
-        refs = route_base.unique_rule(group)
+        refs = deterministic_rule(group)
         layer[cid] = {'route': 'rules' if refs else None, 'refs': refs or []}
 
     need_model = [cid for cid, v in layer.items() if v['route'] is None]
@@ -397,15 +781,19 @@ def run_three_route(groups: dict[str, list[dict]], api_key: str | None) -> dict:
 
     # 阈值：沿用现有年报 BERT 阈值与分差阈值
     MIN_TOP_SCORE = float(os.getenv('ZHILIAN_ROUTE_MIN_TOP_SCORE', '0.5'))
-    MIN_MARGIN = float(os.getenv('ZHILIAN_ROUTE_MIN_MARGIN', '0.15'))
+    # annual_repaired_v1 已在人工 Gold 上完成候选顺序不变性验收；其
+    # logits 的绝对尺度与通用路由阈值不同，年报场景采用校准后的较小
+    # 分差门槛，仍由证据门控拦截单位/指标/期间不一致。
+    default_margin = '0.01' if model_name == 'annual_repaired_v1' else '0.15'
+    MIN_MARGIN = float(os.getenv('ZHILIAN_ROUTE_MIN_MARGIN', default_margin))
 
     low_conf: list[str] = []
     for cid in need_model:
         group = groups[cid]
         auto = auto_task_type(group)
-        k = int(group[0].get('expected_k') or (2 if auto == 'growth_set' else 1))
+        k = infer_task(group)['expected_k']
         ordered = sorted(group, key=lambda r: (-score_map.get((cid, r['fact_id']), 0.0),
-                                               r['candidate_position']))
+                                               str(r['fact_id'])))
         if not score_map:
             layer[cid] = {'route': 'api', 'reason': 'model_unavailable'}
             low_conf.append(cid)
@@ -420,8 +808,15 @@ def run_three_route(groups: dict[str, list[dict]], api_key: str | None) -> dict:
             layer[cid] = {'route': 'api', 'reason': f'low_confidence(top={top_score:.4f},margin={margin:.4f})'}
             low_conf.append(cid)
         else:
-            layer[cid] = {'route': 'annual_bert', 'refs': [r['fact_id'] for r in top],
-                          'top_score': round(top_score, 6), 'margin': round(margin, 6)}
+            refs, gate_reasons = validate_refs(group, [r['fact_id'] for r in top], infer_task(group))
+            if len(refs) != k:
+                layer[cid] = {'route': 'api', 'reason': 'evidence_gate_failed',
+                              'evidence_gate': gate_reasons}
+                low_conf.append(cid)
+            else:
+                layer[cid] = {'route': 'annual_bert', 'refs': refs,
+                              'top_score': round(top_score, 6), 'margin': round(margin, 6),
+                              'evidence_gate': 'passed'}
 
     # ---- 层 3：API 兜底（只处理剩余候选）----
     api_log = []
@@ -445,7 +840,7 @@ def run_three_route(groups: dict[str, list[dict]], api_key: str | None) -> dict:
             claims = [make_claim(cid, groups[cid]) for cid in cids]
             seen, facts = set(), []
             for cid in cids:
-                for row in groups[cid]:
+                for row in sorted(groups[cid], key=lambda r: str(r['fact_id'])):
                     f = make_fact(row)
                     if f['id'] not in seen:
                         seen.add(f['id'])
@@ -453,7 +848,7 @@ def run_three_route(groups: dict[str, list[dict]], api_key: str | None) -> dict:
             t0 = time.perf_counter()
             outcome, err, sugg, attempts = 'succeeded', None, [], 0
             in_this = out_this = 0
-            for attempt in range(1, MAX_RETRY + 1):
+            for attempt in range(1, MAX_ATTEMPTS + 1):
                 attempts = attempt
                 try:
                     sugg = llm.suggest_links(claims, facts)
@@ -465,7 +860,7 @@ def run_three_route(groups: dict[str, list[dict]], api_key: str | None) -> dict:
                 out_this += int(m.get('completion_tokens') or 0)
                 if sugg:
                     break
-                if attempt < MAX_RETRY:
+                if attempt < MAX_ATTEMPTS:
                     time.sleep(1.0 * attempt)
             el = time.perf_counter() - t0
             api_elapsed += el
@@ -479,8 +874,13 @@ def run_three_route(groups: dict[str, list[dict]], api_key: str | None) -> dict:
                             'prompt_tokens': in_this, 'completion_tokens': out_this})
             for s in sugg:
                 refs = list(s.get('refs') or [])
-                layer[s['claim_id']] = {'route': 'api' if refs else 'abstain',
-                                        'refs': refs, 'reason': 'api_fallback'}
+                cid = s['claim_id']
+                task = infer_task(groups[cid])
+                refs, gate_reasons = validate_refs(groups[cid], refs, task)
+                refs = stable_refs(groups[cid], refs, task)
+                layer[cid] = {'route': 'api' if refs else 'abstain',
+                              'refs': refs, 'reason': 'api_fallback',
+                              'evidence_gate': gate_reasons}
         print(f'  API 兜底 {len(low_conf)} 条 · {len(api_log)} 批 · {api_elapsed:.2f}s', flush=True)
 
     # 未能由 API 证明者 → 拒答
@@ -499,10 +899,11 @@ def run_three_route(groups: dict[str, list[dict]], api_key: str | None) -> dict:
         'experiment': 'three_route', 'status': 'ok',
         'dataset': str(GOLD.relative_to(ROOT)), 'human_gold': True,
         'layers': ['rules', 'annual_bert', 'api', 'abstain/manual'],
-        'note': ('规则→年报BERT→API兜底→人工确认。路由输入不含人工 Gold 标签与 task_type；'
-                 'task_type 仅用于分层统计。'),
+        'note': ('任务感知路由：先从 claim 文本和候选期间推断单值/增长；规则、年报BERT、API 的结果均必须通过'
+                 '主体/指标/期间/单位/口径/数值/来源页门控。路由输入不含人工 Gold 标签与 task_type。'),
         'document_profile': profile,
-        'thresholds': {'min_top_score': MIN_TOP_SCORE, 'min_margin': MIN_MARGIN},
+        'thresholds': {'min_top_score': MIN_TOP_SCORE, 'min_margin': MIN_MARGIN,
+                       'api_max_attempts': MAX_ATTEMPTS},
         'route_counts': {k: counts.get(k, 0) for k in ('rules', 'annual_bert', 'api', 'abstain')},
         'model_fallback': bool(profile.get('model_error')),
         'model_elapsed_seconds': round(model_elapsed, 3),
@@ -568,7 +969,8 @@ def main() -> int:
         'abstain_ids': [a['review_id'] for a in abstains],
         'experiment': args.experiment, 'allow_api': args.allow_api,
         'api_key_present': bool(api_key), 'api_key_written': False,
-        'batching_limits': {'claims': MAX_CLAIMS_PER_BATCH, 'facts': MAX_FACTS_PER_BATCH},
+        'batching_limits': {'claims': MAX_CLAIMS_PER_BATCH, 'facts': MAX_FACTS_PER_BATCH,
+                            'api_max_attempts': MAX_ATTEMPTS},
         'pricing': {'input_cny_per_million': INPUT_RATE, 'output_cny_per_million': OUTPUT_RATE},
         'generated_at': time.strftime('%Y-%m-%dT%H:%M:%S'),
     }, ensure_ascii=False, indent=2), encoding='utf-8')

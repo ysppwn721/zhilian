@@ -8,6 +8,7 @@ import os
 import re
 import tempfile
 from pathlib import Path
+from typing import Literal
 from urllib.parse import urlparse
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -17,12 +18,16 @@ from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 
 from .demo import create_demo
-from .llm import config, suggest_links, explain_diagnosis
+from .llm import (config, mode, mode_label, using_mode, remote_allowed, suggest_links,
+                  explain_diagnosis, consume_last_call_metrics)
 from . import __version__
 from . import ocr, quota, reranker
+from .pdf_revised_export import available_docx_backends
 from .store import Store, now
+from .office import digest
 from .report import build_report
-from .agent import run_agent, decide, agent_status
+from .agent import (run_agent, decide, agent_status, run_cross_document_audit,
+                     run_repair_plan)
 
 BASE = Path(__file__).resolve().parent.parent
 DOWNLOAD_ROOT = Path(os.getenv('ZHILIAN_DOWNLOAD_DIR', str(BASE / 'downloads'))).resolve()
@@ -79,6 +84,10 @@ class RepairRequest(BaseModel):
 
 class RevisionRequest(BaseModel):
     revision: int
+
+
+class ModelModeRequest(RevisionRequest):
+    mode: Literal['rules', 'local', 'hybrid', 'api', 'api_only']
 
 
 class OcrRunRequest(RevisionRequest):
@@ -170,11 +179,13 @@ def create_app(data_dir=None):
     @app.get('/api/health')
     def health():
         return {'status': 'ok', 'version': __version__, 'model': config(),
+                'model_mode': mode(), 'model_mode_label': mode_label(),
                 'ocr': ocr.config(),
                 'local_reranker': reranker.status(),
                 'quota': quota.config(),
                 'auto_export': os.getenv('ZHILIAN_AUTO_EXPORT', '').strip().lower() in ('1', 'true'),
-                'password_protected': bool(os.getenv('ZHILIAN_ACCESS_PASSWORD'))}
+                'password_protected': bool(os.getenv('ZHILIAN_ACCESS_PASSWORD')),
+                'pdf_backends': available_docx_backends()}
 
     @app.get('/downloads/{filename}')
     def public_download(filename: str):
@@ -237,8 +248,37 @@ def create_app(data_dir=None):
                 for f in files:
                     await f.close()
 
+    @app.post('/api/projects/from-pdf')
+    async def upload_pdf_project(name: str = Form('PDF 导入项目'), subject: str = Form(''), file: UploadFile = File(...)):
+        """Convert one PDF to Word/Excel sources, then create an Office project.
+
+        The original PDF is retained for provenance but is never treated as an
+        editable project document.  PDFs with no usable structured facts are
+        rejected with a message directing the user to review the generated
+        intermediate files first.
+        """
+        filename = (file.filename or '').replace('\\', '/').split('/')[-1]
+        if Path(filename).suffix.lower() != '.pdf':
+            raise ValueError('请选择 .pdf 文件')
+        if len(filename) > 150 or any(c in filename for c in '<>:"|?*'):
+            raise ValueError('PDF 文件名无效或过长')
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / filename
+            total = 0
+            try:
+                with path.open('wb') as out:
+                    while chunk := await file.read(1024 * 1024):
+                        total += len(chunk)
+                        if total > 100 * 1024 * 1024:
+                            raise ValueError('PDF 不超过100MB')
+                        out.write(chunk)
+                return await run_in_threadpool(store.create_from_pdf, name, path, subject.strip() or None)
+            finally:
+                await file.close()
+
     @app.post('/api/projects/{wid}/documents')
-    async def append_documents(wid: str, revision: int = Form(...), files: list[UploadFile] = File(...)):
+    async def append_documents(wid: str, revision: int = Form(...), files: list[UploadFile] = File(...),
+                               continue_on_error: bool = Form(False)):
         """Append a bounded batch of Word/PPT/image files to an existing project.
 
         The Excel source remains the project's single source of truth and is
@@ -267,7 +307,29 @@ def create_app(data_dir=None):
                                 raise ValueError('每批追加总大小不超过100MB')
                             out.write(chunk)
                     paths.append(path)
-                return await run_in_threadpool(store.append_documents, wid, revision, paths)
+                if not continue_on_error:
+                    return await run_in_threadpool(store.append_documents, wid, revision, paths)
+                # Tolerant mode commits each file as its own transaction.  A
+                # corrupt or duplicate document is reported while successful
+                # files remain available and can be reviewed immediately.
+                current_revision = revision
+                accepted, rejected = [], []
+                for path in paths:
+                    try:
+                        result = await run_in_threadpool(store.append_documents, wid, current_revision, [path])
+                        current_revision = result['revision']
+                        accepted.append({'name': path.name, 'batch': result.get('batch')})
+                    except Exception as exc:
+                        rejected.append({'name': path.name, 'reason': str(exc) or type(exc).__name__})
+                with store.lock:
+                    state = store.public(store.read(wid))
+                state['batch'] = {
+                    'status': 'partial' if rejected and accepted else ('failed' if rejected else 'done'),
+                    'count': len(accepted), 'rejected': len(rejected),
+                    'revision': current_revision,
+                }
+                state['batch_results'] = {'accepted': accepted, 'rejected': rejected}
+                return state
             finally:
                 for f in files:
                     await f.close()
@@ -280,6 +342,11 @@ def create_app(data_dir=None):
     def get_project(wid: str):
         with store.lock:
             return store.public(store.read(wid))
+
+    @app.delete('/api/projects/{wid}')
+    def delete_project(wid: str):
+        """Delete a project selected from 我的项目 after client confirmation."""
+        return store.delete(wid)
 
     @app.get('/api/projects/{wid}/report')
     def report(wid: str):
@@ -351,11 +418,24 @@ def create_app(data_dir=None):
         with store.lock:
             ws = store.read(wid)
             store.verify(ws, body.revision)
-        result = suggest_links(ws['claims'], ws['facts'])
+            selected = mode(ws)
+        with using_mode(selected):
+            if not remote_allowed():
+                raise ValueError(f'当前为 {selected} 模式，不允许调用远程 API')
+            eligible = [c for c in ws['claims'] if not c['confirmed'] and c['kind'] != 'chart']
+            if eligible and config()['enabled'] and len(ws['facts']) <= 150:
+                gate = quota.check()
+                if not gate['allowed']:
+                    raise ValueError(gate['reason'])
+                quota.consume()
+            result = suggest_links(ws['claims'], ws['facts'])
+            call_metrics = consume_last_call_metrics()
         with store.lock:
             ws = store.read(wid)
             store.verify(ws, body.revision)
             ws['suggestions'] = result
+            store.append_model_call(ws, call_metrics, node='link_agent', mode_value=selected,
+                                    candidates_returned=len(result))
             ws['revision'] += 1
             ws['audit'].append({'time': now(), 'event': '模型建议', 'detail': f'模型 {config()["model"]} 提出{len(result)}项建议，尚未确认'})
             store.write(ws)
@@ -367,16 +447,30 @@ def create_app(data_dir=None):
             ws = store.read(wid)
             store.verify(ws, body.revision)
             records = store.public(ws)['diagnosis']
-        explanations = explain_diagnosis(records)
+            selected = mode(ws)
+        with using_mode(selected):
+            can_call = remote_allowed() and config()['enabled'] and bool(records)
+            if can_call:
+                gate = quota.check()
+                if not gate['allowed']:
+                    raise ValueError(gate['reason'])
+                quota.consume()
+            explanations = explain_diagnosis(records)
+            call_metrics = consume_last_call_metrics()
         with store.lock:
             ws = store.read(wid)
             store.verify(ws, body.revision)
             ws['diagnosis_explanations'] = explanations
+            store.append_model_call(ws, call_metrics, node='diagnosis_agent', mode_value=selected,
+                                    candidates_returned=len(explanations))
             ws['revision'] += 1
             ws['audit'].append({'time': now(), 'event': '诊断解释',
                                 'revision': ws['revision'],
                                 'detail': (f'模型 {config()["model"]} 返回{len(explanations)}项解释；未返回的项使用确定性模板'
-                                           if config()['enabled'] else '未配置 DeepSeek，使用确定性模板，未调用模型')})
+                                           if can_call
+                                           else ('未配置 DeepSeek，使用确定性模板，未调用模型'
+                                                 if not config()['enabled']
+                                                 else f'当前为 {selected} 模式，使用确定性模板，未调用远程模型'))})
             store.write(ws)
             return store.public(ws)
 
@@ -410,9 +504,63 @@ def create_app(data_dir=None):
             raise HTTPException(404, '文件不存在')
         return FileResponse(store.folder(wid) / ws['generation'] / d['stored_name'], filename=d['name'])
 
+    @app.get('/api/projects/{wid}/pdf-origins/{index}')
+    def download_pdf_origin(wid: str, index: int):
+        with store.lock:
+            ws = store.read(wid)
+            store.verify(ws, ws['revision'])
+            origins = ws.get('pdf_origins', [])
+            if index < 0 or index >= len(origins):
+                raise HTTPException(404, '原始 PDF 不存在')
+            origin = origins[index]
+            path = store.folder(wid) / ws['generation'] / origin['stored_name']
+            if not path.is_file() or digest(path) != origin.get('sha256'):
+                raise HTTPException(409, '原始 PDF 校验失败，请重新导入')
+            return FileResponse(path, filename=origin['name'], media_type='application/pdf')
+
+    @app.post('/api/projects/{wid}/pdf-revised')
+    def export_revised_pdf(wid: str, body: RevisionRequest):
+        """Generate an independent PDF from the current Word revision."""
+        return store.export_revised_pdf(wid, body.revision)
+
+    @app.get('/api/projects/{wid}/pdf-revisions/{index}')
+    def download_revised_pdf(wid: str, index: int):
+        with store.lock:
+            ws = store.read(wid)
+            store.verify(ws, ws['revision'])
+            items = ws.get('pdf_revisions', [])
+            if index < 0 or index >= len(items):
+                raise HTTPException(404, '修订版 PDF 不存在')
+            item = items[index]
+            verification = item.get('verification') or {}
+            if verification.get('status') != 'passed':
+                raise HTTPException(409, '修订版 PDF 未通过严格视觉一致性验收，请先查看转换清单和差异页')
+            path = store.folder(wid) / ws['generation'] / item.get('stored_name', '')
+            if not path.is_file():
+                raise HTTPException(404, '修订版 PDF 不存在')
+            return FileResponse(path, filename=item.get('name', path.name), media_type='application/pdf')
+
+    @app.get('/api/projects/{wid}/pdf-revisions/{index}/manifest')
+    def download_revised_manifest(wid: str, index: int):
+        with store.lock:
+            ws = store.read(wid)
+            store.verify(ws, ws['revision'])
+            items = ws.get('pdf_revisions', [])
+            if index < 0 or index >= len(items):
+                raise HTTPException(404, '修订版 PDF 清单不存在')
+            item = items[index]
+            path = store.folder(wid) / ws['generation'] / item.get('manifest_stored_name', '')
+            if not path.is_file():
+                raise HTTPException(404, '修订版 PDF 清单不存在')
+            return FileResponse(path, filename=path.name, media_type='application/json')
+
     @app.post('/api/projects/{wid}/agent/run')
     def agent_run(wid: str, body: RevisionRequest):
         return run_agent(store, wid, body.revision)
+
+    @app.post('/api/projects/{wid}/model-mode')
+    def set_model_mode(wid: str, body: ModelModeRequest):
+        return store.set_model_mode(wid, body.revision, body.mode)
 
     @app.post('/api/projects/{wid}/agent/decide')
     def agent_decide(wid: str, body: AgentDecisionRequest):
@@ -421,6 +569,14 @@ def create_app(data_dir=None):
     @app.get('/api/projects/{wid}/agent/status')
     def get_agent_status(wid: str):
         return agent_status(store, wid)
+
+    @app.post('/api/projects/{wid}/review/cross-document')
+    def cross_document_review(wid: str, body: RevisionRequest):
+        return run_cross_document_audit(store, wid, body.revision)
+
+    @app.post('/api/projects/{wid}/review/repair-plan')
+    def repair_plan(wid: str, body: RevisionRequest):
+        return run_repair_plan(store, wid, body.revision)
 
     @app.get('/api/projects/{wid}/export')
     def export(wid: str):

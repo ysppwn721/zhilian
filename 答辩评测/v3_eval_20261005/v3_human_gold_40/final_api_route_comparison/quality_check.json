@@ -1,7 +1,7 @@
 {
   "passed": false,
   "failed": [
-    "纯 API 顺序打乱后预测集合稳定"
+    "纯 API 顺序稳定性"
   ],
   "checked": [
     "同集一致性",

@@ -1,0 +1,70 @@
+{
+  "ready_for_training": false,
+  "blocking_reasons": [
+    "company_leakage_between_splits",
+    "frozen_evaluation_source_reused_for_training",
+    "current_period_selection_shortcut_scores_100_percent",
+    "label_scope_and_period_audit_not_approved"
+  ],
+  "splits": {
+    "train": {
+      "pairs": 285,
+      "claims": 95,
+      "companies": 10,
+      "original_claims": 50,
+      "generated_rewrite_pairs": 135,
+      "multi_positive_claims": 74,
+      "always_current_top1": 1.0
+    },
+    "dev": {
+      "pairs": 48,
+      "claims": 16,
+      "companies": 4,
+      "original_claims": 16,
+      "generated_rewrite_pairs": 0,
+      "multi_positive_claims": 14,
+      "always_current_top1": 1.0
+    },
+    "test": {
+      "pairs": 51,
+      "claims": 17,
+      "companies": 6,
+      "original_claims": 17,
+      "generated_rewrite_pairs": 0,
+      "multi_positive_claims": 15,
+      "always_current_top1": 1.0
+    }
+  },
+  "company_overlap": {
+    "train/dev": [
+      "300149"
+    ],
+    "train/test": [],
+    "dev/test": [
+      "600165"
+    ]
+  },
+  "reused_frozen_train_reports": [
+    "000615_奥园美谷科技股份有限公司2023年年度报告更正后.pdf",
+    "000930_2023年年度报告更正后.pdf",
+    "002097_2020年年度报告全文更新后.pdf",
+    "002097_2021年年度报告全文更新后.pdf",
+    "002097_2022年年度报告更新后.pdf",
+    "002097_2023年年度报告全文更新后.pdf",
+    "002413_2023年年度报告更新后.pdf",
+    "002425_凯撒中国文化股份有限公司2021年年度报告更正后.pdf",
+    "002425_凯撒中国文化股份有限公司2022年年度报告更正后.pdf",
+    "002425_凯撒中国文化股份有限公司2023年年度报告更正后.pdf",
+    "002569_2019年年度报告全文更正后.pdf",
+    "002569_2021年年度报告全文补充更正后.pdf",
+    "002598_2023年年度报告全文更新后.pdf",
+    "002808_2019年年度报告更新后.pdf",
+    "002808_2020年年度报告更新后.pdf",
+    "002808_2021年年度报告更新后.pdf",
+    "002808_2022年年度报告更新后.pdf",
+    "002808_2023年年度报告更新后.pdf",
+    "002825_上海纳尔实业股份有限公司2023年年度报告更正后.pdf",
+    "300149_2022年年度报告更新后.pdf"
+  ],
+  "metric_scope": "single-candidate Top-1 is insufficient to validate multi-fact source linking"
+}

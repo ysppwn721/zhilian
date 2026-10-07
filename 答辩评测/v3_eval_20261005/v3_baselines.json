@@ -1,0 +1,25 @@
+{
+  "dataset": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\v3_real_value_20261005\\benchmark_v3.jsonl",
+  "claims": 340,
+  "programmatic_labels": true,
+  "baselines": {
+    "metric_only": {
+      "quote_claims": 45,
+      "quote_answered": 17,
+      "quote_coverage": 0.37777777777777777,
+      "quote_correct_over_all": 0.37777777777777777,
+      "growth_claims": 295,
+      "growth_exact_match": 0.43389830508474575
+    },
+    "metric_plus_numeric_value_and_unit": {
+      "quote_claims": 45,
+      "quote_answered": 24,
+      "quote_coverage": 0.5333333333333333,
+      "quote_correct_over_all": 0.5333333333333333,
+      "growth_claims": 295,
+      "growth_exact_match": 0.04406779661016949,
+      "growth_precision": 0.6220338983050847,
+      "growth_recall": 0.33559322033898303
+    }
+  }
+}

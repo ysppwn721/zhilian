@@ -1,0 +1,96 @@
+{
+  "experiment": "fixed_task_routed_ensemble",
+  "routing": {
+    "quote_current": "bge",
+    "quote_prior": "bge",
+    "growth_set": "annual_repaired_v1"
+  },
+  "reason": "Use BGE for single-source selection and annual-repaired BERT for two-source growth-set retrieval; no score mixing or benchmark tuning.",
+  "programmatic_labels": true,
+  "model_metrics": {
+    "quote_current": {
+      "claims": 425,
+      "top1_accuracy": 0.8494117647058823,
+      "error_association_rate": 0.1505882352941177,
+      "ambiguous_top1": 0
+    },
+    "quote_prior": {
+      "claims": 425,
+      "top1_accuracy": 0.8470588235294118,
+      "error_association_rate": 0.15294117647058825,
+      "ambiguous_top1": 0
+    },
+    "growth_set": {
+      "claims": 425,
+      "source_set_exact_match": 0.8705882352941177,
+      "source_set_completeness_recall": 0.8835294117647059,
+      "source_set_precision": 0.8835294117647059,
+      "ambiguous_at_top2_boundary": 0
+    }
+  },
+  "comparison": {
+    "bge": {
+      "quote_current": {
+        "claims": 425,
+        "top1_accuracy": 0.8494117647058823,
+        "error_association_rate": 0.1505882352941177,
+        "ambiguous_top1": 0
+      },
+      "quote_prior": {
+        "claims": 425,
+        "top1_accuracy": 0.8470588235294118,
+        "error_association_rate": 0.15294117647058825,
+        "ambiguous_top1": 0
+      },
+      "growth_set": {
+        "claims": 425,
+        "source_set_exact_match": 0.1811764705882353,
+        "source_set_completeness_recall": 0.5117647058823529,
+        "source_set_precision": 0.5117647058823529,
+        "ambiguous_at_top2_boundary": 0
+      }
+    },
+    "annual_repaired_v1": {
+      "quote_current": {
+        "claims": 425,
+        "top1_accuracy": 0.5552941176470588,
+        "error_association_rate": 0.4447058823529412,
+        "ambiguous_top1": 0
+      },
+      "quote_prior": {
+        "claims": 425,
+        "top1_accuracy": 0.35294117647058826,
+        "error_association_rate": 0.6470588235294117,
+        "ambiguous_top1": 0
+      },
+      "growth_set": {
+        "claims": 425,
+        "source_set_exact_match": 0.8705882352941177,
+        "source_set_completeness_recall": 0.8835294117647059,
+        "source_set_precision": 0.8835294117647059,
+        "ambiguous_at_top2_boundary": 0
+      }
+    },
+    "equal_weight_rrf": {
+      "quote_current": {
+        "claims": 425,
+        "top1_accuracy": 0.7341176470588235,
+        "error_association_rate": 0.26588235294117646,
+        "ambiguous_top1": 83
+      },
+      "quote_prior": {
+        "claims": 425,
+        "top1_accuracy": 0.6635294117647059,
+        "error_association_rate": 0.3364705882352941,
+        "ambiguous_top1": 109
+      },
+      "growth_set": {
+        "claims": 425,
+        "source_set_exact_match": 0.48,
+        "source_set_completeness_recall": 0.74,
+        "source_set_precision": 0.74,
+        "ambiguous_at_top2_boundary": 13
+      }
+    }
+  }
+}

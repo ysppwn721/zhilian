@@ -1,0 +1,131 @@
+{
+  "fixture": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\chart_eval\\chart_fixture_before.pptx",
+  "output": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\chart_eval\\chart_fixture_after.pptx",
+  "chart_types": [
+    "柱状图",
+    "条形图",
+    "饼图",
+    "圆环图"
+  ],
+  "before_values": [
+    [
+      60.0,
+      40.0
+    ],
+    [
+      60.0,
+      40.0
+    ],
+    [
+      60.0,
+      40.0
+    ],
+    [
+      60.0,
+      40.0
+    ]
+  ],
+  "after_values": [
+    [
+      50.0,
+      35.0
+    ],
+    [
+      50.0,
+      35.0
+    ],
+    [
+      50.0,
+      35.0
+    ],
+    [
+      50.0,
+      35.0
+    ]
+  ],
+  "expected_after": [
+    [
+      50.0,
+      35.0
+    ],
+    [
+      50.0,
+      35.0
+    ],
+    [
+      50.0,
+      35.0
+    ],
+    [
+      50.0,
+      35.0
+    ]
+  ],
+  "timing_ms": {
+    "read": 7.052,
+    "patch": 18.287,
+    "reread": 6.495,
+    "end_to_end": 31.834
+  },
+  "recognized": 4,
+  "verified_after_patch": 4,
+  "warnings": [
+    "幻灯片备注及母版中的文字未纳入检查",
+    "幻灯片备注及母版中的文字未纳入检查"
+  ],
+  "modes": [
+    {
+      "mode": "rules",
+      "charts": 4,
+      "recognized": 4,
+      "repaired": 4,
+      "reread_verified": 4,
+      "accuracy": 1.0,
+      "api_calls": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_yuan": 0.0,
+      "model_route": "deterministic chart path"
+    },
+    {
+      "mode": "local",
+      "charts": 4,
+      "recognized": 4,
+      "repaired": 4,
+      "reread_verified": 4,
+      "accuracy": 1.0,
+      "api_calls": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_yuan": 0.0,
+      "model_route": "deterministic chart path"
+    },
+    {
+      "mode": "hybrid",
+      "charts": 4,
+      "recognized": 4,
+      "repaired": 4,
+      "reread_verified": 4,
+      "accuracy": 1.0,
+      "api_calls": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_yuan": 0.0,
+      "model_route": "deterministic chart path"
+    },
+    {
+      "mode": "api",
+      "charts": 4,
+      "recognized": 4,
+      "repaired": 4,
+      "reread_verified": 4,
+      "accuracy": 1.0,
+      "api_calls": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_yuan": 0.0,
+      "model_route": "deterministic chart path"
+    }
+  ],
+  "caveat": "图表是确定性路径；四种模型模式对图表零 API 调用，不能用图表样本比较模型准确率。"
+}

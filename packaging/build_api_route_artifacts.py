@@ -83,26 +83,42 @@ def main() -> int:
                  'token': None, '费用(元)': 0.0, '数据说明': '本地已有结果，未重跑'})
 
     # 每个策略的分母说明（消除"规则只处理 3 条却有 94.7%"的歧义）
+    route_quote_total = route['metrics']['quote_claims'] if route else 19
+    route_quote_answered = (sum(bool(x.get('pred_fact_ids')) for x in route.get('per_claim', [])
+                                 if x.get('task_type') != 'growth_set') if route else 0)
+    route_quote_coverage = route_quote_answered / route_quote_total if route_quote_total else None
+    pure_quote_total = pure['metrics']['quote_claims'] if pure else 19
+    pure_quote_answered = (sum(bool(x.get('pred_fact_ids')) for x in pure.get('per_claim', [])
+                                if x.get('task_type') != 'growth_set') if pure else 0)
+    pure_quote_coverage = pure_quote_answered / pure_quote_total if pure_quote_total else None
+    offline_rule_count = bge_offline['route_counts'].get('rules', 0)
     DENOM = {
-        '纯 API（本次实测）': '分母 19 条单值题（覆盖率 83.78%）；增长题分母 18 条',
-        '自动三层路由（本次实测）': '分母 19 条单值题（覆盖率 100%）；增长题分母 18 条',
-        '离线三层路由（规则+年报BERT，早期基线）': '分母 19 条单值题；规则仅接手 3 条，其余转年报 BERT',
+        '纯 API（本次实测）': f'分母 19 条单值题（单值覆盖率 {pure_quote_coverage*100:.2f}%）；增长题分母 18 条' if pure_quote_coverage is not None else '分母 19 条单值题；增长题分母 18 条',
+        '自动三层路由（本次实测）': f'分母 19 条单值题（单值覆盖率 {route_quote_coverage*100:.2f}%）；增长题分母 18 条' if route_quote_coverage is not None else '分母 19 条单值题；增长题分母 18 条',
+        '离线三层路由（规则+年报BERT，早期基线）': f'分母 19 条单值题；规则仅接手 {offline_rule_count} 条，其余转年报 BERT',
         '年报 BERT（本地基线，同集）': '分母 19 条单值题',
         'BGE（本地基线，同集）': '分母 19 条单值题',
     }
     for r in rows:
         if r['策略'] in DENOM:
             r['分母说明'] = DENOM[r['策略']]
-    # 规则层单独一行：必须给"可回答样本"与"全部单值题"两个分母
-    rule_answered, rule_correct = 3, 3
+    # 规则层单独一行：必须给“可回答样本”与“全部单值题”两个分母。
+    # 从本次路由明细动态计算，避免把早期 3/3 基线误标成本轮结果。
+    rule_quote = ([x for x in route.get('per_claim', [])
+                   if x.get('route') == 'rules' and x.get('task_type') != 'growth_set']
+                  if route else [])
+    rule_answered = len(rule_quote)
+    rule_correct = sum(bool(x.get('exact_match')) for x in rule_quote)
+    rule_total = route_quote_total
     rows.append({'策略': '规则层（唯一才用，单值）', '单值 Top-1': rule_correct / rule_answered,
                  '增长精确匹配': None, '增长 Precision': None, '增长 Recall': None, '增长 F1': None,
-                 '覆盖率': rule_answered / 19, '拒答率': 1 - rule_answered / 19,
+                 '覆盖率': rule_answered / rule_total if rule_total else 0.0,
+                 '拒答率': 1 - rule_answered / rule_total if rule_total else 1.0,
                  '耗时(秒)': 0.0, 'token': 0, '费用(元)': 0.0,
                  '数据说明': f'可回答样本准确率 {rule_correct}/{rule_answered}=100%；'
-                             f'若以全部 19 条为分母则为 {rule_correct}/19={rule_correct/19*100:.1f}%；'
-                             f'覆盖率 {rule_answered}/19={rule_answered/19*100:.1f}%',
-                 '分母说明': '可回答样本（3 条）。全部单值题分母下为 15.8%'})
+                             f'若以全部 {rule_total} 条为分母则为 {rule_correct}/{rule_total}={rule_correct/rule_total*100:.1f}%；'
+                             f'覆盖率 {rule_answered}/{rule_total}={rule_answered/rule_total*100:.1f}%',
+                 '分母说明': f'可回答样本（{rule_answered} 条）。全部单值题分母为 {rule_total} 条'})
 
     with (DEST / 'api_vs_route_metrics.csv').open('w', encoding='utf-8-sig', newline='') as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
@@ -178,6 +194,30 @@ def main() -> int:
         fig.savefig(DEST / 'route_distribution.png', dpi=150)
         plt.close(fig)
 
+    # ---------- 图 5：任务感知路由流程（答辩素材） ----------
+    fig, ax = plt.subplots(figsize=(13, 4.6))
+    ax.axis('off')
+    boxes = [
+        (0.02, 0.42, 0.16, 0.20, '论断文本\n+候选事实'),
+        (0.23, 0.42, 0.17, 0.20, '任务识别\n单值 / 增长 / 不完整'),
+        (0.45, 0.66, 0.20, 0.20, '单值路径\n证据门控 → 规则/BERT'),
+        (0.45, 0.20, 0.20, 0.20, '增长路径\n双来源+期间校验'),
+        (0.72, 0.42, 0.15, 0.20, '低置信\nAPI 一次重试'),
+        (0.90, 0.42, 0.08, 0.20, '证明\n交付\n否则拒答'),
+    ]
+    for x, y, w, h, label in boxes:
+        ax.add_patch(plt.Rectangle((x, y), w, h, facecolor='#eef4fb', edgecolor='#3269a8', linewidth=1.5))
+        ax.text(x + w / 2, y + h / 2, label, ha='center', va='center', fontsize=10)
+    arrows = [((0.18, 0.52), (0.23, 0.52)), ((0.40, 0.52), (0.45, 0.76)),
+              ((0.40, 0.52), (0.45, 0.30)), ((0.65, 0.76), (0.72, 0.52)),
+              ((0.65, 0.30), (0.72, 0.52)), ((0.87, 0.52), (0.90, 0.52))]
+    for (x1, y1), (x2, y2) in arrows:
+        ax.annotate('', xy=(x2, y2), xytext=(x1, y1), arrowprops={'arrowstyle': '->', 'color': '#666', 'lw': 1.3})
+    ax.text(0.50, 0.96, '任务感知路由：先判任务，再按证据完整度升级', ha='center', fontsize=14, fontweight='bold')
+    fig.tight_layout()
+    fig.savefig(DEST / '任务感知路由_决策流程.png', dpi=180, bbox_inches='tight')
+    plt.close(fig)
+
     # ---------- Markdown 报告 ----------
     def fmt(v, pct=True):
         if v is None:
@@ -231,8 +271,9 @@ def main() -> int:
             for x in bad:
                 md += [f"| {x['batch']} | {x['claims']} | {x['facts']} | {x.get('attempts')} | "
                        f"{x['outcome']} | {x['completion_tokens']} |"]
+            max_attempts = b.get('max_attempts', max((x.get('attempts', 1) for x in bad), default=1))
             md += ['', '这些批次 API 返回 HTTP 200 且 `finish_reason=stop`，但 `suggestions` 为空。',
-                   '同一输入重试 3 次仍为空，属**可复现的模型行为**（非网络或额度问题），',
+                   f'同一输入最多重试 {max_attempts - 1} 次仍为空，属**可复现的模型行为**（非网络或额度问题），',
                    '故按拒答计入，未伪造结果。', '']
 
     if route:
@@ -247,7 +288,8 @@ def main() -> int:
                f"- 置信阈值：top_score ≥ {route['thresholds']['min_top_score']}，"
                f"margin ≥ {route['thresholds']['min_margin']}",
                f"- 模型回退发生：{'是' if route['model_fallback'] else '否'}",
-               '- 路由输入不含人工 Gold 标签与 `task_type`（任务类型由论断文本自动判定）',
+               '- 路由输入不含人工 Gold 标签与 `task_type`（任务类型由论断文本和候选期间自动判定）',
+               '- 规则、本地模型和 API 返回都必须通过主体/指标/期间/单位/口径/数值/来源页门控；失败则升级或拒答。',
                '', '### 路由分布', '', '| 路由 | 条数 | 正确 | 准确率 |', '|---|---|---|---|']
         for k, v in m['by_route'].items():
             md += [f"| {k} | {v['claims']} | {v['correct']} | {fmt(v['accuracy'])} |"]
@@ -279,7 +321,7 @@ def main() -> int:
 
     md += ['## 四、同集对比表', '',
            '**所有单值题数字的分母都是 19 条单值题**（37 条中扣除 18 条增长题），',
-           '除非该行另有标注。下表把每个策略的实际接手范围一并列出，避免"规则只处理 3 条却有 94.7%"的误读。',
+           '除非该行另有标注。下表把每个策略的实际接手范围一并列出，避免把整条路由成绩误读成规则单独成绩。',
            '',
            '| 策略 | 单值 Top-1 | 增长精确匹配 | 增长 F1 | 耗时(秒) | token | 费用(元) | 分母 / 接手范围 |',
            '|---|---|---|---|---|---|---|---|']
@@ -291,16 +333,24 @@ def main() -> int:
                f"{r.get('分母说明') or r['数据说明']} |"]
     md += ['', '### 关于「规则」的两个数字必须区分清楚', '',
            '| 说法 | 分子/分母 | 数值 | 含义 |', '|---|---|---:|---|',
-           '| 规则层可回答样本准确率 | 3/3 | **100.0%** | 规则给出唯一答案的题里全部答对 |',
-           '| 规则层占全部单值题 | 3/19 | **15.8%** | 若以全部单值题为分母（未回答算错） |',
-           '| 规则层覆盖率 | 3/19 | **15.8%** | 只有 3 条由规则直接解决 |',
-           '| 离线三层路由（早期基线） | 18/19 | **94.7%** | **整条路由**的成绩，不是规则单独的成绩 |',
-           '| 自动三层路由（本次实测） | 17/19 | **89.5%** | 同上，本次重测；两次差异来自模型非确定性 |',
+           f'| 规则层可回答样本准确率 | {rule_correct}/{rule_answered} | **{rule_correct/rule_answered*100:.1f}%** | 规则给出唯一答案的题里全部答对 |',
+           f'| 规则层占全部单值题 | {rule_correct}/{rule_total} | **{rule_correct/rule_total*100:.1f}%** | 若以全部单值题为分母（未回答算错） |',
+           f'| 规则层覆盖率 | {rule_answered}/{rule_total} | **{rule_answered/rule_total*100:.1f}%** | 由规则直接解决的单值题比例 |',
+           f"| 离线三层路由（早期基线） | {round(bge_offline['quote_top1']*route_quote_total)}/{route_quote_total} | **{bge_offline['quote_top1']*100:.2f}%** | **整条路由**的成绩，不是规则单独的成绩 |",
+           f"| 自动三层路由（本次实测） | {round(route['metrics']['quote_top1']*route_quote_total)}/{route_quote_total} | **{route['metrics']['quote_top1']*100:.2f}%** | 整条路由：规则 + 年报 BERT + API 兜底 |" if route else '| 自动三层路由（本次实测） | — | — | 未生成 |',
            '',
-           '**因此报告与 PPT 中不得把 94.7% 标成「纯规则」。** 规则单独的可回答样本准确率是 100%（分母 3），',
-           '而它在全部单值题上的贡献只有 15.8%（覆盖率）；94.7% 属于整条离线路由。',
+           '**规则层数字只描述规则接手的样本；自动三层路由数字描述整条路由。** 两者分母和接手范围不同，不能混用。',
            '']
-    md += ['', '## 五、口径与限制', '',
+    md += ['', '## 五、丢分层定位与修复', '',
+           '修复前三层路由的 3 条错误分别来自：年报 BERT 选错同页指标 1 条、API 只返回增长题一个期间来源 1 条、',
+           '年报 BERT 把历史年份误当上期 1 条；规则层没有出现错误。',
+           '本轮加入受控指标简称、指标语义单位归一化、报告年份期间槽位，以及同指标双期间完整性门控后，',
+           f"路由分布为规则 {route['route_counts'].get('rules', 0)}、年报 BERT {route['route_counts'].get('annual_bert', 0)}、"
+           f"API {route['route_counts'].get('api', 0)}、拒答 {route['route_counts'].get('abstain', 0)}；"
+           f"单值 Top-1 {fmt(route['metrics']['quote_top1'])}，增长集合精确匹配 {fmt(route['metrics']['growth_exact_match'])}。",
+           '这组结果只说明本批人工 Gold 上的门控修复有效，不代表所有年报都可由规则直接回答；',
+           '指标别名、单位和年份归一化仍应在新增公司上保持保守，无法唯一证明时继续升级或拒答。',
+           '', '## 六、口径与限制', '',
            '- 37 条为人工复核标签；3 条人工拒答不计入准确率。',
            '- 增长题按**来源集合**评价（精确匹配 + P/R/F1），不是 Top-1。',
            '- 单值题只允许一个来源，超出者按首条截断（确定性校验）。',
@@ -314,16 +364,14 @@ def main() -> int:
            '本地 BGE 的顺序不变性为 1.0（`changed_claims=0`），因此这是 **API 侧**的特性，',
            '不是评测脚本的问题。产品化时若依赖缓存或固定顺序，需注意该敏感性。',
            '',
-           '**2. 纯 API 有 1 条论断在多次重试后仍返回空 `suggestions`。**',
+           '**2. API 空返回按一次重试后拒答。**',
            '',
-           '`v3-300539-0191` 在 4 次独立运行、每次最多 3 次重试下均返回 '
-           '`{"suggestions":[]}`（HTTP 200、`finish_reason=stop`、约 7 个输出 token）。',
-           '该题候选集合中**确实存在**正确事实，因此这是**模型行为**而非网络、额度或密钥问题。',
-           '已按拒答计入，未伪造结果。',
+           '当前产物中的异常批次会列出实际尝试次数；HTTP 200 但 `suggestions` 为空时，',
+           '最多再请求一次，随后按拒答计入，避免无限重试消耗费用。',
            '',
            '**3. 增长题的「上期」可能以显式年份表达。**',
            '',
-           '三层路由有 2 条增长题的预测用 `2013年` / `2016年` 指代上期，语义正确。',
+           '显式年份只有在能对应报告年或报告年前一年时才进入本期/上期槽位；',
            '评价按来源集合是否覆盖两个期间槽位判定，不要求字面等于「上期」。',
            '',
            '**4. 三层路由的 API 兜底是真实的，但规模很小。**',
@@ -336,7 +384,7 @@ def main() -> int:
     print(f'生成完成 → {DEST.relative_to(ROOT)}')
     for f in ('api_vs_route_metrics.csv', 'api_vs_route_report.md',
               '效果对比_纯API_vs_自动三层路由.png', '时间对比_纯API_vs_自动三层路由.png',
-              '费用对比_纯API_vs_自动三层路由.png', 'route_distribution.png'):
+              '费用对比_纯API_vs_自动三层路由.png', 'route_distribution.png', '任务感知路由_决策流程.png'):
         p = DEST / f
         print(f'  {"✓" if p.is_file() else "✗"} {f}  {p.stat().st_size if p.is_file() else 0:,} bytes')
     return 0

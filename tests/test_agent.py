@@ -174,6 +174,34 @@ def test_rule_unique_claims_skip_model(project, monkeypatch):
     assert ws['agent']['pending']['kind'] == 'confirm_links'
 
 
+def test_unique_unverifiable_source_escalates_but_stale_value_stays_in_rules(project):
+    store, public = project
+    ws = store.read(public['id'])
+    quote = deepcopy(next(c for c in ws['claims'] if c['kind'] == 'quote'))
+    ws['claims'] = [quote]
+    rules = [{'claim_id': quote['id'], 'refs': quote['refs']}]
+    current = next(f for f in ws['facts'] if f['id'] == quote['refs'][0])
+    current['value'] = 90
+    assert agent._candidate_buckets(ws, rules)[0] == [quote]
+    current['unit'] = '件'
+    unique, multi, zero = agent._candidate_buckets(ws, rules)
+    assert unique == [] and multi == [quote] and zero == []
+
+
+def test_local_single_source_returns_concrete_rejection(project, monkeypatch):
+    store, public = project
+    ws = store.read(public['id'])
+    quote = deepcopy(next(c for c in ws['claims'] if c['kind'] == 'quote'))
+    ws['claims'] = [quote]
+    next(f for f in ws['facts'] if f['id'] == quote['refs'][0])['unit'] = '件'
+    ws['model_mode'] = 'local'
+    monkeypatch.setattr(agent.reranker, 'status', lambda: {'enabled': True})
+    result = agent.suggest_links_local(store, ws, {})
+    assert not result['suggestions']
+    assert result['decisions'][quote['id']]['action'] == 'abstain'
+    assert '单位不兼容' in result['decisions'][quote['id']]['reason']
+
+
 def test_model_trace_and_candidates_are_safe(project, monkeypatch):
     store, ws = project
     monkeypatch.setenv('DEEPSEEK_API_KEY', 'test-secret')
@@ -195,6 +223,9 @@ def test_model_trace_and_candidates_are_safe(project, monkeypatch):
     assert ws['agent']['pending']['kind'] == 'confirm_links'
     trace = next(t for t in ws['agent']['trace'] if t['model'])
     assert trace['model'] == 'deepseek-flash' and '收到 1 项' in trace['summary']
+    assert ws['model_call_summary']['remote'] == 1
+    assert ws['model_calls'][0]['node'] == 'link_agent'
+    assert ws['model_calls'][0]['outcome'] == 'succeeded'
     assert 'test-secret' not in json.dumps(ws)
     assert 'test-secret' not in (store.folder(ws['id']) / 'state.json').read_text(encoding='utf-8')
     approve(store, ws)

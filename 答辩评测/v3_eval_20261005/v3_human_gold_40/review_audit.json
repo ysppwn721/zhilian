@@ -1,0 +1,421 @@
+{
+  "review_rows": 40,
+  "valid_decisions": 37,
+  "abstained": 3,
+  "invalid": 0,
+  "errors": [],
+  "decisions": [
+    {
+      "review_id": "v3-000543-0089",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "经营活动产生的现金流量净额@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current operating cash flow value matches the claim and source page 7.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000586-0194",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润（元）@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current attributable net profit matches value, unit and consolidated scope on page 6.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000736-0184",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "总资产（元）@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Total assets 812,693.80 ten-thousand yuan matches the claim on page 7.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000806-0189",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current attributable net profit value matches the claim on page 6.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000889-0179",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润(元)@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current net profit value matches the claim on page 6.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000916-0201",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "经营活动产生的现金流量净额@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current operating cash flow matches 31,676.19 ten-thousand yuan on page 6.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000950-0199",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current parent-company net profit value matches the claim on page 6.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000993-0198",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current attributable net profit value matches the claim on page 6.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002166-0173",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润（元）@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current attributable net profit value matches the claim on page 7.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002390-0181",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current parent-company net profit value matches the claim on page 9.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002529-0186",
+      "task_type": "quote_current",
+      "selected_fact_ids": [],
+      "abstain": true,
+      "notes": "Candidate only has attributable net profit, not the claimed continuing-operations net profit.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002663-0123",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "经营活动产生的现金流量净额@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current operating cash flow -40,055.93 ten-thousand yuan matches page 22.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-300093-0193",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "研发投入金额（元）@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current R&D investment 2,556.37 ten-thousand yuan matches page 20.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-300147-0027",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "营业收入@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current revenue 1,523,980,138.10 yuan matches page 16.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-300165-0167",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current net profit 3,617.73 ten-thousand yuan matches page 8.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-300313-0077",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "研发费用@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current R&D expense 128.81 ten-thousand yuan matches page 27.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-300341-0166",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "营业收入（元）@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current revenue value matches the claim on page 8.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-300482-0083",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current net profit 30,774.45 ten-thousand yuan matches page 9.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-300529-0113",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current attributable net profit value matches the claim on page 7.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-300539-0191",
+      "task_type": "quote_current",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润（元）@本期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current attributable net profit value matches the claim on page 8.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000543-0252",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "经营活动产生的现金流量净@本期@合并",
+        "经营活动产生的现金流量净@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current 13.67 billion yuan and prior 989,442,166.46 yuan correspond after unit conversion.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000595-0125",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并",
+        "归属于上市公司股东的净利润@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current 2,058.65 ten-thousand yuan and prior -118,977,230.56 yuan correspond.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000597-0170",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "经营活动产生的现金流量净@本期@合并",
+        "经营活动产生的现金流量净@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current 38,451 ten-thousand yuan and prior 99,700,460.11 yuan give 285.67 percent growth.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000678-0101",
+      "task_type": "growth_set",
+      "selected_fact_ids": [],
+      "abstain": true,
+      "notes": "No complete same-metric current/prior pair supports the claimed 2.07 percent decline.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000737-0183",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "营业收入（元）@本期@合并",
+        "营业收入（元）@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current and prior revenue correspond; computed decline is about 0.77 percent.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000818-0200",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并",
+        "归属于上市公司股东的净利润@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current and prior net profit correspond; the text describes it as basically flat.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-000889-0109",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "经营活动产生的现金流量净额@本期@合并",
+        "经营活动产生的现金流量净额@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current 4,316.33 and prior 14,844.91 ten-thousand yuan correspond.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002100-0188",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "一、营业总收入@本期@合并",
+        "一、营业总收入@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current 527,303.24 and prior 4,630,025,738.72 yuan correspond; growth about 13.89 percent.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002166-0287",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "总资产（元）@本期@合并",
+        "总资产（元）@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current and prior total assets correspond; computed decline about 26.75 percent.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002198-0182",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "经营活动产生的现金流量净@本期@合并",
+        "经营活动产生的现金流量净@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current 4,231.29 ten-thousand yuan and prior 103,362,813.35 yuan correspond; decline about 59.06 percent.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002220-0075",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并",
+        "归属于上市公司股东的净利润@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current and prior attributable net profit correspond; negative-value comparison matches the text.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002390-0232",
+      "task_type": "growth_set",
+      "selected_fact_ids": [],
+      "abstain": true,
+      "notes": "Claim says prior EPS 0.13, but the only prior candidate is 0.14.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002412-0196",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "研发投入资本化的金额（元）@本期@合并",
+        "研发投入资本化的金额（元）@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current 275 ten-thousand yuan and prior 0 yuan support a 100 percent change.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002553-0192",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "营业收入（元）@本期@合并",
+        "营业收入（元）@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current and prior revenue correspond; growth about 0.95 percent.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002644-0063",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "营业收入@本期@合并",
+        "营业收入@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current and prior revenue correspond; growth about 36.89 percent.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002663-0233",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "基本每股收益（元/股）@本期@合并",
+        "基本每股收益（元/股）@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current and prior EPS correspond; decline about 57.14 percent.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002880-0087",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并",
+        "归属于上市公司股东的净利润@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current and prior net profit correspond; growth about 1.22 percent.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-002932-0151",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "基本每股收益（元/股）@本期@合并",
+        "基本每股收益（元/股）@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current and prior EPS correspond; decline about 17.56 percent.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-300040-0156",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "营业收入（元）@本期@合并",
+        "营业收入（元）@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current 102,378.67 ten-thousand yuan and prior 1,428,214,706.47 yuan correspond; decline about 28.32 percent.",
+      "valid": true
+    },
+    {
+      "review_id": "v3-300119-0033",
+      "task_type": "growth_set",
+      "selected_fact_ids": [
+        "归属于上市公司股东的净利润@本期@合并",
+        "归属于上市公司股东的净利润@上期@合并"
+      ],
+      "abstain": false,
+      "notes": "Current 11,897.89 ten-thousand yuan and prior 104,895,236.66 yuan correspond; growth about 13.43 percent.",
+      "valid": true
+    }
+  ]
+}

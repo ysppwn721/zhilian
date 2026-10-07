@@ -8,17 +8,18 @@
     "v3-000678-0101",
     "v3-002390-0232"
   ],
-  "experiment": "both",
-  "allow_api": true,
-  "api_key_present": true,
+  "experiment": "route",
+  "allow_api": false,
+  "api_key_present": false,
   "api_key_written": false,
   "batching_limits": {
     "claims": 1,
-    "facts": 60
+    "facts": 60,
+    "api_max_attempts": 2
   },
   "pricing": {
     "input_cny_per_million": 1.0,
     "output_cny_per_million": 4.0
   },
-  "generated_at": "2026-10-05T21:37:29"
+  "generated_at": "2026-10-06T09:34:38"
 }

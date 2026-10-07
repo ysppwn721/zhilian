@@ -1,0 +1,18 @@
+{
+  "frozen_at": "2026-10-05",
+  "purpose": "v1 位置伪影修复证据，冻结不再修改",
+  "files": {
+    "human_gold_20261004.jsonl": {
+      "sha256": "17b0997d64850a8d151d2cad4121863bfb0749f741a0763849a8a5e09d7e1479",
+      "bytes": 987178
+    },
+    "human_gold_20261004_shuffled.jsonl": {
+      "sha256": "7f12738d651da3edfad567d29d3090162a1dc912299d16e96d5d41eeaa15e3f9",
+      "bytes": 1069900
+    },
+    "human_gold_pure_api_20261004.jsonl": {
+      "sha256": "2f42e94ea2b624c8880711207c11a570e996bf66f32f8e1f7c05a7a314ba14f0",
+      "bytes": 78343
+    }
+  }
+}

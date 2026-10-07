@@ -1,0 +1,16 @@
+{
+  "pdf": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\cn_reports\\000506_2023年年度报告更正后.pdf",
+  "stats": {
+    "numeric_sentences": 2955,
+    "recognized_sentences": 88,
+    "claims": 125,
+    "flagged_claims": 125,
+    "review_queue": 125,
+    "coverage": 0.02978,
+    "heuristic_suspected_false_rate": 1.0,
+    "confirmed_false": null,
+    "confirmed_false_rate": null
+  },
+  "label_basis": "规则安全旗标与人工复核队列；尚未形成该 PDF 的人工金标准，因此 flagged_claims 不能直接称为误抽取数",
+  "next_step": "在 claim_audit_queue.csv 中填写 review_label=正确/误抽取/不确定，并将 confirmed_false 填为 1/0 后重新汇总"
+}

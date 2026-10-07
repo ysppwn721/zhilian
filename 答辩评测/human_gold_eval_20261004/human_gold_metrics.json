@@ -1,0 +1,197 @@
+{
+  "experiment": "human_gold_semantic_evaluation_20261004",
+  "dataset": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\human_gold_eval_20261004\\human_gold_20261004.jsonl",
+  "human_gold": {
+    "claims": 150,
+    "candidate_rows": 1613,
+    "gold_source_links": 200,
+    "task_counts": {
+      "quote_current": 50,
+      "quote_prior": 50,
+      "growth_set": 50
+    },
+    "companies": 77,
+    "source_claims": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\semantic_review_batch_20261004\\review_claims_completed_20261004.csv",
+    "source_candidates": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\semantic_review_batch_20261004\\review_candidates_completed_20261004.csv",
+    "source_sha256": {
+      "review_claims_completed_20261004.csv": "de0d956ae7fe0509fb0687cbd7020dc615e38cea6e0ca6a3523ff907dd93eb4c",
+      "review_candidates_completed_20261004.csv": "715c4c3729863c9f986a7f983613560c5a2c7a684dee45bff31747e654bbf24c"
+    },
+    "derived_dataset_sha256": "17b0997d64850a8d151d2cad4121863bfb0749f741a0763849a8a5e09d7e1479"
+  },
+  "models": {
+    "rules": {
+      "quote_current": {
+        "claims": 50,
+        "top1_accuracy": 0.52,
+        "error_association_rate": 0.48,
+        "ambiguous_top1": 24
+      },
+      "quote_prior": {
+        "claims": 50,
+        "top1_accuracy": 0.28,
+        "error_association_rate": 0.72,
+        "ambiguous_top1": 36
+      },
+      "growth_set": {
+        "claims": 50,
+        "source_set_exact_match": 0.8,
+        "source_set_completeness_recall": 0.85,
+        "source_set_precision": 0.85,
+        "ambiguous_at_top2_boundary": 10
+      }
+    },
+    "bge": {
+      "quote_current": {
+        "claims": 50,
+        "top1_accuracy": 0.78,
+        "error_association_rate": 0.21999999999999997,
+        "ambiguous_top1": 0
+      },
+      "quote_prior": {
+        "claims": 50,
+        "top1_accuracy": 0.92,
+        "error_association_rate": 0.07999999999999996,
+        "ambiguous_top1": 0
+      },
+      "growth_set": {
+        "claims": 50,
+        "source_set_exact_match": 0.58,
+        "source_set_completeness_recall": 0.72,
+        "source_set_precision": 0.72,
+        "ambiguous_at_top2_boundary": 0
+      }
+    },
+    "bert_v2": {
+      "quote_current": {
+        "claims": 50,
+        "top1_accuracy": 0.96,
+        "error_association_rate": 0.040000000000000036,
+        "ambiguous_top1": 0
+      },
+      "quote_prior": {
+        "claims": 50,
+        "top1_accuracy": 0.0,
+        "error_association_rate": 1.0,
+        "ambiguous_top1": 15
+      },
+      "growth_set": {
+        "claims": 50,
+        "source_set_exact_match": 0.7,
+        "source_set_completeness_recall": 0.81,
+        "source_set_precision": 0.81,
+        "ambiguous_at_top2_boundary": 1
+      }
+    },
+    "annual_repaired_v1": {
+      "quote_current": {
+        "claims": 50,
+        "top1_accuracy": 0.68,
+        "error_association_rate": 0.31999999999999995,
+        "ambiguous_top1": 0
+      },
+      "quote_prior": {
+        "claims": 50,
+        "top1_accuracy": 0.98,
+        "error_association_rate": 0.020000000000000018,
+        "ambiguous_top1": 0
+      },
+      "growth_set": {
+        "claims": 50,
+        "source_set_exact_match": 1.0,
+        "source_set_completeness_recall": 1.0,
+        "source_set_precision": 1.0,
+        "ambiguous_at_top2_boundary": 0
+      }
+    },
+    "rrf_bge_annual": {
+      "quote_current": {
+        "claims": 50,
+        "top1_accuracy": 0.7,
+        "error_association_rate": 0.30000000000000004,
+        "ambiguous_top1": 9
+      },
+      "quote_prior": {
+        "claims": 50,
+        "top1_accuracy": 0.92,
+        "error_association_rate": 0.07999999999999996,
+        "ambiguous_top1": 2
+      },
+      "growth_set": {
+        "claims": 50,
+        "source_set_exact_match": 0.92,
+        "source_set_completeness_recall": 0.94,
+        "source_set_precision": 0.94,
+        "ambiguous_at_top2_boundary": 0
+      }
+    },
+    "task_routed": {
+      "quote_current": {
+        "claims": 50,
+        "top1_accuracy": 0.78,
+        "error_association_rate": 0.21999999999999997,
+        "ambiguous_top1": 0
+      },
+      "quote_prior": {
+        "claims": 50,
+        "top1_accuracy": 0.92,
+        "error_association_rate": 0.07999999999999996,
+        "ambiguous_top1": 0
+      },
+      "growth_set": {
+        "claims": 50,
+        "source_set_exact_match": 1.0,
+        "source_set_completeness_recall": 1.0,
+        "source_set_precision": 1.0,
+        "ambiguous_at_top2_boundary": 0
+      }
+    }
+  },
+  "elapsed_seconds_cpu": {
+    "rules": 0.002,
+    "bge": 40.953,
+    "bert_v2": 72.138,
+    "annual_repaired_v1": 64.11,
+    "rrf_bge_annual": 105.063,
+    "task_routed": 105.063
+  },
+  "candidate_order_invariance": {
+    "rules": {
+      "shuffle_seed": 20261004,
+      "changed_claims": 0,
+      "claims": 150,
+      "prediction_set_consistency": 1.0
+    },
+    "bge": {
+      "shuffle_seed": 20261004,
+      "changed_claims": 0,
+      "claims": 150,
+      "prediction_set_consistency": 1.0
+    },
+    "bert_v2": {
+      "shuffle_seed": 20261004,
+      "changed_claims": 2,
+      "claims": 150,
+      "prediction_set_consistency": 0.9866666666666667
+    },
+    "annual_repaired_v1": {
+      "shuffle_seed": 20261004,
+      "changed_claims": 0,
+      "claims": 150,
+      "prediction_set_consistency": 1.0
+    },
+    "rrf_bge_annual": {
+      "derived_from": [
+        "bge",
+        "annual_repaired_v1"
+      ]
+    },
+    "task_routed": {
+      "derived_from": [
+        "bge",
+        "annual_repaired_v1"
+      ]
+    }
+  },
+  "training_data_used": false
+}

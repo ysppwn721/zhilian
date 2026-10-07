@@ -1,0 +1,37 @@
+{
+  "model": "bge",
+  "device": "CPUExecutionProvider",
+  "elapsed_seconds": 10.103,
+  "metrics": {
+    "by_task": {
+      "quote_current": {
+        "claims": 19,
+        "top1_accuracy": 0.631578947368421,
+        "error_association_rate": 0.368421052631579,
+        "ambiguous_top1": 0
+      },
+      "growth_set": {
+        "claims": 18,
+        "source_set_exact_match": 0.5555555555555556,
+        "source_set_completeness_recall": 0.7222222222222222,
+        "source_set_precision": 0.7222222222222222,
+        "ambiguous_at_top2_boundary": 0,
+        "source_set_f1": 0.7222222222222222
+      }
+    },
+    "by_variant": {
+      "literal": {
+        "quote_claims": 19,
+        "quote_top1_accuracy": 0.631578947368421,
+        "growth_claims": 18,
+        "growth_set_exact_match": 0.5555555555555556
+      }
+    }
+  },
+  "candidate_order_invariance": {
+    "seed": 20261005,
+    "claims": 37,
+    "changed_claims": 0,
+    "prediction_set_consistency": 1.0
+  }
+}

@@ -1,0 +1,466 @@
+{
+  "ready_for_training": false,
+  "validation_status": "pending_label_scope_period_and_candidate_audit",
+  "source": "答辩评测\\annual_reports_new_20261002",
+  "reports_processed": 50,
+  "candidate_rows": 32,
+  "company_disjoint_split": true,
+  "labels_are": "unassigned; anchors are retrieval evidence only",
+  "stats": [
+    {
+      "company": "603011",
+      "file": "603011_2023_合锻智能.pdf",
+      "sentences": 6740,
+      "facts": 14,
+      "current_fact_anchors": 1,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 1
+    },
+    {
+      "company": "688306",
+      "file": "688306_2023_均普智能.pdf",
+      "sentences": 6123,
+      "facts": 14,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "601106",
+      "file": "601106_2023_中国一重.pdf",
+      "sentences": 5809,
+      "facts": 14,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "000425",
+      "file": "000425_2023_徐工机械.pdf",
+      "sentences": 6163,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "002363",
+      "file": "002363_2023_隆基机械.pdf",
+      "sentences": 4491,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "603396",
+      "file": "603396_2023_金辰股份.pdf",
+      "sentences": 6832,
+      "facts": 22,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "600967",
+      "file": "600967_2023_内蒙一机.pdf",
+      "sentences": 6039,
+      "facts": 28,
+      "current_fact_anchors": 2,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "688590",
+      "file": "688590_2023_新致软件.pdf",
+      "sentences": 6832,
+      "facts": 22,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "603636",
+      "file": "603636_2023_南威软件.pdf",
+      "sentences": 7546,
+      "facts": 18,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "688095",
+      "file": "688095_2023_福昕软件.pdf",
+      "sentences": 7453,
+      "facts": 30,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "688588",
+      "file": "688588_2023_凌志软件.pdf",
+      "sentences": 6885,
+      "facts": 26,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "688058",
+      "file": "688058_2023_宝兰德.pdf",
+      "sentences": 7561,
+      "facts": 24,
+      "current_fact_anchors": 1,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "603232",
+      "file": "603232_2023_格尔软件.pdf",
+      "sentences": 6023,
+      "facts": 18,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "300378",
+      "file": "300378_2023_鼎捷软件.pdf",
+      "sentences": 5697,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "002124",
+      "file": "002124_2023_天邦食品.pdf",
+      "sentences": 6009,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "603027",
+      "file": "603027_2023_千禾味业.pdf",
+      "sentences": 4965,
+      "facts": 20,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "603517",
+      "file": "603517_2023_绝味食品.pdf",
+      "sentences": 5785,
+      "facts": 34,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "002650",
+      "file": "002650_2023_加加食品.pdf",
+      "sentences": 5763,
+      "facts": 8,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "300973",
+      "file": "300973_2023_立高食品.pdf",
+      "sentences": 5882,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "605567",
+      "file": "605567_2023_春雪食品.pdf",
+      "sentences": 6591,
+      "facts": 30,
+      "current_fact_anchors": 1,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 1
+    },
+    {
+      "company": "603345",
+      "file": "603345_2023_安井食品.pdf",
+      "sentences": 5917,
+      "facts": 32,
+      "current_fact_anchors": 4,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 4
+    },
+    {
+      "company": "002589",
+      "file": "002589_2023_瑞康医药.pdf",
+      "sentences": 4715,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "000908",
+      "file": "000908_2023_景峰医药.pdf",
+      "sentences": 4257,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "002581",
+      "file": "002581_2023_未名医药.pdf",
+      "sentences": 5143,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "688247",
+      "file": "688247_2023_宣泰医药.pdf",
+      "sentences": 6499,
+      "facts": 26,
+      "current_fact_anchors": 1,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "688192",
+      "file": "688192_2023_迪哲医药.pdf",
+      "sentences": 5500,
+      "facts": 14,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "603233",
+      "file": "603233_2023_大参林.pdf",
+      "sentences": 5956,
+      "facts": 24,
+      "current_fact_anchors": 1,
+      "prior_fact_anchors": 1,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "688166",
+      "file": "688166_2023_博瑞医药.pdf",
+      "sentences": 7376,
+      "facts": 30,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 1,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "600905",
+      "file": "600905_2023_三峡能源.pdf",
+      "sentences": 8638,
+      "facts": 18,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "000096",
+      "file": "000096_2023_广聚能源.pdf",
+      "sentences": 3930,
+      "facts": 58,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "601615",
+      "file": "601615_2023_明阳智能.pdf",
+      "sentences": 8303,
+      "facts": 14,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "001210",
+      "file": "001210_2023_金房能源.pdf",
+      "sentences": 4138,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "001331",
+      "file": "001331_2023_胜通能源.pdf",
+      "sentences": 4428,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "688184",
+      "file": "688184_2023_帕瓦股份.pdf",
+      "sentences": 6462,
+      "facts": 22,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "601222",
+      "file": "601222_2023_林洋能源.pdf",
+      "sentences": 6799,
+      "facts": 16,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "605366",
+      "file": "605366_2023_宏柏新材.pdf",
+      "sentences": 6516,
+      "facts": 30,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "603681",
+      "file": "603681_2023_永冠新材.pdf",
+      "sentences": 6921,
+      "facts": 8,
+      "current_fact_anchors": 1,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 1
+    },
+    {
+      "company": "002211",
+      "file": "002211_2023_修订版_宏达新材.pdf",
+      "sentences": 4053,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "688680",
+      "file": "688680_2023_海优新材.pdf",
+      "sentences": 6942,
+      "facts": 26,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "605377",
+      "file": "605377_2023_华旺科技.pdf",
+      "sentences": 5279,
+      "facts": 26,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "300398",
+      "file": "300398_2023_飞凯材料.pdf",
+      "sentences": 7840,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "688033",
+      "file": "688033_2023_天宜上佳.pdf",
+      "sentences": 7396,
+      "facts": 20,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "601668",
+      "file": "601668_2023_中国建筑.pdf",
+      "sentences": 10184,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "000078",
+      "file": "000078_2023_海王生物.pdf",
+      "sentences": 6089,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "600645",
+      "file": "600645_2023_中源协和.pdf",
+      "sentences": 7289,
+      "facts": 14,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "600820",
+      "file": "600820_2023_隧道股份.pdf",
+      "sentences": 7030,
+      "facts": 16,
+      "current_fact_anchors": 1,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 1
+    },
+    {
+      "company": "603698",
+      "file": "603698_2023_航天工程.pdf",
+      "sentences": 5244,
+      "facts": 32,
+      "current_fact_anchors": 11,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 11
+    },
+    {
+      "company": "600339",
+      "file": "600339_2023_中油工程.pdf",
+      "sentences": 5887,
+      "facts": 20,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "600603",
+      "file": "600603_2023_广汇物流.pdf",
+      "sentences": 6662,
+      "facts": 14,
+      "current_fact_anchors": 4,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 4
+    },
+    {
+      "company": "603117",
+      "file": "603117_2023_ST万林.pdf",
+      "sentences": 5064,
+      "facts": 28,
+      "current_fact_anchors": 2,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 2
+    }
+  ],
+  "blocking_reasons": [
+    "label_scope_and_period_audit_not_approved",
+    "growth_expression_audit_pending",
+    "candidate_set_balance_audit_pending"
+  ]
+}

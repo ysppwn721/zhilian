@@ -8,6 +8,7 @@ ROOT = Path(SPECPATH).resolve().parent
 datas = [
     (str(ROOT / "web"), "web"),
     (str(ROOT / "README.md"), "."),
+    (str(ROOT / "VERSION"), "."),
     (str(ROOT / ".env.example"), "."),
     (str(ROOT / "THIRD_PARTY_NOTICES.md"), "."),
 ]

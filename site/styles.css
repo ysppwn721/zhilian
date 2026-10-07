@@ -38,7 +38,7 @@ body {
 .brand { display: flex; align-items: center; gap: 12px; }
 .mark {
   width: 38px; height: 38px; flex: none;
-  display: grid; place-items: center;
+  display: block; object-fit: cover;
   background: var(--brand); color: #fff;
   border-radius: 11px; font-size: 21px; font-weight: 700;
 }
@@ -195,7 +195,10 @@ td b { color: var(--brand); }
 .hl b { color: var(--ink); }
 
 /* ---------- 平台下载卡 ---------- */
-.plat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.plat { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+.platcard { min-width: 0; }
+.platcard .btn { max-width: 100%; white-space: normal; }
+#domestic-install, #domestic-download { scroll-margin-top: 90px; }
 .platcard {
   display: flex; flex-direction: column;
   background: var(--card); border: 1px solid var(--line);
@@ -227,6 +230,7 @@ td b { color: var(--brand); }
 .docs { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
 .docs h4 { margin: 0 0 12px; font-size: 16px; }
 
+
 /* ---------- 页脚 ---------- */
 footer { padding: 36px 0; background: #10201c; color: #9fb8b2; font-size: 13.5px; }
 footer p { margin: 0 0 6px; }
@@ -246,3 +250,61 @@ footer .small { font-size: 12.5px; color: #74908a; }
   .hero { padding: 48px 0 40px; }
   .band { padding: 48px 0; }
 }
+
+/* ---------- 下载中心 ---------- */
+.download-center{padding:76px 0 82px;background:#f0f5f2;border-top:1px solid #dfe9e4;scroll-margin-top:68px}
+.download-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:28px}
+.download-kicker{display:flex;align-items:center;gap:8px;margin:0 0 9px;color:#66776e;font-size:12px;font-weight:650}
+.live-dot,.ready-dot{width:8px;height:8px;flex:none;border-radius:50%;background:#3c8c68;box-shadow:0 0 0 4px #d9ede0}
+.download-heading h3{margin:0;font-size:32px;line-height:1.2;color:#172b25}
+.download-lead{margin:10px 0 0;color:#65756f;font-size:14px}
+.download-state{display:flex;align-items:center;gap:11px;padding:12px 15px;background:#fff;border:1px solid #e0e9e4;border-radius:8px;min-width:220px}
+.state-symbol{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#e9f2ed;color:#317455;font-weight:700}
+.download-state b,.download-state small{display:block}.download-state b{font-size:12px;color:#263a33}.download-state small{margin-top:2px;color:#8a9992;font-size:10px}
+.download-workspace{overflow:hidden;background:#fff;border:1px solid #dce7e1;border-radius:10px;box-shadow:0 12px 34px #1a3d2b0b}
+.platform-rail{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:10px;border-bottom:1px solid #e9efec;background:#fbfcfb;gap:5px}
+.platform-tab{display:flex;align-items:center;justify-content:center;gap:9px;min-width:0;min-height:48px;padding:8px 10px;border:0;border-radius:7px;background:transparent;color:#62736c;font-family:inherit;font-size:12px;font-weight:600;line-height:1.2;cursor:pointer;transition:background .16s,color .16s}
+.platform-tab:hover{background:#f0f5f2;color:#183c2f}.platform-tab.selected{background:#e6f1ea;color:#1d6949;box-shadow:inset 0 0 0 1px #d5e7db}
+.platform-mark{display:grid;place-items:center;width:24px;height:24px;flex:none;border:1px solid #c9d8d0;border-radius:6px;background:#fff;color:#60736a;font-size:10px;font-weight:700}
+.selected .platform-mark{border-color:#b8d5c2;color:#266e4e}
+.windows-mark{grid-template-columns:repeat(2,6px);grid-template-rows:repeat(2,6px);gap:2px}.windows-mark i{width:6px;height:6px;background:currentColor}
+.download-main{display:grid;grid-template-columns:minmax(0,1.03fr) minmax(280px,.85fr);gap:34px;padding:32px 34px 30px}
+.download-product{min-width:0;padding:5px 0}
+.product-overline{display:flex;align-items:center;gap:10px;min-height:20px;color:#6b7b74;font-size:11px}
+.ready-dot{width:7px;height:7px;box-shadow:none}.version-chip{padding:3px 8px;border-radius:5px;background:#f2eee1;color:#795d28;font-size:10px;font-weight:700}
+.download-product h4{margin:16px 0 8px;color:#172b25;font-size:25px;line-height:1.3}
+.product-copy{max-width:520px;min-height:48px;margin:0;color:#66766f;font-size:13px;line-height:1.7}
+.package-list{display:grid;gap:9px;margin-top:20px}
+.package-primary,.package-secondary{display:flex;align-items:center;gap:12px;min-height:68px;padding:12px 14px;border-radius:8px;text-decoration:none;transition:transform .16s,border-color .16s,background .16s}
+.package-primary{background:#174f3c;color:#fff;border:1px solid #174f3c}.package-primary:hover{background:#21694e;border-color:#21694e;transform:translateY(-1px)}
+.package-icon{display:grid;place-items:center;width:32px;height:32px;flex:none;border-radius:7px;background:#ffffff20;color:#fff;font-size:19px}
+.package-primary b,.package-secondary b{display:block;font-size:13px}.package-primary small,.package-secondary small{display:block;margin-top:3px;font-size:10px;opacity:.76}
+.package-arrow{margin-left:auto;font-size:14px;opacity:.75}
+.package-secondary{justify-content:space-between;background:#fff;color:#2b3f36;border:1px solid #e2eae5}.package-secondary:hover{border-color:#9fc5ad;background:#f9fcfa}.package-secondary>span:last-child{color:#397b58;font-size:17px}
+.download-feedback{min-height:18px;margin:9px 0 0;color:#397b58;font-size:10px}
+.download-helper{display:flex;align-items:center;gap:10px;margin:10px 0 0;font-size:10px;line-height:1.5}
+.download-helper a{color:#347450;font-weight:650;text-decoration:none}
+.download-helper a:hover{text-decoration:underline}
+.download-helper span{color:#89968f}
+.product-facts{display:flex;gap:15px;flex-wrap:wrap;margin-top:15px;padding-top:13px;border-top:1px solid #edf1ee;color:#89968f;font-size:10px}
+.product-facts b{color:#52685d;font-weight:650}
+.product-preview{align-self:stretch;min-width:0;padding:12px;background:#edf3ef;border-radius:8px}
+.preview-label{display:flex;justify-content:space-between;align-items:center;padding:1px 2px 9px;color:#3e5148;font-size:10px;font-weight:650}.preview-label span:last-child{color:#8a9991;font-weight:400}
+.product-preview img{display:block;width:100%;height:266px;object-fit:cover;object-position:center 8%;border:1px solid #d7e1db;border-radius:5px;background:#fff}
+.product-preview p{margin:9px 2px 1px;color:#75847d;font-size:10px;line-height:1.5}
+.download-secondary-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:38px 0 14px}
+.download-secondary-heading h4{margin:0;color:#20342c;font-size:16px}.download-secondary-heading p{margin:3px 0 0;color:#819088;font-size:11px}
+.download-secondary-heading>a{color:#476b58;text-decoration:none;font-size:11px}.download-secondary-heading>a:hover{text-decoration:underline}
+.resource-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.resource-item{display:flex;align-items:center;gap:12px;min-width:0;padding:15px;background:#fff;border:1px solid #e0e8e3;border-radius:8px;transition:border-color .16s,transform .16s}
+.resource-item:hover{border-color:#b5d0bf;transform:translateY(-1px)}.resource-symbol{display:grid;place-items:center;width:36px;height:36px;flex:none;border-radius:8px;font-size:10px;font-weight:750}
+.template-symbol{background:#e7f2eb;color:#32724f}.source-symbol{background:#f1ece2;color:#8a6530}.model-symbol{background:#e8edf1;color:#476376}
+.resource-item>div:nth-child(2){min-width:0;flex:1}.resource-item h5{margin:0;color:#2b3f36;font-size:11px}.resource-item p{overflow:hidden;margin:2px 0;color:#78877f;font-size:9px;text-overflow:ellipsis;white-space:nowrap}.resource-item small{color:#a0aaa4;font-size:9px}
+.resource-action{display:grid;place-items:center;width:30px;height:30px;flex:none;border:1px solid #dfe8e2;border-radius:6px;color:#356c4c;text-decoration:none;font-size:16px}.resource-action:hover{background:#eaf3ed;border-color:#c1d8c8}
+.model-note{margin:10px 0 0;color:#89968f;font-size:10px}
+.install-details{margin-top:22px;border-top:1px solid #dce6e0;border-bottom:1px solid #dce6e0}
+.install-details summary{padding:14px 2px;color:#52665b;font-size:12px;font-weight:650;cursor:pointer;list-style:none}.install-details summary::-webkit-details-marker{display:none}.install-details summary:after{content:'＋';float:right;color:#648672}.install-details[open] summary:after{content:'−'}
+.install-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;padding:4px 0 15px}.install-grid h5{margin:9px 0;color:#2f473a;font-size:12px}.install-grid p,.mobile-note span{color:#77867e;font-size:10px;line-height:1.7}.install-grid pre{margin:10px 0;padding:12px;border-radius:6px;background:#1d332b}.install-grid pre code{color:#d1e8d9;font-size:10px}.install-grid .textlink{font-size:10px}
+.mobile-note{display:flex;align-items:center;gap:13px;padding:13px 0 16px;border-top:1px solid #e6ece8}.mobile-note b{flex:none;color:#41594c;font-size:11px}.mobile-note span{flex:1}.mobile-note a{flex:none;color:#3f7354;text-decoration:none;font-size:10px}
+@media(max-width:800px){.download-main{grid-template-columns:minmax(0,1fr) minmax(220px,.8fr);gap:20px;padding:26px}.resource-grid{grid-template-columns:1fr 1fr}.download-state{min-width:190px}}
+@media(max-width:620px){.download-center{padding:52px 0 58px}.download-heading{align-items:flex-start;flex-direction:column;gap:16px}.download-heading h3{font-size:27px}.download-state{min-width:0}.platform-rail{display:flex;overflow-x:auto;scrollbar-width:thin}.platform-tab{flex:none;min-width:108px}.platform-tab:last-child{min-width:130px}.download-main{grid-template-columns:1fr;padding:20px;gap:18px}.download-product h4{font-size:22px}.product-preview{order:-1}.product-preview img{height:190px}.product-facts{gap:10px}.resource-grid{grid-template-columns:1fr}.download-secondary-heading{align-items:flex-start}.install-grid{grid-template-columns:1fr;gap:8px}.mobile-note{align-items:flex-start;flex-wrap:wrap}.mobile-note span{flex-basis:calc(100% - 120px)}.mobile-note a{margin-left:auto}.download-helper{align-items:flex-start;flex-direction:column;gap:3px}}

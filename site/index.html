@@ -51,7 +51,7 @@
 
 <section class="facts">
   <div class="wrap grid4">
-    <div class="card"><b>244</b><span>自动化回归测试全部通过</span></div>
+    <div class="card"><b>290</b><span>自动化回归测试全部通过</span></div>
     <div class="card"><b>5 类</b><span>可核验论断：数值·增长率·排名·阈值·图表</span></div>
     <div class="card"><b>50 份/批</b><span>一份事实表对照多批 Word / PPT / 图片</span></div>
     <div class="card"><b>0</b><span>依赖大模型即可完整运行</span></div>
@@ -97,165 +97,72 @@
   </div>
 </section>
 
-<section id="download" class="band alt">
+<section id="download" class="download-center">
   <div class="wrap">
-    <h3>下载</h3>
-    <p class="sec-lead">
-      请按你的操作系统选择。若不确定，页面会自动高亮当前系统对应的版本。
-      Windows 提供标准安装版和免安装版，Linux 提供原生包；统信 UOS / 银河麒麟提供 x86_64 兼容基础包，macOS 提供目标系统构建包。
-    </p>
-
-    <div class="plat" id="plat">
-      <article class="platcard" data-os="windows">
-        <div class="phead"><span class="pico">⊞</span><h4>Windows</h4></div>
-        <p class="pstate ready">可下载 · v0.2.1</p>
-        <ul class="meta">
-          <li>Windows 10 / 11（64 位）</li>
-          <li>标准安装版约 27 MB，免安装版约 32 MB</li>
-          <li>无需 Python；安装版支持选择位置、快捷方式和卸载</li>
-          <li>支持一份 Excel 对照多批 Word / PPT</li>
-        </ul>
-        <a class="btn primary" href="https://github.com/ysppwn721/biaoliruyi/releases/latest/download/知链_v0.2.1_Windows安装版.exe" download>下载安装版</a>
-        <a class="textlink" href="downloads/知链_v0.2.1_Windows免安装.zip.000" download>下载免安装 ZIP</a>
-      </article>
-
-      <article class="platcard" data-os="macos">
-        <div class="phead"><span class="pico"></span><h4>macOS</h4></div>
-        <p class="pstate ready">可构建 · 目标系统生成原生包</p>
-        <ul class="meta">
-          <li>计划支持 macOS 12 及以上（Intel / Apple 芯片）</li>
-          <li>运行 `packaging/build.sh` 生成对应架构包</li>
-          <li>当前页面提供跨平台构建包，需在 macOS 实机执行</li>
-        </ul>
-        <a class="btn" href="downloads/知链_v0.2.1_跨平台构建包.zip" download>下载构建包</a>
-      </article>
-
-      <article class="platcard" data-os="linux">
-        <div class="phead"><span class="pico">🐧</span><h4>Linux</h4></div>
-        <p class="pstate ready">可下载 · v0.2.1</p>
-        <ul class="meta">
-          <li>Ubuntu 22.04+ / Debian 12+ / Fedora / Arch</li>
-          <li>原生包约 75 MB，无需 Python；另有 0.4 MB 源码安装包</li>
-          <li>原生包安装到用户目录，不需要 root</li>
-          <li>安装后出现在应用菜单，支持一键卸载</li>
-        </ul>
-        <a class="btn primary" href="downloads/Zhilian-0.2.1-linux-x86_64-glibc228.tar.gz" download>下载 Linux 原生包</a>
-        <a class="textlink" href="downloads/Zhilian-0.2.1-linux-x86_64-src.tar.gz" download>下载源码安装包</a>
-        <a class="textlink" href="#linux-install">查看安装命令</a>
-      </article>
-
-      <article class="platcard" data-os="domestic" id="domestic-download">
-        <div class="phead"><span class="pico" aria-hidden="true">▦</span><h4>国产系统</h4></div>
-        <p class="pstate ready">统信 UOS / 银河麒麟 · x86_64 已测试</p>
-        <ul class="meta">
-          <li>x86_64 / amd64 · glibc 2.28 及以上</li>
-          <li>约 21 MB；内置 Python，安装到用户目录，无需 sudo</li>
-          <li>纯规则离线可用，可配置在线 API</li>
-          <li>通过系统浏览器打开本机工作台</li>
-          <li>已完成 UOS / 麒麟测试；不适用于 ARM64、龙芯、申威</li>
-        </ul>
-        <a class="btn primary" href="downloads/Zhilian-0.2.1-linux-x86_64-glibc228.tar.gz" download>下载国产系统兼容包</a>
-        <a class="textlink" href="#domestic-install">查看安装步骤与验证范围</a>
-      </article>
-
-      <article class="platcard" data-os="android">
-        <div class="phead"><span class="pico">🤖</span><h4>Android</h4></div>
-        <p class="pstate plan">规划中 · 走浏览器</p>
-        <ul class="meta">
-          <li>安卓端计划以浏览器方式接入，不单独发布 APK</li>
-          <li>原因：系统需按路径读写 Excel / Word / PPT，
-              而主流安卓文件管理器走 SAF 不暴露真实路径</li>
-          <li>打开上方在线演示即等同于安卓端可用</li>
-        </ul>
-        <a class="btn" href="#try">使用在线演示</a>
-      </article>
-    </div>
-
-    <div class="dl-note">
-      <strong>说明</strong>：Windows 安装版和免安装包已构建并完成健康检查，Linux x86_64 原生包已在 Ubuntu 22.04 WSL 构建并完成安装启动检查。安装版支持标准安装流程；免安装包可运行中文启动脚本或英文启动脚本；macOS 仍需在目标系统构建原生包；
-      页面提供同一套构建包和脚本；跨平台二进制不能在 Windows 上交叉伪造，
-      发布前需在真实机器上完成安装与文件读写验证。
-    </div>
-
-    <div class="dl">
-      <div class="dlcard">
-        <h4>完整源代码 <span class="tag">全平台通用</span></h4>
-        <p>含后端、前端、自动化测试与第三方许可声明，可自行构建与复现。</p>
-        <ul class="meta">
-          <li>版本 v0.2.1 ｜ 约 0.8 MB</li>
-          <li>运行 <code>pytest -q</code> 可复现当前 260 项测试</li>
-        </ul>
-        <a class="btn" href="downloads/知链_源代码_v0.2.1.zip" download>下载源代码</a>
+    <div class="download-heading">
+      <div>
+        <p class="download-kicker"><span class="live-dot"></span> 知链 · 版本 0.2.1</p>
+        <h3>获取适合你的版本</h3>
+        <p class="download-lead">选择运行平台，查看对应的安装包、系统要求和安装方式。</p>
       </div>
-      <div class="dlcard">
-        <h4>事实表模板</h4>
-        <p>导入前请按模板整理数据，首行需包含 7 个固定列，列顺序可任意调整。</p>
-        <ul class="meta">
-          <li>事实ID · 主体 · 指标 · 期间 · 数值 · 单位 · 统计口径</li>
-        </ul>
-        <a class="btn" href="downloads/知链事实表模板.xlsx" download>下载模板</a>
-      </div>
-      <div class="dlcard">
-        <h4>本地语义模型包 <span class="tag">可选</span></h4>
-        <p>模型文件需配合 ONNX Runtime 等本地推理依赖使用。安装前请确认程序包含推理依赖；国产系统兼容基础包不含这些依赖，仅解压模型文件无法启用本地语义功能。</p>
-        <ul class="meta">
-          <li>BGE reranker v2 m3 · ONNX INT8 · 压缩包约 409 MB</li>
-          <li>Linux 使用 tar.gz；Windows 使用 ZIP</li>
-        </ul>
-        <a class="btn" href="https://github.com/ysppwn721/biaoliruyi/releases/latest/download/Zhilian-bge-reranker-v2-m3-onnx-int8.tar.gz" download>下载 Linux 模型包</a>
-        <a class="textlink" href="https://github.com/ysppwn721/biaoliruyi/releases/latest/download/Zhilian-bge-reranker-v2-m3-onnx-int8.zip" download>下载 Windows ZIP</a>
-      </div>
-      <div class="dlcard">
-        <h4>Windows 标准安装版</h4>
-        <p>双击安装程序，选择安装位置并创建快捷方式；可从系统设置或开始菜单卸载。</p>
-        <ul class="meta">
-          <li>默认安装到当前用户目录，不需要管理员权限</li>
-          <li>用户项目数据与安装目录分离</li>
-        </ul>
-        <a class="btn" href="https://github.com/ysppwn721/biaoliruyi/releases/latest/download/知链_v0.2.1_Windows安装版.exe" download>下载 Windows 安装版</a>
-      </div>
-      <div class="dlcard">
-        <h4>Windows 免安装包</h4>
-        <p>解压后双击 <code>Zhilian.exe</code>，会打开带知链图标的独立应用窗口；缺少系统 WebView 时自动退回浏览器。</p>
-        <ul class="meta">
-          <li>最适合快速试用与现场演示</li>
-          <li>纯规则模式无需联网、无需密钥</li>
-        </ul>
-        <a class="btn" href="downloads/知链_v0.2.1_Windows免安装.zip.000" download>重新下载 Windows 包</a>
+      <div class="download-state" id="download-state" aria-live="polite">
+        <span class="state-symbol">✓</span><span><b>无需注册</b><small>安装后可先用纯规则模式</small></span>
       </div>
     </div>
 
-    <div class="docker" id="linux-install">
-      <h4>Linux 安装</h4>
-      <p class="muted">下载 tar.gz（glibc 2.28 基线，国产系统可用） 后执行以下两条命令即可。安装到用户目录，<strong>不需要 sudo</strong>。</p>
-      <pre><code># 原生包（无需 Python）
-tar -xzf Zhilian-0.2.1-linux-x86_64.tar.gz
-cd Zhilian &amp;&amp; bash install.sh
+    <div class="download-workspace">
+      <div class="platform-rail" role="tablist" aria-label="选择运行平台">
+        <button class="platform-tab selected" id="tab-windows" type="button" role="tab" aria-controls="download-product" aria-selected="true" data-platform="windows"><span class="platform-mark windows-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Windows</button>
+        <button class="platform-tab" id="tab-uos" type="button" role="tab" aria-controls="download-product" aria-selected="false" data-platform="uos"><span class="platform-mark">U</span>统信 / 麒麟</button>
+        <button class="platform-tab" id="tab-linux" type="button" role="tab" aria-controls="download-product" aria-selected="false" data-platform="linux"><span class="platform-mark">L</span>Linux</button>
+        <button class="platform-tab" id="tab-macos" type="button" role="tab" aria-controls="download-product" aria-selected="false" data-platform="macos"><span class="platform-mark">M</span>macOS</button>
+        <button class="platform-tab" id="tab-mobile" type="button" role="tab" aria-controls="download-product" aria-selected="false" data-platform="mobile"><span class="platform-mark">↗</span>手机 / 平板</button>
+      </div>
 
-# 源码安装包（需要 Python）
-tar -xzf Zhilian-0.2.1-linux-x86_64-src.tar.gz
-cd Zhilian-0.2.1-linux-x86_64-src &amp;&amp; bash setup.sh</code></pre>
-      <p class="muted">
-        用 <code>bash setup.sh</code> 而不是 <code>./setup.sh</code>：从 Windows 打包的压缩包不携带 Unix
-        权限位，直接执行可能报 Permission denied。setup.sh 会先补齐权限再安装。
-      </p>
-      <p class="muted">
-        原生包安装后，在应用菜单搜索「知链」，或执行 <code>~/.local/bin/zhilian</code>（自定义 XDG 目录时以安装提示为准）。
-        原生包无需另装 Python；源码安装包首次运行需联网安装依赖。卸载请在解压目录运行 <code>bash uninstall.sh</code>，项目数据会保留。
-      </p>
-      <h4 id="domestic-install" style="margin-top:22px">统信 UOS / 银河麒麟安装（x86_64 兼容包）</h4>
-      <p class="muted">先执行 <code>uname -m</code> 确认输出为 <code>x86_64</code>，再用 <code>ldd --version</code> 检查 glibc 不低于 2.28。下载兼容包后，在下载目录执行：</p>
-      <pre><code>tar -xzf Zhilian-0.2.1-linux-x86_64-glibc228.tar.gz
+      <div class="download-main">
+        <div class="download-product" id="download-product" role="tabpanel" aria-live="polite">
+          <div class="product-overline"><span class="ready-dot"></span><span id="product-status">Windows 10 / 11 · 64 位</span><span class="version-chip">v0.2.1</span></div>
+          <h4 id="product-title">Windows 桌面版</h4>
+          <p class="product-copy" id="product-copy">当前提供免安装便携版。下载两个分卷和合并脚本，完成合并后解压即可启动。</p>
+          <div class="package-list" id="package-list">
+            <a class="package-primary" data-download-link href="https://zhilian.space/downloads/知链_v0.2.1_Windows免安装.zip.000" download>
+              <span class="package-icon" aria-hidden="true">↓</span><span><b>便携版分卷 1 / 2</b><small>20 MB · ZIP 分卷</small></span><span class="package-arrow" aria-hidden="true">↗</span>
+            </a>
+            <a class="package-secondary" data-download-link href="https://zhilian.space/downloads/知链_v0.2.1_Windows免安装.zip.001" download>
+              <span><b>便携版分卷 2 / 2</b><small>8.7 MB · 请与分卷 1 放在同一文件夹</small></span><span aria-hidden="true">↓</span>
+            </a>
+            <p class="download-helper"><a data-download-link href="https://zhilian.space/downloads/合并Windows分卷.ps1" download>下载分卷合并脚本</a><span>三个文件放在同一文件夹后运行脚本。</span></p>
+          </div>
+          <p class="download-feedback" id="download-feedback" aria-live="polite"></p>
+          <div class="product-facts"><span><b>本地运行</b> 项目文件保存在本机</span><span><b>无需安装</b> 标准安装版暂未提供</span></div>
+        </div>
+        <aside class="product-preview">
+          <div class="preview-label"><span>知链工作台</span><span>真实界面</span></div>
+          <img src="static/assets/zhilian-workspace.png" alt="知链一致性工作台界面，展示论断核验和 Excel 事实来源" loading="lazy">
+          <p>把 Excel 事实与 Word、PPT 结论放在同一条可追溯流程中。</p>
+        </aside>
+      </div>
+    </div>
+
+    <div class="download-secondary-heading"><div><h4>配套资源</h4><p>按需获取模板、源码或本地语义模型</p></div><a href="#install-details">安装与兼容说明 ↓</a></div>
+    <div class="resource-grid">
+      <article class="resource-item"><div class="resource-symbol template-symbol">X</div><div><h5>事实表模板</h5><p>按固定字段整理 Excel 数据源。</p><small>Excel · 5.5 KB</small></div><a class="resource-action" data-download-link href="https://zhilian.space/downloads/知链事实表模板.xlsx" download aria-label="下载事实表模板">↓</a></article>
+      <article class="resource-item"><div class="resource-symbol source-symbol">{ }</div><div><h5>完整源代码</h5><p>包含应用、测试和第三方许可。</p><small>ZIP · 约 0.8 MB</small></div><a class="resource-action" data-download-link href="https://zhilian.space/downloads/知链_源代码_v0.2.1.zip" download aria-label="下载源代码">↓</a></article>
+      <article class="resource-item"><div class="resource-symbol model-symbol">AI</div><div><h5>本地语义模型</h5><p>BGE reranker v2 m3 · ONNX INT8。</p><small>约 390 MB · 可选安装</small></div><a class="resource-action" data-download-link href="https://demo.zhilian.space/downloads/Zhilian-bge-reranker-v2-m3-onnx-int8.zip" download aria-label="下载本地语义模型">↓</a></article>
+    </div>
+    <p class="model-note">本地语义模型需配合推理依赖使用；基础安装包不含模型。只使用确定性规则时无需下载模型。</p>
+
+    <details id="install-details" class="install-details">
+      <summary>安装步骤与兼容范围</summary>
+      <div class="install-grid">
+        <div id="windows-install"><h5>Windows</h5><p>下载两个便携版分卷和合并脚本，放在同一文件夹运行脚本，生成 ZIP 后解压并启动。</p><pre><code>powershell -ExecutionPolicy Bypass -File .\合并Windows分卷.ps1</code></pre><p>标准安装版暂未提供下载；便携版无需安装，项目文件保存在本机。</p></div>
+        <div id="linux-install"><h5>Linux / UOS / 银河麒麟</h5><p>面向 x86_64，glibc 2.28 及以上；安装到用户目录，无需 sudo。</p><pre><code>tar -xzf Zhilian-0.2.1-linux-x86_64-glibc228.tar.gz
 cd Zhilian
-bash install.sh
-~/.local/bin/zhilian</code></pre>
-      <p class="muted">安装脚本会创建启动命令和应用菜单入口。默认通过系统浏览器打开本机工作台；这不是远程在线演示。纯规则模式无需联网，在线 API 需自行配置密钥。</p>
-      <p class="dl-note"><strong>兼容范围</strong>：提供面向统信 UOS / 银河麒麟的 x86_64 兼容构建。已完成 ELF 依赖检查、Debian 10（glibc 2.28）容器启动检查，以及 Ubuntu 22.04 WSL 安装、修复、导出与卸载检查；UOS / 麒麟 x86_64 已完成安装、启动、导入、修复、导出测试；不代表覆盖所有硬件架构或取得兼容认证。基础包不含本地模型与推理依赖，ARM64、龙芯、申威不适用。</p>
-      <h4 style="margin-top:22px">使用 Docker 运行（Windows / macOS / Linux 通用）</h4>
-      <pre><code>docker build -t biaoliruyi .
-docker run --rm -e ZHILIAN_ACCESS_PASSWORD=你的密码 -p 8765:8765 biaoliruyi</code></pre>
-      <p class="muted">启动后访问 http://127.0.0.1:8765 。Docker 适合不想在本机安装 Python 的场景；macOS 与 Linux 也可用 <code>packaging/build.sh</code> 在目标系统生成不依赖 Python 的原生便携程序。</p>
-    </div>
+bash install.sh</code></pre><p>已在 UOS / 麒麟 x86_64 完成安装、启动、导入、修复和导出测试；不适用于 ARM64、龙芯或申威。</p><a class="textlink" data-download-link href="https://zhilian.space/downloads/Zhilian-0.2.1-linux-x86_64-glibc228.tar.gz" download>获取 Linux / 国产系统安装包 →</a></div>
+        <div id="domestic-install"><h5>macOS</h5><p>目前提供跨平台构建包，需在目标 macOS 设备上运行构建脚本；当前没有可直接安装的签名应用。</p><a class="textlink" data-download-link href="https://zhilian.space/downloads/知链_v0.2.1_跨平台构建包.zip" download>获取跨平台构建包 →</a></div>
+      </div>
+      <div class="mobile-note"><b>Android / iPad</b><span>暂不提供独立安装包。可使用在线演示；本地文件写回能力以浏览器和设备权限为准。</span><a href="#try">打开在线演示 →</a></div>
+    </details>
   </div>
 </section>
 
@@ -387,25 +294,80 @@ docker run --rm -e ZHILIAN_ACCESS_PASSWORD=你的密码 -p 8765:8765 biaoliruyi<
   </div>
 </footer>
 <script>
-// 按访问者操作系统高亮对应下载卡，减少"该下哪个"的犹豫
+// Recommend the matching package and keep every platform available as a tab.
 (function () {
   var ua = (navigator.userAgent || '') + ' ' + (navigator.platform || '');
-  var os = /Android/i.test(ua) ? 'android'
-         : /iPhone|iPad|iPod/i.test(ua) ? 'macos'
-         : /Win/i.test(ua) ? 'windows'
-         : /Mac/i.test(ua) ? 'macos'
-         : /UOS|UnionTech|Kylin/i.test(ua) ? 'domestic'
-         : /Linux|X11|Ubuntu/i.test(ua) ? 'linux'
-         : '';
-  if (!os) return;
-  var card = document.querySelector('.platcard[data-os="' + os + '"]');
-  if (!card) return;
-  card.classList.add('current');
-  var head = card.querySelector('h4');
-  var badge = document.createElement('span');
-  badge.className = 'badge-current';
-  badge.textContent = '当前系统';
-  head.appendChild(badge);
+  var platform = /Android|iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'mobile'
+    : /UOS|UnionTech|Kylin/i.test(ua) ? 'uos'
+    : /Win/i.test(ua) ? 'windows'
+    : /Mac/i.test(ua) ? 'macos'
+    : /Linux|X11|Ubuntu/i.test(ua) ? 'linux' : '';
+  var products = {
+    windows: {
+      status: 'Windows 10 / 11 · 64 位', title: 'Windows 桌面版',
+      copy: '当前提供免安装便携版。下载两个分卷和合并脚本，完成合并后解压即可启动。',
+      packages: '<a class="package-primary" data-download-link href="https://zhilian.space/downloads/知链_v0.2.1_Windows免安装.zip.000" download><span class="package-icon" aria-hidden="true">↓</span><span><b>便携版分卷 1 / 2</b><small>20 MB · ZIP 分卷</small></span><span class="package-arrow" aria-hidden="true">↗</span></a><a class="package-secondary" data-download-link href="https://zhilian.space/downloads/知链_v0.2.1_Windows免安装.zip.001" download><span><b>便携版分卷 2 / 2</b><small>8.7 MB · 与分卷 1 一起使用</small></span><span aria-hidden="true">↓</span></a><p class="download-helper"><a data-download-link href="https://zhilian.space/downloads/合并Windows分卷.ps1" download>下载分卷合并脚本</a><span>三个文件放在同一文件夹后运行脚本。</span></p>',
+      facts: '<span><b>本地运行</b> 项目文件保存在本机</span><span><b>无需安装</b> 标准安装版暂未提供</span>'
+    },
+    uos: {
+      status: '统信 UOS / 银河麒麟 · x86_64', title: '国产系统兼容包',
+      copy: '内置 Python，安装在用户目录。面向 x86_64 与 glibc 2.28 及以上环境，安装不需要 sudo。',
+      packages: '<a class="package-primary" data-download-link href="https://zhilian.space/downloads/Zhilian-0.2.1-linux-x86_64-glibc228.tar.gz" download><span class="package-icon" aria-hidden="true">↓</span><span><b>下载国产系统兼容包</b><small>约 20 MB · tar.gz · x86_64</small></span><span class="package-arrow" aria-hidden="true">↗</span></a><a class="package-secondary" href="#install-details"><span><b>查看安装与验证范围</b><small>已完成 UOS / 麒麟实机流程测试</small></span><span aria-hidden="true">→</span></a>',
+      facts: '<span><b>已测试</b> 安装、启动、导入与导出</span><span><b>不支持</b> ARM64、龙芯、申威</span>'
+    },
+    linux: {
+      status: 'Linux x86_64 · glibc 2.28+', title: 'Linux 原生版',
+      copy: '无需预装 Python。安装脚本把程序放入用户目录，并添加应用菜单入口；也可选择源码安装包。',
+      packages: '<a class="package-primary" data-download-link href="https://zhilian.space/downloads/Zhilian-0.2.1-linux-x86_64-glibc228.tar.gz" download><span class="package-icon" aria-hidden="true">↓</span><span><b>Linux 原生安装包</b><small>约 20 MB · 无需 Python</small></span><span class="package-arrow" aria-hidden="true">↗</span></a><a class="package-secondary" data-download-link href="https://zhilian.space/downloads/Zhilian-0.2.1-linux-x86_64-src.tar.gz" download><span><b>源码安装包</b><small>约 0.4 MB · 需要 Python</small></span><span aria-hidden="true">↓</span></a>',
+      facts: '<span><b>无需 root</b> 安装于当前用户</span><span><b>包含卸载脚本</b> 项目数据保留</span>'
+    },
+    macos: {
+      status: 'macOS · 目标设备构建', title: 'macOS 构建包',
+      copy: '目前提供跨平台构建包，不是可直接安装的签名应用。需在目标 Mac 上运行构建脚本。',
+      packages: '<a class="package-primary" data-download-link href="https://zhilian.space/downloads/知链_v0.2.1_跨平台构建包.zip" download><span class="package-icon" aria-hidden="true">↓</span><span><b>下载跨平台构建包</b><small>约 0.7 MB · 在目标系统构建</small></span><span class="package-arrow" aria-hidden="true">↗</span></a><a class="package-secondary" href="#install-details"><span><b>查看构建说明</b><small>暂未提供原生安装器</small></span><span aria-hidden="true">→</span></a>',
+      facts: '<span><b>需目标设备</b> 不能在 Windows 交叉生成 macOS 二进制</span>'
+    },
+    mobile: {
+      status: '手机与平板 · 浏览器访问', title: '在线体验',
+      copy: '当前不提供 APK 或 iOS 安装包。移动设备可打开在线工作台；本地 Office 文件权限受浏览器支持范围影响。',
+      packages: '<a class="package-primary" href="https://demo.zhilian.space/" target="_blank" rel="noopener"><span class="package-icon" aria-hidden="true">↗</span><span><b>打开在线工作台</b><small>无需安装 · 测试账号见在线体验区域</small></span><span class="package-arrow" aria-hidden="true">↗</span></a><a class="package-secondary" href="#try"><span><b>查看演示环境状态</b><small>联网访问 · 支持项目隔离</small></span><span aria-hidden="true">→</span></a>',
+      facts: '<span><b>无需安装</b> 使用系统浏览器</span><span><b>本地写回</b> 取决于浏览器文件权限</span>'
+    }
+  };
+  function select(key, recommended) {
+    var item = products[key];
+    if (!item) return;
+    document.querySelectorAll('.platform-tab').forEach(function (tab) {
+      var active = tab.dataset.platform === key;
+      tab.classList.toggle('selected', active);
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      tab.tabIndex = active ? 0 : -1;
+    });
+    document.getElementById('product-status').textContent = item.status;
+    document.getElementById('product-title').textContent = item.title;
+    document.getElementById('product-copy').textContent = item.copy;
+    document.getElementById('download-product').setAttribute('aria-labelledby', 'tab-' + key);
+    document.getElementById('package-list').innerHTML = item.packages;
+    document.querySelector('.product-facts').innerHTML = item.facts;
+    document.getElementById('download-feedback').textContent = '';
+    document.getElementById('download-state').innerHTML = '<span class="state-symbol">✓</span><span><b>' + (recommended ? '已为你推荐 ' + item.title : '平台已切换') + '</b><small>版本 0.2.1 · 纯规则模式可离线运行</small></span>';
+  }
+  document.querySelectorAll('.platform-tab').forEach(function (tab, index, tabs) {
+    tab.addEventListener('click', function () { select(tab.dataset.platform, false); });
+    tab.addEventListener('keydown', function (event) {
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+      event.preventDefault();
+      var next = (index + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length;
+      tabs[next].focus(); tabs[next].click();
+    });
+  });
+  document.addEventListener('click', function (event) {
+    var link = event.target.closest('[data-download-link]');
+    if (!link) return;
+    var feedback = document.getElementById('download-feedback');
+    if (feedback) feedback.textContent = '已触发下载；若浏览器没有开始，请再次点击。';
+  });
+  if (platform) select(platform, true);
 })();
 </script>
 

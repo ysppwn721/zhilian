@@ -201,7 +201,8 @@ def test_deepseek_success_metadata_only_and_revision(api_project, monkeypatch):
     after = store.read(ws['id'])
     assert 'test-secret' not in json.dumps(after)
     assert {k for k in before.keys() | after.keys() if before.get(k) != after.get(k)} == {
-        'revision', 'audit', 'diagnosis_explanations'}
+        'revision', 'audit', 'diagnosis_explanations', 'model_calls'}
+    assert after['model_calls'][-1]['node'] == 'diagnosis_agent'
     assert file_hashes(store, after) == hashes
     assert result['checks'] == ws['checks']
     stale = client.post(endpoint, json={'revision': ws['revision']})

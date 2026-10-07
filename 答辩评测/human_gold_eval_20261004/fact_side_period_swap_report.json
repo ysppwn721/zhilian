@@ -1,0 +1,52 @@
+{
+  "model": "annual_repaired_v1",
+  "design": "fact 侧 period 标签互换，claim 不动",
+  "gold": {
+    "quote_current": {
+      "n": 50,
+      "orig_acc": 0.68,
+      "flip_rate": 0.7
+    },
+    "quote_prior": {
+      "n": 50,
+      "orig_acc": 0.98,
+      "flip_rate": 0.98
+    }
+  },
+  "train": {
+    "quote_本期": {
+      "n": 182,
+      "orig_acc": 0.7088,
+      "flip_rate": 0.7308
+    },
+    "quote_上期": {
+      "n": 182,
+      "orig_acc": 0.956,
+      "flip_rate": 1.0
+    }
+  },
+  "dev": {
+    "quote_本期": {
+      "n": 171,
+      "orig_acc": 0.7018,
+      "flip_rate": 0.7485
+    },
+    "quote_上期": {
+      "n": 171,
+      "orig_acc": 0.9532,
+      "flip_rate": 1.0
+    }
+  },
+  "test": {
+    "quote_本期": {
+      "n": 207,
+      "orig_acc": 0.7246,
+      "flip_rate": 0.7101
+    },
+    "quote_上期": {
+      "n": 207,
+      "orig_acc": 0.9565,
+      "flip_rate": 0.9903
+    }
+  }
+}

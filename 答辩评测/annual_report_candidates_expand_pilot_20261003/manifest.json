@@ -1,0 +1,106 @@
+{
+  "ready_for_training": false,
+  "validation_status": "pending_label_scope_period_and_candidate_audit",
+  "source": "答辩评测\\annual_reports_expand_20261003",
+  "reports_processed": 10,
+  "candidate_rows": 0,
+  "company_disjoint_split": true,
+  "labels_are": "unassigned; anchors are retrieval evidence only",
+  "stats": [
+    {
+      "company": "000852",
+      "file": "000852_2023_石化机械.pdf",
+      "sentences": 4846,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "605259",
+      "file": "605259_2023_绿田机械.pdf",
+      "sentences": 4573,
+      "facts": 24,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "301028",
+      "file": "301028_2023_东亚机械.pdf",
+      "sentences": 4354,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "603338",
+      "file": "603338_2023_浙江鼎力.pdf",
+      "sentences": 4928,
+      "facts": 22,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "300823",
+      "file": "300823_2023_建科机械.pdf",
+      "sentences": 5446,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "600984",
+      "file": "600984_2023_建设机械.pdf",
+      "sentences": 6728,
+      "facts": 14,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "600698",
+      "file": "600698_2023_湖南天雁.pdf",
+      "sentences": 4732,
+      "facts": 6,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "873706",
+      "file": "873706_2023_铁拓机械.pdf",
+      "sentences": 3839,
+      "facts": 0,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "603029",
+      "file": "603029_2023_天鹅股份.pdf",
+      "sentences": 5504,
+      "facts": 22,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    },
+    {
+      "company": "603270",
+      "file": "603270_2023_金帝股份.pdf",
+      "sentences": 6466,
+      "facts": 20,
+      "current_fact_anchors": 0,
+      "prior_fact_anchors": 0,
+      "growth_anchor_sentences": 0
+    }
+  ],
+  "blocking_reasons": [
+    "label_scope_and_period_audit_not_approved",
+    "growth_expression_audit_pending",
+    "candidate_set_balance_audit_pending"
+  ]
+}

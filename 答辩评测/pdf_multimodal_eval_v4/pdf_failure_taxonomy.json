@@ -1,0 +1,69 @@
+{
+  "source": "答辩评测\\pdf_multimodal_eval_v4\\pdf_change_checks.csv",
+  "failed_rows": 17,
+  "categories": {
+    "change_column_selection": 6,
+    "magnitude_mismatch": 1,
+    "other_structural_mismatch": 5,
+    "sign_or_period_mismatch": 5
+  },
+  "label_basis": "heuristic triage for engineering; not human truth",
+  "examples": [
+    {
+      "source_file": "300149_2022年年度报告更新后.pdf",
+      "source_page": "8",
+      "table_number": "1",
+      "row_number": "52",
+      "metric": "营业收入",
+      "unit": "表内单位",
+      "calculated_change": "12751.263835499318",
+      "reported_change": "40861.01",
+      "within_tolerance": "False",
+      "failure_category": "change_column_selection",
+      "failure_reason": "报告值数量级像变动金额而非百分比，疑似变动金额/变动比例列错位",
+      "example_image": "答辩评测\\pdf_multimodal_eval_v4\\failure_examples\\change_column_selection_p8.png"
+    },
+    {
+      "source_file": "002097_2020年年度报告全文更新后.pdf",
+      "source_page": "21",
+      "table_number": "1",
+      "row_number": "31",
+      "metric": "经营活动产生的现金流量净额",
+      "unit": "表内单位",
+      "calculated_change": "24216.0387710618",
+      "reported_change": "144.64",
+      "within_tolerance": "False",
+      "failure_category": "magnitude_mismatch",
+      "failure_reason": "计算值与报告值数量级差异大，需检查拆列数字、表头或单位",
+      "example_image": "答辩评测\\pdf_multimodal_eval_v4\\failure_examples\\magnitude_mismatch_p21.png"
+    },
+    {
+      "source_file": "002425_凯撒中国文化股份有限公司2021年年度报告更正后.pdf",
+      "source_page": "22",
+      "table_number": "1",
+      "row_number": "61",
+      "metric": "经营活动产生的现金流量净",
+      "unit": "表内单位",
+      "calculated_change": "9.194789640247091",
+      "reported_change": "27.42",
+      "within_tolerance": "False",
+      "failure_category": "other_structural_mismatch",
+      "failure_reason": "已发现差异，但现有字段不足以自动判定具体原因",
+      "example_image": "答辩评测\\pdf_multimodal_eval_v4\\failure_examples\\other_structural_mismatch_p22.png"
+    },
+    {
+      "source_file": "002097_2020年年度报告全文更新后.pdf",
+      "source_page": "21",
+      "table_number": "1",
+      "row_number": "37",
+      "metric": "投资活动产生的现金流量净额",
+      "unit": "表内单位",
+      "calculated_change": "-6307.442106526737",
+      "reported_change": "13.23",
+      "within_tolerance": "False",
+      "failure_category": "sign_or_period_mismatch",
+      "failure_reason": "计算值与报告值符号相反，需检查上期列、负数括号或变动方向",
+      "example_image": "答辩评测\\pdf_multimodal_eval_v4\\failure_examples\\sign_or_period_mismatch_p21.png"
+    }
+  ]
+}

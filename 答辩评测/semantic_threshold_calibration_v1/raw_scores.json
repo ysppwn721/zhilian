@@ -1,0 +1,578 @@
+[
+  {
+    "claim_id": "rewrite_v2_sales_current_01",
+    "category": "sales_current",
+    "gold": "sales_current",
+    "top_fact": "sales_current",
+    "raw_score": -2.1867077350616455,
+    "margin": 0.3697335720062256
+  },
+  {
+    "claim_id": "rewrite_v2_sales_current_02",
+    "category": "sales_current",
+    "gold": "sales_current",
+    "top_fact": "sales_prev",
+    "raw_score": -3.2895736694335938,
+    "margin": 0.3678853511810303
+  },
+  {
+    "claim_id": "rewrite_v2_sales_current_03",
+    "category": "sales_current",
+    "gold": "sales_current",
+    "top_fact": "sales_current",
+    "raw_score": -2.5094902515411377,
+    "margin": 0.27252840995788574
+  },
+  {
+    "claim_id": "rewrite_v2_sales_current_04",
+    "category": "sales_current",
+    "gold": "sales_current",
+    "top_fact": "sales_current",
+    "raw_score": -3.4615039825439453,
+    "margin": 0.23256421089172363
+  },
+  {
+    "claim_id": "rewrite_v2_sales_current_05",
+    "category": "sales_current",
+    "gold": "sales_current",
+    "top_fact": "sales_prev",
+    "raw_score": -3.047091484069824,
+    "margin": 0.04855823516845703
+  },
+  {
+    "claim_id": "rewrite_v2_sales_current_06",
+    "category": "sales_current",
+    "gold": "sales_current",
+    "top_fact": "sales_current",
+    "raw_score": -2.4984517097473145,
+    "margin": 0.010672569274902344
+  },
+  {
+    "claim_id": "rewrite_v2_sales_current_07",
+    "category": "sales_current",
+    "gold": "sales_current",
+    "top_fact": "sales_prev",
+    "raw_score": -4.38247013092041,
+    "margin": 0.14752626419067383
+  },
+  {
+    "claim_id": "rewrite_v2_sales_current_08",
+    "category": "sales_current",
+    "gold": "sales_current",
+    "top_fact": "sales_current",
+    "raw_score": -2.8435091972351074,
+    "margin": 0.4415771961212158
+  },
+  {
+    "claim_id": "rewrite_v2_sales_current_09",
+    "category": "sales_current",
+    "gold": "sales_current",
+    "top_fact": "sales_current",
+    "raw_score": -2.8125810623168945,
+    "margin": 0.43354201316833496
+  },
+  {
+    "claim_id": "rewrite_v2_sales_current_10",
+    "category": "sales_current",
+    "gold": "sales_current",
+    "top_fact": "sales_current",
+    "raw_score": -3.2265844345092773,
+    "margin": 0.046709537506103516
+  },
+  {
+    "claim_id": "rewrite_v2_sales_current_11",
+    "category": "sales_current",
+    "gold": "sales_current",
+    "top_fact": "sales_prev",
+    "raw_score": -2.57043194770813,
+    "margin": 0.5571513175964355
+  },
+  {
+    "claim_id": "rewrite_v2_sales_current_12",
+    "category": "sales_current",
+    "gold": "sales_current",
+    "top_fact": "sales_prev",
+    "raw_score": -3.2613072395324707,
+    "margin": 0.029363393783569336
+  },
+  {
+    "claim_id": "rewrite_v2_sales_prev_01",
+    "category": "sales_prev",
+    "gold": "sales_prev",
+    "top_fact": "sales_prev",
+    "raw_score": -0.7636530995368958,
+    "margin": 1.6845805048942566
+  },
+  {
+    "claim_id": "rewrite_v2_sales_prev_02",
+    "category": "sales_prev",
+    "gold": "sales_prev",
+    "top_fact": "sales_prev",
+    "raw_score": -2.9929211139678955,
+    "margin": 0.6684627532958984
+  },
+  {
+    "claim_id": "rewrite_v2_sales_prev_03",
+    "category": "sales_prev",
+    "gold": "sales_prev",
+    "top_fact": "sales_prev",
+    "raw_score": -1.9098877906799316,
+    "margin": 0.41195130348205566
+  },
+  {
+    "claim_id": "rewrite_v2_sales_prev_04",
+    "category": "sales_prev",
+    "gold": "sales_prev",
+    "top_fact": "sales_prev",
+    "raw_score": -1.5723448991775513,
+    "margin": 1.4028691053390503
+  },
+  {
+    "claim_id": "rewrite_v2_sales_prev_05",
+    "category": "sales_prev",
+    "gold": "sales_prev",
+    "top_fact": "sales_prev",
+    "raw_score": -1.8871722221374512,
+    "margin": 0.8423283100128174
+  },
+  {
+    "claim_id": "rewrite_v2_sales_prev_06",
+    "category": "sales_prev",
+    "gold": "sales_prev",
+    "top_fact": "sales_prev",
+    "raw_score": -1.741410493850708,
+    "margin": 0.2928318977355957
+  },
+  {
+    "claim_id": "rewrite_v2_sales_prev_07",
+    "category": "sales_prev",
+    "gold": "sales_prev",
+    "top_fact": "sales_prev",
+    "raw_score": -1.1385670900344849,
+    "margin": 1.2213186025619507
+  },
+  {
+    "claim_id": "rewrite_v2_sales_prev_08",
+    "category": "sales_prev",
+    "gold": "sales_prev",
+    "top_fact": "sales_prev",
+    "raw_score": -2.7290773391723633,
+    "margin": 0.5334694385528564
+  },
+  {
+    "claim_id": "rewrite_v2_sales_prev_09",
+    "category": "sales_prev",
+    "gold": "sales_prev",
+    "top_fact": "sales_prev",
+    "raw_score": -3.564352512359619,
+    "margin": 0.3664588928222656
+  },
+  {
+    "claim_id": "rewrite_v2_sales_prev_10",
+    "category": "sales_prev",
+    "gold": "sales_prev",
+    "top_fact": "sales_current",
+    "raw_score": -2.6082968711853027,
+    "margin": 0.09718680381774902
+  },
+  {
+    "claim_id": "rewrite_v2_sales_prev_11",
+    "category": "sales_prev",
+    "gold": "sales_prev",
+    "top_fact": "sales_current",
+    "raw_score": -2.8414113521575928,
+    "margin": 0.0848701000213623
+  },
+  {
+    "claim_id": "rewrite_v2_sales_prev_12",
+    "category": "sales_prev",
+    "gold": "sales_prev",
+    "top_fact": "sales_prev",
+    "raw_score": -2.745547294616699,
+    "margin": 0.01867055892944336
+  },
+  {
+    "claim_id": "rewrite_v2_product_a_01",
+    "category": "product_a",
+    "gold": "product_a",
+    "top_fact": "product_a",
+    "raw_score": -0.9538735151290894,
+    "margin": 1.4727238416671753
+  },
+  {
+    "claim_id": "rewrite_v2_product_a_02",
+    "category": "product_a",
+    "gold": "product_a",
+    "top_fact": "product_a",
+    "raw_score": -0.9746366739273071,
+    "margin": 2.0212894678115845
+  },
+  {
+    "claim_id": "rewrite_v2_product_a_03",
+    "category": "product_a",
+    "gold": "product_a",
+    "top_fact": "product_a",
+    "raw_score": -0.9862498044967651,
+    "margin": 2.468216300010681
+  },
+  {
+    "claim_id": "rewrite_v2_product_a_04",
+    "category": "product_a",
+    "gold": "product_a",
+    "top_fact": "product_a",
+    "raw_score": -1.38374662399292,
+    "margin": 2.3919942378997803
+  },
+  {
+    "claim_id": "rewrite_v2_product_a_05",
+    "category": "product_a",
+    "gold": "product_a",
+    "top_fact": "product_a",
+    "raw_score": 1.4276050329208374,
+    "margin": 1.935256004333496
+  },
+  {
+    "claim_id": "rewrite_v2_product_a_06",
+    "category": "product_a",
+    "gold": "product_a",
+    "top_fact": "product_a",
+    "raw_score": -0.7843311429023743,
+    "margin": 1.6038023829460144
+  },
+  {
+    "claim_id": "rewrite_v2_product_a_07",
+    "category": "product_a",
+    "gold": "product_a",
+    "top_fact": "product_a",
+    "raw_score": -1.6144732236862183,
+    "margin": 1.3757251501083374
+  },
+  {
+    "claim_id": "rewrite_v2_product_a_08",
+    "category": "product_a",
+    "gold": "product_a",
+    "top_fact": "product_a",
+    "raw_score": -1.820674180984497,
+    "margin": 2.1685287952423096
+  },
+  {
+    "claim_id": "rewrite_v2_product_a_09",
+    "category": "product_a",
+    "gold": "product_a",
+    "top_fact": "product_a",
+    "raw_score": -1.0722508430480957,
+    "margin": 2.3130064010620117
+  },
+  {
+    "claim_id": "rewrite_v2_product_a_10",
+    "category": "product_a",
+    "gold": "product_a",
+    "top_fact": "product_a",
+    "raw_score": 0.8425559401512146,
+    "margin": 1.990279495716095
+  },
+  {
+    "claim_id": "rewrite_v2_product_a_11",
+    "category": "product_a",
+    "gold": "product_a",
+    "top_fact": "product_a",
+    "raw_score": -1.1956322193145752,
+    "margin": 2.345257043838501
+  },
+  {
+    "claim_id": "rewrite_v2_product_a_12",
+    "category": "product_a",
+    "gold": "product_a",
+    "top_fact": "product_a",
+    "raw_score": -0.584016740322113,
+    "margin": 1.651773750782013
+  },
+  {
+    "claim_id": "rewrite_v2_product_b_01",
+    "category": "product_b",
+    "gold": "product_b",
+    "top_fact": "product_b",
+    "raw_score": -1.0338246822357178,
+    "margin": 2.262873888015747
+  },
+  {
+    "claim_id": "rewrite_v2_product_b_02",
+    "category": "product_b",
+    "gold": "product_b",
+    "top_fact": "product_b",
+    "raw_score": -1.0069005489349365,
+    "margin": 2.7397329807281494
+  },
+  {
+    "claim_id": "rewrite_v2_product_b_03",
+    "category": "product_b",
+    "gold": "product_b",
+    "top_fact": "product_b",
+    "raw_score": -0.6314775943756104,
+    "margin": 3.1224892139434814
+  },
+  {
+    "claim_id": "rewrite_v2_product_b_04",
+    "category": "product_b",
+    "gold": "product_b",
+    "top_fact": "product_b",
+    "raw_score": -1.2472587823867798,
+    "margin": 2.7483328580856323
+  },
+  {
+    "claim_id": "rewrite_v2_product_b_05",
+    "category": "product_b",
+    "gold": "product_b",
+    "top_fact": "product_b",
+    "raw_score": 0.7265186905860901,
+    "margin": 1.6067843437194824
+  },
+  {
+    "claim_id": "rewrite_v2_product_b_06",
+    "category": "product_b",
+    "gold": "product_b",
+    "top_fact": "product_b",
+    "raw_score": -0.6994404792785645,
+    "margin": 2.3505165576934814
+  },
+  {
+    "claim_id": "rewrite_v2_product_b_07",
+    "category": "product_b",
+    "gold": "product_b",
+    "top_fact": "product_b",
+    "raw_score": -1.456412672996521,
+    "margin": 1.941846489906311
+  },
+  {
+    "claim_id": "rewrite_v2_product_b_08",
+    "category": "product_b",
+    "gold": "product_b",
+    "top_fact": "product_b",
+    "raw_score": -1.4549429416656494,
+    "margin": 2.6610147953033447
+  },
+  {
+    "claim_id": "rewrite_v2_product_b_09",
+    "category": "product_b",
+    "gold": "product_b",
+    "top_fact": "product_b",
+    "raw_score": -0.8752851486206055,
+    "margin": 2.709674119949341
+  },
+  {
+    "claim_id": "rewrite_v2_product_b_10",
+    "category": "product_b",
+    "gold": "product_b",
+    "top_fact": "product_b",
+    "raw_score": 0.32180067896842957,
+    "margin": 1.4656959474086761
+  },
+  {
+    "claim_id": "rewrite_v2_product_b_11",
+    "category": "product_b",
+    "gold": "product_b",
+    "top_fact": "product_b",
+    "raw_score": -0.9750913381576538,
+    "margin": 2.7315138578414917
+  },
+  {
+    "claim_id": "rewrite_v2_product_b_12",
+    "category": "product_b",
+    "gold": "product_b",
+    "top_fact": "product_b",
+    "raw_score": -0.47817838191986084,
+    "margin": 2.678031325340271
+  },
+  {
+    "claim_id": "rewrite_v2_spending_01",
+    "category": "spending",
+    "gold": "spending",
+    "top_fact": "spending",
+    "raw_score": -0.42554113268852234,
+    "margin": 1.0533006489276886
+  },
+  {
+    "claim_id": "rewrite_v2_spending_02",
+    "category": "spending",
+    "gold": "spending",
+    "top_fact": "spending",
+    "raw_score": -2.336984634399414,
+    "margin": 0.7742440700531006
+  },
+  {
+    "claim_id": "rewrite_v2_spending_03",
+    "category": "spending",
+    "gold": "spending",
+    "top_fact": "spending",
+    "raw_score": -1.9483752250671387,
+    "margin": 0.6095771789550781
+  },
+  {
+    "claim_id": "rewrite_v2_spending_04",
+    "category": "spending",
+    "gold": "spending",
+    "top_fact": "spending",
+    "raw_score": -2.0342421531677246,
+    "margin": 1.3725554943084717
+  },
+  {
+    "claim_id": "rewrite_v2_spending_05",
+    "category": "spending",
+    "gold": "spending",
+    "top_fact": "spending",
+    "raw_score": -1.064898133277893,
+    "margin": 0.5985445976257324
+  },
+  {
+    "claim_id": "rewrite_v2_spending_06",
+    "category": "spending",
+    "gold": "spending",
+    "top_fact": "spending",
+    "raw_score": -0.8949357271194458,
+    "margin": 1.450644850730896
+  },
+  {
+    "claim_id": "rewrite_v2_spending_07",
+    "category": "spending",
+    "gold": "spending",
+    "top_fact": "spending",
+    "raw_score": -4.497161865234375,
+    "margin": 0.37480974197387695
+  },
+  {
+    "claim_id": "rewrite_v2_spending_08",
+    "category": "spending",
+    "gold": "spending",
+    "top_fact": "spending",
+    "raw_score": -2.0599334239959717,
+    "margin": 0.06156635284423828
+  },
+  {
+    "claim_id": "rewrite_v2_spending_09",
+    "category": "spending",
+    "gold": "spending",
+    "top_fact": "spending",
+    "raw_score": -4.161044597625732,
+    "margin": 0.45753908157348633
+  },
+  {
+    "claim_id": "rewrite_v2_spending_10",
+    "category": "spending",
+    "gold": "spending",
+    "top_fact": "spending",
+    "raw_score": -0.4073714315891266,
+    "margin": 1.0984358489513397
+  },
+  {
+    "claim_id": "rewrite_v2_spending_11",
+    "category": "spending",
+    "gold": "spending",
+    "top_fact": "spending",
+    "raw_score": -1.6510310173034668,
+    "margin": 0.3914642333984375
+  },
+  {
+    "claim_id": "rewrite_v2_spending_12",
+    "category": "spending",
+    "gold": "spending",
+    "top_fact": "spending",
+    "raw_score": -2.762446165084839,
+    "margin": 0.5167856216430664
+  },
+  {
+    "claim_id": "rewrite_v2_budget_01",
+    "category": "budget",
+    "gold": "budget",
+    "top_fact": "budget",
+    "raw_score": -0.7205418348312378,
+    "margin": 0.15974825620651245
+  },
+  {
+    "claim_id": "rewrite_v2_budget_02",
+    "category": "budget",
+    "gold": "budget",
+    "top_fact": "budget",
+    "raw_score": -2.139284133911133,
+    "margin": 1.089184045791626
+  },
+  {
+    "claim_id": "rewrite_v2_budget_03",
+    "category": "budget",
+    "gold": "budget",
+    "top_fact": "budget",
+    "raw_score": -2.7901499271392822,
+    "margin": 0.2572200298309326
+  },
+  {
+    "claim_id": "rewrite_v2_budget_04",
+    "category": "budget",
+    "gold": "budget",
+    "top_fact": "spending",
+    "raw_score": -1.7169971466064453,
+    "margin": 0.33429789543151855
+  },
+  {
+    "claim_id": "rewrite_v2_budget_05",
+    "category": "budget",
+    "gold": "budget",
+    "top_fact": "budget",
+    "raw_score": -0.6763894557952881,
+    "margin": 0.8199247121810913
+  },
+  {
+    "claim_id": "rewrite_v2_budget_06",
+    "category": "budget",
+    "gold": "budget",
+    "top_fact": "budget",
+    "raw_score": -2.288398265838623,
+    "margin": 0.8069641590118408
+  },
+  {
+    "claim_id": "rewrite_v2_budget_07",
+    "category": "budget",
+    "gold": "budget",
+    "top_fact": "budget",
+    "raw_score": -2.8269741535186768,
+    "margin": 0.2693517208099365
+  },
+  {
+    "claim_id": "rewrite_v2_budget_08",
+    "category": "budget",
+    "gold": "budget",
+    "top_fact": "budget",
+    "raw_score": -0.06104445457458496,
+    "margin": 1.0700335502624512
+  },
+  {
+    "claim_id": "rewrite_v2_budget_09",
+    "category": "budget",
+    "gold": "budget",
+    "top_fact": "budget",
+    "raw_score": -1.8684989213943481,
+    "margin": 0.6746948957443237
+  },
+  {
+    "claim_id": "rewrite_v2_budget_10",
+    "category": "budget",
+    "gold": "budget",
+    "top_fact": "spending",
+    "raw_score": -1.7486872673034668,
+    "margin": 0.2340477705001831
+  },
+  {
+    "claim_id": "rewrite_v2_budget_11",
+    "category": "budget",
+    "gold": "budget",
+    "top_fact": "budget",
+    "raw_score": -1.9182921648025513,
+    "margin": 0.7669390439987183
+  },
+  {
+    "claim_id": "rewrite_v2_budget_12",
+    "category": "budget",
+    "gold": "budget",
+    "top_fact": "budget",
+    "raw_score": -2.5656049251556396,
+    "margin": 0.20967602729797363
+  }
+]

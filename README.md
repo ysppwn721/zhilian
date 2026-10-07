@@ -24,9 +24,9 @@ python -m pip install -r requirements-runtime.txt
 python run.py
 ```
 
-`requirements-runtime.txt` 只含应用本体真正 import 的依赖（体积最小，适合信创环境）。
-`requirements.txt` 是开发/评测全集，额外含 `pandas`、`pdfplumber` 与本地重排模型三项——
-这些只被 `答辩评测/` 下的脚本使用，应用缺失时会自动降级，不是运行必需。
+`requirements-runtime.txt` 含应用本体和网页 PDF 导入所需依赖，适合信创环境。
+`requirements.txt` 是开发/评测全集，额外含 `pandas` 与本地重排模型。
+若从源码安装并启用网页 PDF 导入，必须安装其中的 PyMuPDF 与 pdfplumber；PDF 扫描件仍需外部 OCR。
 跑测试用 `requirements-dev.txt`。
 
 未配置任何模型也可以运行。无需购买 GPU 或服务器即可在本机体验。
@@ -54,6 +54,8 @@ python run.py
 增删事实或改变含义需要重新建立项目并审阅关联。源表导入及后续修复均可以撤销。
 
 创建项目时上传一份 `.xlsx` 和至少一份 `.docx` 或 `.pptx`，首批最多10份、合计30MB。项目创建后可在“来源与文件”点击“追加成果文档”，按批次继续加入 Word/PPT/图片；默认单批最多50份、100MB，项目总文档默认最多500份。后续批次不再上传 Excel，系统会为每批建立 revision、批次 ID 和审计记录，任何文件解析失败都会回滚整批。Excel首行必须包含下面的列，顺序可以变化：
+
+也可以通过 `POST /api/projects/from-pdf` 导入单份 PDF。系统会先生成带页码的正文 Word 和带来源页、表格编号、行号的事实表候选 Excel，再创建普通 Office 项目；原 PDF 会作为只读溯源文件保留，不参与直接修改。没有提取到可用表格事实时，接口会要求先人工整理生成的中间文件。
 
 | 事实ID | 主体 | 指标 | 期间 | 数值 | 单位 | 统计口径 |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -91,7 +93,25 @@ DEEPSEEK_MODEL=deepseek-flash
 
 重启服务后刷新网页。客户无需配置密钥，直接点击“DeepSeek 关联建议”，在“查看依据”中审阅建议并确认来源。首次测试应使用未确认的演示论断；已确认论断和图表不会发送。费用由部署方承担。
 
-`/api/health` 中 `model.enabled=true` 和 `key_configured=true` 只说明服务端已读取密钥，不代表真实 API 已验证。必须成功请求一次建议才能确认连通性。请求关闭思考模式、启用 JSON 输出，用于受限的事实来源匹配。旧的 `ZHILIAN_LLM_*` 配置不再使用。
+`/api/health` 中 `model.enabled=true` 和 `key_configured=true` 只说明服务端已读取密钥，不代表真实 API 已验证。必须成功请求一次建议才能确认连通性。请求关闭思考模式、启用 JSON 输出，用于受限的事实来源匹配。模型路由使用 `ZHILIAN_LLM_MODE`；自定义服务地址和论断数字脱敏分别使用 `ZHILIAN_LLM_BASE_URL`、`ZHILIAN_LLM_REDACT_NUMBERS`。
+
+### 显式模型路由模式
+
+打开项目后，可在工作台右上角 **“处理模式”下拉框** 或 **齿轮 → 模型与运行方式** 中切换，无需重启。选择按项目保存，不影响其他项目。未选择时继承服务端环境变量 `ZHILIAN_LLM_MODE`，默认值为 `hybrid`：
+
+| 模式 | 行为 | 网络/API |
+|---|---|---|
+| `rules` | 仅规则候选与人工确认 | 不调用模型，可离线 |
+| `local` | 规则 + 本地 BGE 语义召回 | 不调用远程 API |
+| `hybrid` | 规则 → 本地 BGE → API 兜底 | 默认，按困难样本调用 |
+| `api` | 规则 → API，跳过本地 BGE | 会产生 API 调用 |
+| `api_only` | 全部已识别、未确认的非图表正文论断交 API | 仅用于对照实验，会产生费用 |
+
+例如：`ZHILIAN_LLM_MODE=local`。修改 `.env` 后需重启；非法环境变量值回退 `hybrid`，接口提交非法值则拒绝。`/api/health.model_mode` 是服务端默认值，项目响应的 `model_mode` 是当前项目有效值。
+
+切换模式不会请求模型，也不会重置已确认来源或修改文件；旧模型建议和待办失效，点击“运行智能体”重新生成候选。对照实验请用新建、尚未确认的相同资料，避免混入之前的人工作业结果。`api_only` 不把规则 refs 发送给 API，也不把规则或关联记忆作为正文建议补回；失败或弃答交人工处理。图表仍走确定性路径。
+
+`rules` 和 `local` 同时阻止远程关联、诊断润色及 OCR 请求。`local` 需要另装本地模型；不可用时仅保留规则和人工，不偷偷升级 API。`hybrid` 无本地模型时可转 API。关联、诊断解释和 OCR 的远程调用均受每日额度约束；关联仍受单批 40 条论断、150 条事实限制。模型只提建议，确定性引擎负责计算；来源确认和文件写回各有人工批准。
 
 ### 当前模型职责与限制
 
@@ -103,7 +123,7 @@ DEEPSEEK_MODEL=deepseek-flash
 
 ## 智能体（Agent）
 
-“运行智能体”启动证据链验证任务：**准备 → 关联 → 诊断 → 询问（人工） → 修复 → 复核 → 完成**。首版是确定性状态机编排，不是让模型自由选择工具的 ReAct 循环。Agent 是编排器，复用 `store` / `engine` / `office` / `llm`，大模型仅作为来源关联工具，不计算、不裁决、不写文件。
+"运行智能体"启动证据链验证任务：**准备 → 关联 → 诊断 → 询问（人工） → 修复 → 复核 → 完成**。首版是确定性状态机编排，不是让模型自由选择工具的 ReAct 循环。Agent 是编排器，复用 `store` / `engine` / `office` / `llm`；模型只提出来源候选、语义审计疑点或风险说明，不计算、不裁决、不写文件。
 
 导入自己的 Excel 与 Word/PPT 后，“导入识别完成”窗口会显示文件数、已识别论断数，并提供“运行智能体”和“先查看识别结果”两个入口。点击“运行智能体”后仍需在启动说明中点击“开始运行”；关闭窗口后也可从工作台顶部启动。普通导入项目与演示项目使用相同的智能体流程，无须先载入演示变更。
 
@@ -120,8 +140,15 @@ DEEPSEEK_MODEL=deepseek-flash
 - `POST /api/projects/{wid}/agent/run`：`{"revision":当前版本}`。
 - `POST /api/projects/{wid}/agent/decide`：`{"revision":当前版本,"decisions":[{"kind":"confirm_links","items":[{"claim_id":"论断ID","refs":["事实ID"]}]}]}`。kind 需匹配当前 pending，可为 `confirm_links`、`resolve_ambiguity` 或 `approve_repair`；修复只需 claim_id。每次只批准一组当前阶段的非空条目。
 - `GET /api/projects/{wid}/agent/status`：只读返回 phase、pending、trace、result，并以 stale 标识待办是否过期。
+- `POST /api/projects/{wid}/review/cross-document`：运行跨文档审计智能体，保存带签名的只读证据与可选语义疑点。
+- `POST /api/projects/{wid}/review/repair-plan`：运行修复规划智能体，生成必须人工批准的结构化计划。
 
 扩展点位于 `zhilian/agent.py` 的 `TOOLS`。新增同签名函数 `tool(store, ws, payload) -> dict` 并注册后，在相应阶段通过 `_tool` 调用即可获得统一轨迹。未来 `analyze_ambiguity` 可接在关联阶段，`summarize` 可接在复核之后；本次未实现这两项。文件修改已通过 `repair` 工具完成；未来扩展修改能力应沿用人工批准、现有修复校验及复核，不允许模型直接写文件。
+
+来源页还提供两个只读智能体动作：
+
+- “运行跨文档审计”先按主体、指标、期间和口径做确定性归并，再在 `hybrid`/`api` 且已配置服务时调用语义审计模型。模型输入是脱敏论断和事实元数据，输出只允许疑点类别、跨文件 claim ID 和不含数字的原因；数值差异与单位换算仍由程序完成。
+- “生成修复计划”列出已确认论断的文件、位置、原文、新文本、事实引用、风险等级和写回前验证项。它只生成待批准计划，不修改 Office 文件；数据、来源、文件版本或处理模式变化后，旧审计和旧计划会显示为“已过期”。两项动作都会写入 Agent 轨迹和模型账本。
 
 ### Agent 验证方法
 
@@ -147,7 +174,7 @@ Agent 测试覆盖真实 Office 修改、人工闸门、消歧、部分批准、
 
 项目读写标准 OOXML 文件，不依赖、打包或逆向WPS软件，不调用WPS SDK。WPS常用的`.xlsx/.docx/.pptx`是支持的输入扩展名；旧格式`.xls/.doc/.ppt`需另存为新格式。
 
-已支持Word普通正文与一层普通表格；PPT普通文本框、表格和单系列簇状柱形图。文本局部替换会保留未修改run的格式，替换内容继承其首个run的格式。跨多种格式的一个论断修改后，内部格式可能合并；这不是任意排版保真的承诺。
+已支持Word普通正文与一层普通表格；PPT普通文本框、表格，以及可与事实类别一一对应的单系列原生柱状图、条形图、饼图和圆环图。文本局部替换会保留未修改run的格式，替换内容继承其首个run的格式。跨多种格式的一个论断修改后，内部格式可能合并；这不是任意排版保真的承诺。
 
 页眉页脚、备注、母版、图片文字、组合对象、复杂域、复杂图表与宏不属于首版验证范围。WPS特有扩展、旧格式及复杂排版需要实测，不能宣称全功能兼容。项目没有接入WPS在线编辑或收费平台；以后接入需另行核对相应许可。
 
@@ -179,7 +206,7 @@ tests/             引擎、真实文件、HTTP和模型适配器回归测试
 
 测试覆盖真实Word/PPT修改与图表导出、原文保留、变更不失效、定性增长、排名并列、零基期、口径冲突、歧义来源、公式拒绝、并发版本冲突、磁盘篡改、撤销、导出包、HTTP上传持久化和模型建议校验。
 
-整合后的开发主线全量回归为 **260 项通过**（1 个 deprecation warning，2026-09-26 Windows 环境复核）。测试数据为构造样例，证明这些边界下的实现行为，不代表真实行业泛化准确率。`requirements-lock.txt`记录本机验证过的依赖版本；跨平台部署时需重新验证安装和文件导出。
+整合后的开发主线全量回归为 **347 项通过**（1 个 deprecation warning，2026-10-02 Windows 环境复核）。本轮新增跨文档审计、修复规划、审计快照失效和本地零候选路由用例。测试数据为构造样例，证明这些边界下的实现行为，不代表真实行业泛化准确率。`requirements-lock.txt`记录本机验证过的依赖版本；跨平台部署时需重新验证安装和文件导出。
 
 ## MCP 接口
 
@@ -205,9 +232,15 @@ Claude Desktop 等客户端的接入配置示例：
 
 知链支持可选的 ONNX INT8 本地事实来源排序模型。基础模式不需要模型；配置本地模型后，Agent 对规则多候选进行排序，并在事实表不超过 150 条时对零候选论断做整表语义召回。低置信度仍转人工或 API，不直接写入文件。
 
+PDF 目前是隔离的识别与审计支线，不替代 Office 主流程。对 PDF 数字纠错默认只生成勘误表，原 PDF 不被修改；`zhilian/pdf_writeback.py` 会在未来写回前检查文字层、数字签名、旧值是否重复出现在表格/图表位置、字体字形和修改后页级哈希。详细规则见 [PDF 安全写回说明](docs/PDF安全写回说明.md)。
+
+PDF 的正式导入路线是提取为 Office 中间文件：`zhilian/pdf_office_export.py` 将 PDF 文字层生成带原始页码的 Word，将通过结构校验的表格生成带来源页、表格编号和行号的 Excel，并保留转换清单。原始 PDF 不被修改。详见 [PDF 转 Office 导入说明](docs/PDF转Office导入说明.md)。
+
 推荐模型为 `bge-reranker-v2-m3` 的 ONNX INT8 版本。模型权重约 570MB，独立放在 `models/bge-reranker-v2-m3-onnx-int8/`，不进入基础源码包。依赖为 `onnxruntime`、`tokenizers` 和 `numpy`，不需要 PyTorch。
 
-启用方式：在 `.env` 设置 `ZHILIAN_LOCAL_RERANKER_PATH=models/bge-reranker-v2-m3-onnx-int8`，重启服务后通过 `/api/health` 查看 `local_reranker.enabled=true`。模型不可用时自动退回规则/API流程。
+启用方式：在 `.env` 设置 `ZHILIAN_LOCAL_RERANKER_PATH=models/bge-reranker-v2-m3-onnx-int8`，重启服务后通过 `/api/health` 查看 `local_reranker.enabled=true`。模型不可用时自动退回规则/API流程。年报专用模型可以单独配置目录、文件名和展示名，例如 `ZHILIAN_LOCAL_RERANKER_PATH=models/zh_reranker_bert_annual_repaired_v1_onnx_compat`、`ZHILIAN_LOCAL_RERANKER_FILE=model_fp32.onnx`、`ZHILIAN_LOCAL_RERANKER_NAME=annual-repaired-bert-fp32`；它是研究候选，接入前仍需独立人工 Gold 和 CPU 验收。
+
+年报模式可以自动识别：智能体只根据文件名和已提取正文中的“年度报告、报告期、合并报表、董事会报告”等确定性信号形成文档画像，不把原文发送给模型。达到阈值且配置了年报模型时，困难候选使用年报模型；否则使用默认本地模型并记录回退原因。画像、选择的模型和证据会保存在 Agent 路由记录中。
 
 ## 部署
 

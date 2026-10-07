@@ -1,0 +1,31 @@
+{
+  "pool": "答辩评测\\annual_reports_v3_pool",
+  "excluded_companies": 510,
+  "questions": 340,
+  "rows": 2654,
+  "companies": 97,
+  "layers": {
+    "synonym": 146,
+    "sameperiod": 75,
+    "implicit": 59,
+    "growth": 60
+  },
+  "task_types": {
+    "growth_set": 295,
+    "quote_current": 45
+  },
+  "candidate_roles": {
+    "same_period_other_metric": 1865,
+    "gold_source": 635,
+    "same_metric_wrong_period": 154
+  },
+  "claim_contains_real_value": 0.9588,
+  "zero_info_baselines": {
+    "always_first": 0.2529,
+    "always_last": 0.2529,
+    "random_expected": 0.2478
+  },
+  "sha256": "47eb0e03dcf9fa7c42bb6f74cfe288cd72b5a624e5a2ec685a2d4b82ae7d73e7",
+  "seed": 20261005,
+  "note": "v3：claim 逐字出自年报原句并含真实数值；候选含四种真实角色；公司与全部训练集/既有评测集隔离。"
+}

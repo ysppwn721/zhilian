@@ -1,0 +1,20 @@
+{
+  "dataset": "答辩评测\\human_gold_eval_20261004\\human_gold_20261004_shuffled.jsonl",
+  "auto_taskid_accuracy": 0.9867,
+  "auto_taskid_confusion": {
+    "quote->quote": 98,
+    "quote->growth": 2,
+    "growth->growth": 50
+  },
+  "quote_tasks_detected": 98,
+  "rule_status": {
+    "rule": 98
+  },
+  "rule_direct_accuracy": 1.0,
+  "growth_tasks_detected": 52,
+  "growth_model_top2": 0.9615,
+  "growth_after_verification": 0.9615,
+  "growth_verification_rejects": {},
+  "auto_route_overall": 1.0,
+  "note": "不读 task_type；自动任务识别 + 规则优先路由。"
+}

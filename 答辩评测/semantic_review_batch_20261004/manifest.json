@@ -1,0 +1,23 @@
+{
+  "batch": "semantic_review_batch_20261004",
+  "seed": 20261004,
+  "source": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\annual_reports_weak_training_repaired_20261004\\test.jsonl",
+  "source_split": "held-out test companies from the repaired weak-label corpus",
+  "blind_review": true,
+  "programmatic_labels_removed": true,
+  "claims": 150,
+  "candidate_rows": 1613,
+  "task_counts": {
+    "quote_本期": 50,
+    "quote_上期": 50,
+    "growth_set": 50
+  },
+  "companies": 77,
+  "files": [
+    "review_claims.csv",
+    "review_candidates.csv",
+    "review_claims.jsonl",
+    "审阅说明.md",
+    "semantic_review_batch_20261004.xlsx"
+  ]
+}

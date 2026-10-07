@@ -6,13 +6,14 @@
 > 详见 `docs/部署说明.md`。本文这套 compose + Caddy 方案适用于「服务器直出整站并
 > 自行申请 HTTPS」，与线上方案二选一即可（两者都会占 80/443）。
 
-这套部署让同一个域名同时提供产品首页和真实演示：
+这套部署是历史上的同域备选方案。当前线上已采用静态站与演示后端分域：
 
 - `https://zhilian.space/`：产品介绍、下载和使用说明
-- `https://zhilian.space/demo/`：真实知链工作台
-- `https://zhilian.space/api/*`、`/static/*`：由 Caddy 转发到 FastAPI
+- `https://demo.zhilian.space/`：真实知链工作台和 FastAPI 后端
+- `https://zhilian.space/demo/`：兼容旧链接的跳转页
 
-不需要 Quick Tunnel。服务器需要 Docker、Docker Compose，以及安全组放行 TCP 80 和 443。
+当前线上由 Cloudflare Tunnel 将 `demo.zhilian.space` 转发到服务器本机 FastAPI，服务器不开放公网入站端口。
+本文的 Docker + Caddy 方案仅供需要服务器直出整站时参考。
 
 ## 首次部署
 
@@ -32,14 +33,17 @@ docker compose up -d --build
 docker compose ps
 ```
 
-将域名 `zhilian.space` 的 DNS A 记录指向服务器公网 IP。若 DNS 由 Cloudflare 托管，可以开启代理；Caddy 仍会自动申请 HTTPS 证书。域名生效后验证：
+若采用本文备选方案，将域名 DNS 指向服务器公网 IP。当前线上方案的验证命令为：
 
 ```bash
 curl -I https://zhilian.space/
-curl -u zhilian:<部署密码> https://zhilian.space/api/health
+curl -i https://demo.zhilian.space/api/health
+curl -u zhilian:<部署密码> https://demo.zhilian.space/api/health
 ```
 
-浏览器打开 `https://zhilian.space/demo/`，用户名固定为 `zhilian`，密码是 `.env` 中的 `ZHILIAN_ACCESS_PASSWORD`。
+未带认证的后端健康检查预期返回 `401`，带测试账号预期返回 `200`。浏览器打开
+`https://demo.zhilian.space/`，用户名固定为 `zhilian`，密码是 `.env` 中的
+`ZHILIAN_ACCESS_PASSWORD`。两个公网域名均由 Cloudflare 提供边缘 HTTPS。
 
 ## 更新版本
 

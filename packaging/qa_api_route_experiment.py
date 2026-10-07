@@ -126,7 +126,7 @@ if api_key:
                    'original': g[0]['claim_text'], 'refs': [], 'confirmed': False}]
         facts = [{'id': r['fact_id'], 'subject': '公司', 'metric': r['metric'],
                   'period': r['period'], 'unit': r.get('unit') or '未标明',
-                  'scope': r.get('scope') or '未标明'} for r in g]
+                  'scope': r.get('scope') or '未标明'} for r in sorted(g, key=lambda x: str(x['fact_id']))]
         try:
             sugg = llm.suggest_links(claims, facts)
             llm.consume_last_call_metrics()

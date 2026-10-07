@@ -7,6 +7,7 @@ __pycache__/
 .pytest_cache/
 *.pyc
 .env
+答辩评测/human_gold_api.env
 
 # 演示与测试生成物：可由 zhilian/demo.py 与 tests/ 重复生成
 测试文件_20260918/
@@ -43,5 +44,73 @@ downloads-large/Zhilian-0.2.1-windows-x64.zip
 # 双源漂移，并曾在其中留下真实 API Key。源码真源只有仓库根一处。
 华北五省设计/
 
+# 站点分发的安装包：单个 19.5MB 且可由构建脚本重新生成。
+# 已从跟踪中移除（历史仍保留，不重写历史以免影响他人克隆）；分发走 GitHub Release。
+site/downloads/*.tar.gz
+site/downloads/*.zip
+site/downloads/*.zip.*
+
 # 构建用虚拟环境：被误纳入版本控制（430 个文件 / 约 6MB），无任何脚本引用。
 .build-venv/
+
+# ============================================================================
+# 大体积数据目录：不进开源仓库（本机实测体积）
+# ============================================================================
+# 语料 PDF 8068 MB / 1947 个文件，另有数据 JSON 约 350 MB。
+# GitHub 单文件上限 100 MB、仓库建议上限 1 GB，这些资源既无法推送也不应开源。
+# 语料可用 packaging/collect_annual_reports.py 重新采集复现。
+# 注意：不忽略整个「答辩评测/」——其中的 *.md / *.py / manifest.jsonl 体积很小，
+# 是理解与复现口径所必需的，应当开源。
+答辩评测/annual_reports_*/*
+# 例外：语料清单体积极小（约 150KB/批），是复现采集口径所需的元数据，应当开源。
+# 注意必须用 `dir/*` 而不是 `dir/`：后者会排除目录本身，git 便不会进入该目录，
+# 否定规则（!）也就永远匹配不到里面的文件。
+!答辩评测/annual_reports_*/manifest.jsonl
+!答辩评测/annual_reports_*/manifest.csv
+!答辩评测/annual_reports_*/candidates_v2_stats.json
+答辩评测/cn_reports/
+答辩评测/public_data
+答辩评测/公开数据
+答辩评测/**/*.pdf
+答辩评测/**/*.pack
+答辩评测/.git/
+答辩评测/**/*.bak_*
+# 单个超过 25MB 的公开数据集拼接产物（可由 packaging/fetch_public_training_data.py 重新下载）
+答辩评测/public_reranker_pairs.jsonl
+答辩评测/public_reranker_pairs_*.jsonl
+答辩评测/text_anchors.json
+答辩评测/**/text_anchors.json
+
+# 安装包与可执行产物（约 1.1 GB），由构建脚本生成
+交付物/**/*.zip
+交付物/**/*.tar.gz
+交付物/**/*.exe
+
+# 运行时输出与工作区状态：包含大体积中间产物，可由脚本重新生成
+output/**/*.docx
+output/**/*.xlsx
+output/**/*.zip
+output/**/*.exe
+output/**/*.pdf
+output/**/*.data
+output/workspaces/
+output/submission_template_work/
+output/public_training_data/
+
+# 前端依赖与构建中间产物
+PPT/node_modules/
+.ppt_build/
+.ppt-edit-build/
+.ppt-output/
+ppt-output/
+_svg_convert_test/
+tmp/
+
+# 测试与运行期临时目录
+.pytest-run/
+pytest-of-Administrator/
+.codex-finalizer-plan/
+
+# 训练用虚拟环境（35000+ 文件）
+.train-cuda-venv/
+

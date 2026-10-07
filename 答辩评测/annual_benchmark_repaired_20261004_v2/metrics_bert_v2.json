@@ -1,0 +1,189 @@
+{
+  "model": "bert_v2",
+  "model_path": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\models\\zh_reranker_bert_ft_v2",
+  "device": "cuda",
+  "batch_size": 64,
+  "batching": "input_order_dynamic_padding",
+  "dataset": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\annual_benchmark_repaired_20261004_v2\\benchmark.jsonl",
+  "programmatic_labels": true,
+  "rows": 14450,
+  "claims": 1275,
+  "companies": 19,
+  "reports": 36,
+  "baselines": {
+    "quote_current_prior": {
+      "first_in_seeded_order": 0.11764705882352941,
+      "last_in_seeded_order": 0.09058823529411765,
+      "always_current_period_with_stable_tiebreak": 0.08235294117647059,
+      "always_prior_period_with_stable_tiebreak": 0.08235294117647059,
+      "period_only_unique_resolution_rate": 0.0,
+      "period_only_candidate_count_mean": 8.0,
+      "period_only_random_tie_expected_top1": 0.125,
+      "literal_metric_and_period_rule": {
+        "claims": 850,
+        "answered": 618,
+        "coverage": 0.7270588235294118,
+        "top1_accuracy_on_answered": 0.9320388349514563,
+        "correct_over_all_claims": 0.6776470588235294
+      },
+      "controlled_alias_lexicon_and_period_rule": {
+        "claims": 850,
+        "answered": 850,
+        "coverage": 1.0,
+        "top1_accuracy_on_answered": 1.0,
+        "correct_over_all_claims": 1.0,
+        "lexicon_entries": 6
+      },
+      "random_choice_expected_accuracy": 0.1111111111111111,
+      "first_position_gold_rate": 0.11764705882352941
+    },
+    "growth_set": {
+      "claims": 425,
+      "first_two_in_shuffled_order_exact_match": 0.007058823529411765,
+      "last_two_in_shuffled_order_exact_match": 0.002352941176470588,
+      "literal_metric_set_rule": {
+        "claims": 425,
+        "answered": 309,
+        "coverage": 0.7270588235294118,
+        "source_set_exact_match_on_answered": 0.9320388349514563,
+        "exact_over_all_claims": 0.6776470588235294
+      },
+      "controlled_alias_lexicon_set_rule": {
+        "answered": 425,
+        "coverage": 1.0,
+        "source_set_exact_match_on_answered": 1.0,
+        "exact_over_all_claims": 1.0,
+        "lexicon_entries": 6
+      },
+      "random_two_choice_expected_exact_match": 0.00833333333333331
+    }
+  },
+  "model_metrics": {
+    "by_task": {
+      "quote_current": {
+        "claims": 425,
+        "top1_accuracy": 0.2564705882352941,
+        "error_association_rate": 0.7435294117647059,
+        "ambiguous_top1": 0
+      },
+      "quote_prior": {
+        "claims": 425,
+        "top1_accuracy": 0.6964705882352941,
+        "error_association_rate": 0.30352941176470594,
+        "ambiguous_top1": 0
+      },
+      "growth_set": {
+        "claims": 425,
+        "source_set_exact_match": 0.44941176470588234,
+        "source_set_completeness_recall": 0.7129411764705882,
+        "source_set_precision": 0.7129411764705882,
+        "ambiguous_at_top2_boundary": 0
+      }
+    },
+    "by_variant": {
+      "literal": {
+        "quote_claims": 576,
+        "quote_top1_accuracy": 0.4947916666666667,
+        "growth_claims": 288,
+        "growth_set_exact_match": 0.46875
+      },
+      "controlled_alias": {
+        "quote_claims": 274,
+        "quote_top1_accuracy": 0.43795620437956206,
+        "growth_claims": 137,
+        "growth_set_exact_match": 0.40875912408759124
+      }
+    }
+  },
+  "candidate_order_invariance": {
+    "shuffle_seed": 73,
+    "full_rank_aggregation_uses_cached_pair_scores": true,
+    "full_rank_aggregation_prediction_set_changed_claims": 0,
+    "full_rank_aggregation_prediction_set_consistency": 1.0,
+    "full_rescore_after_shuffle": false,
+    "max_absolute_score_delta": 0.0,
+    "before": {
+      "by_task": {
+        "quote_current": {
+          "claims": 425,
+          "top1_accuracy": 0.2564705882352941,
+          "error_association_rate": 0.7435294117647059,
+          "ambiguous_top1": 0
+        },
+        "quote_prior": {
+          "claims": 425,
+          "top1_accuracy": 0.6964705882352941,
+          "error_association_rate": 0.30352941176470594,
+          "ambiguous_top1": 0
+        },
+        "growth_set": {
+          "claims": 425,
+          "source_set_exact_match": 0.44941176470588234,
+          "source_set_completeness_recall": 0.7129411764705882,
+          "source_set_precision": 0.7129411764705882,
+          "ambiguous_at_top2_boundary": 0
+        }
+      },
+      "by_variant": {
+        "literal": {
+          "quote_claims": 576,
+          "quote_top1_accuracy": 0.4947916666666667,
+          "growth_claims": 288,
+          "growth_set_exact_match": 0.46875
+        },
+        "controlled_alias": {
+          "quote_claims": 274,
+          "quote_top1_accuracy": 0.43795620437956206,
+          "growth_claims": 137,
+          "growth_set_exact_match": 0.40875912408759124
+        }
+      }
+    },
+    "after": {
+      "by_task": {
+        "growth_set": {
+          "claims": 425,
+          "source_set_exact_match": 0.44941176470588234,
+          "source_set_completeness_recall": 0.7129411764705882,
+          "source_set_precision": 0.7129411764705882,
+          "ambiguous_at_top2_boundary": 0
+        },
+        "quote_current": {
+          "claims": 425,
+          "top1_accuracy": 0.2564705882352941,
+          "error_association_rate": 0.7435294117647059,
+          "ambiguous_top1": 0
+        },
+        "quote_prior": {
+          "claims": 425,
+          "top1_accuracy": 0.6964705882352941,
+          "error_association_rate": 0.30352941176470594,
+          "ambiguous_top1": 0
+        }
+      },
+      "by_variant": {
+        "controlled_alias": {
+          "quote_claims": 274,
+          "quote_top1_accuracy": 0.43795620437956206,
+          "growth_claims": 137,
+          "growth_set_exact_match": 0.40875912408759124
+        },
+        "literal": {
+          "quote_claims": 576,
+          "quote_top1_accuracy": 0.4947916666666667,
+          "growth_claims": 288,
+          "growth_set_exact_match": 0.46875
+        }
+      }
+    },
+    "rescore_sample": {
+      "claims_per_task_requested": 16,
+      "claims": 48,
+      "rows": 544,
+      "max_absolute_score_delta": 0.0,
+      "prediction_set_changed_claims": 0,
+      "prediction_set_consistency": 1.0
+    }
+  },
+  "elapsed_seconds_evaluation": 48.44
+}

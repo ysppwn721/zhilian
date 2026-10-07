@@ -1,0 +1,40 @@
+{
+  "dataset": "答辩评测\\v3_real_value_20261005\\benchmark_v3_core90.jsonl",
+  "source": "答辩评测\\v3_real_value_20261005\\benchmark_v3.jsonl",
+  "source_sha256": "47eb0e03dcf9fa7c42bb6f74cfe288cd72b5a624e5a2ec685a2d4b82ae7d73e7",
+  "sha256": "29f8aee2ba95570fd77a7979e3fa75e54faa1e55c0b43611c11c6bc88a1f007c",
+  "claims": 90,
+  "rows": 666,
+  "companies": 63,
+  "task_types": {
+    "quote_current": 45,
+    "growth_set": 45
+  },
+  "period_balance": {
+    "quote_current": 45,
+    "quote_prior": 0,
+    "note": "池内没有合法的真实上期纯单值句，未伪造配平样本"
+  },
+  "claim_contains_real_value": 1.0,
+  "claim_contains_real_value_by_task": {
+    "quote_current": {
+      "claims": 45,
+      "claim_contains_real_value": 1.0
+    },
+    "quote_prior": {
+      "claims": 0,
+      "claim_contains_real_value": 0.0
+    },
+    "growth_set": {
+      "claims": 45,
+      "claim_contains_real_value": 1.0
+    }
+  },
+  "zero_information_baseline": {
+    "first": 0.17777777777777778,
+    "last": 0.15555555555555556,
+    "random_expected": 0.09916225749559082
+  },
+  "selection": "company round-robin; lexicographic claim order within company",
+  "note": "任务平衡核心集：45 条真实数值单值 + 45 条真实增长双来源；不是本期/上期期间配平集。"
+}

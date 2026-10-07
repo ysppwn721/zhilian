@@ -25,6 +25,18 @@ def confirm_all(store, w):
     return store.confirm(w['id'], w['revision'], [{'claim_id': c['id'], 'refs': c['refs']} for c in w['claims']])
 
 
+def test_delete_project_removes_workspace_and_all_versions(project, tmp_path):
+    store, w = project
+    folder = store.folder(w['id'])
+    assert folder.is_dir()
+    result = store.delete(w['id'])
+    assert result == {'id': w['id'], 'name': '测试项目', 'deleted': True}
+    assert not folder.exists()
+    assert store.list() == []
+    with pytest.raises(FileNotFoundError):
+        store.read(w['id'])
+
+
 def test_real_files_roundtrip_and_undo(project):
     store, w = project
     assert w['summary']['claims'] >= 11
@@ -146,6 +158,9 @@ def test_api_workflow_and_boundary(tmp_path, monkeypatch):
     assert client.get('/api/projects/not-valid').status_code == 400
     assert client.get('/api/projects/'+'a'*32).status_code == 404
     assert client.get(f'/api/projects/{w["id"]}/export').status_code == 200
+    deleted = client.delete(f'/api/projects/{w["id"]}')
+    assert deleted.status_code == 200 and deleted.json()['deleted'] is True
+    assert client.get(f'/api/projects/{w["id"]}').status_code == 404
     monkeypatch.setenv('ZHILIAN_ACCESS_PASSWORD', 'local-test-password')
     assert client.get('/api/health').status_code == 401
     assert client.get('/api/health', auth=('zhilian', 'local-test-password')).status_code == 200
@@ -213,6 +228,96 @@ def test_append_documents_api_rejects_excel_and_supports_batch(tmp_path, monkeyp
     rejected = client.post(f'/api/projects/{w["id"]}/documents', data={'revision': result['revision']},
                            files=[('files', (excel.name, excel.read_bytes(), 'application/octet-stream'))])
     assert rejected.status_code == 400
+
+
+def test_append_documents_api_tolerant_mode_keeps_good_files_and_reports_bad(tmp_path, monkeypatch):
+    monkeypatch.delenv('ZHILIAN_ACCESS_PASSWORD', raising=False)
+    from zhilian.app import create_app
+    app = create_app(tmp_path / 'api')
+    client = TestClient(app)
+    paths = create_demo(tmp_path / 'input')
+    created = client.post('/api/projects', data={'name': '容错批次'},
+                          files=[('files', (p.name, p.read_bytes(), 'application/octet-stream')) for p in paths[:2]])
+    assert created.status_code == 200, created.text
+    w = created.json()
+    good = tmp_path / 'input' / '追加正常.docx'
+    doc = Document(paths[1])
+    doc.add_paragraph('容错模式应保留的正常文件')
+    doc.save(good)
+    bad = tmp_path / 'input' / '追加损坏.docx'
+    bad.write_bytes(b'not an Office document')
+    response = client.post(
+        f"/api/projects/{w['id']}/documents",
+        data={'revision': w['revision'], 'continue_on_error': 'true'},
+        files=[
+            ('files', (good.name, good.read_bytes(), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')),
+            ('files', (bad.name, bad.read_bytes(), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')),
+        ],
+    )
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result['batch']['status'] == 'partial'
+    assert result['batch']['count'] == 1 and result['batch']['rejected'] == 1
+    assert result['batch_results']['accepted'][0]['name'] == good.name
+    assert result['batch_results']['rejected'][0]['name'] == bad.name
+    assert '有效的 Office' in result['batch_results']['rejected'][0]['reason']
+    assert result['summary']['documents'] == 3
+    assert result['revision'] == w['revision'] + 1
+
+
+def test_append_documents_api_tolerant_mode_rejects_duplicate_but_accepts_new_file(tmp_path, monkeypatch):
+    monkeypatch.delenv('ZHILIAN_ACCESS_PASSWORD', raising=False)
+    from zhilian.app import create_app
+    app = create_app(tmp_path / 'api')
+    client = TestClient(app)
+    paths = create_demo(tmp_path / 'input')
+    created = client.post('/api/projects', data={'name': '重复文件隔离'},
+                          files=[('files', (p.name, p.read_bytes(), 'application/octet-stream')) for p in paths[:2]])
+    w = created.json()
+    duplicate = paths[1]
+    good = tmp_path / 'input' / '第三份报告.docx'
+    doc = Document(paths[1])
+    doc.add_paragraph('不应被重复文件失败拖累')
+    doc.save(good)
+    response = client.post(
+        f"/api/projects/{w['id']}/documents",
+        data={'revision': w['revision'], 'continue_on_error': 'true'},
+        files=[
+            ('files', (duplicate.name, duplicate.read_bytes(), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')),
+            ('files', (good.name, good.read_bytes(), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')),
+        ],
+    )
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result['batch']['status'] == 'partial'
+    assert result['batch']['count'] == 1 and result['batch']['rejected'] == 1
+    assert result['batch_results']['rejected'][0]['name'] == duplicate.name
+    assert result['batch_results']['accepted'][0]['name'] == good.name
+    assert result['summary']['documents'] == 3
+
+
+def test_append_documents_api_tolerant_mode_all_bad_does_not_change_project(tmp_path, monkeypatch):
+    monkeypatch.delenv('ZHILIAN_ACCESS_PASSWORD', raising=False)
+    from zhilian.app import create_app
+    app = create_app(tmp_path / 'api')
+    client = TestClient(app)
+    paths = create_demo(tmp_path / 'input')
+    created = client.post('/api/projects', data={'name': '全失败批次'},
+                          files=[('files', (p.name, p.read_bytes(), 'application/octet-stream')) for p in paths[:2]])
+    w = created.json()
+    bad = tmp_path / 'input' / '全损坏.docx'
+    bad.write_bytes(b'not an Office document')
+    response = client.post(
+        f"/api/projects/{w['id']}/documents",
+        data={'revision': w['revision'], 'continue_on_error': 'true'},
+        files=[('files', (bad.name, bad.read_bytes(), 'application/octet-stream'))],
+    )
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result['batch']['status'] == 'failed'
+    assert result['batch']['count'] == 0 and result['batch']['rejected'] == 1
+    assert result['revision'] == w['revision']
+    assert result['summary']['documents'] == w['summary']['documents']
 
 
 def test_append_document_batch_rolls_back_when_one_file_is_invalid(tmp_path):

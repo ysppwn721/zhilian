@@ -1,0 +1,11 @@
+{
+  "source_review": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\v3_eval_20261005\\v3_review_sheet_40.csv",
+  "source_benchmark": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\v3_real_value_20261005\\benchmark_v3.jsonl",
+  "review_rows": 40,
+  "claims_scored": 37,
+  "candidate_rows_scored": 279,
+  "abstained_claims": 3,
+  "invalid_rows": 0,
+  "labels": "human_reviewed_source_ids",
+  "programmatic_labels_not_used_for_scoring": true
+}

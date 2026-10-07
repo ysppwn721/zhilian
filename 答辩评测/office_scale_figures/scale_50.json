@@ -1,0 +1,16 @@
+{
+  "documents_total": 53,
+  "excel_sources": 1,
+  "word_documents": 50,
+  "ppt_pages": 24,
+  "ppt_claims": 24,
+  "word_claims": 50,
+  "batches": 2,
+  "batch_seconds": [
+    1.611,
+    0.603
+  ],
+  "total_seconds": 3.302,
+  "summary_claims": 79,
+  "status": "passed"
+}

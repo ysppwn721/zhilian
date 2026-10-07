@@ -55,6 +55,10 @@ def test_model_suggestions_validated_without_key_leak(monkeypatch,tmp_path):
         # Fact values are not needed for semantic linking and are not sent.
         user=json.loads(kwargs['json']['messages'][1]['content'])
         assert 'value' not in user['facts'][0]
+        assert all(c['expected_k'] == (2 if c['kind'] == 'growth' else 1)
+                   for c in user['claims'] if c['kind'] in {'growth', 'quote'})
+        assert all(c['task_rule'] in {'growth_set', 'quote_current'}
+                   for c in user['claims'] if c['kind'] in {'growth', 'quote'})
         content={'suggestions':[
             {'claim_id':first['id'],'refs':first['refs'],'reason':'match'},
             {'claim_id':first['id'],'refs':['invented-id'],'reason':'bad'},
@@ -65,6 +69,53 @@ def test_model_suggestions_validated_without_key_leak(monkeypatch,tmp_path):
     assert len(result)==1
     assert first['confirmed'] is False
     assert 'test-secret' not in json.dumps(llm.config())
+
+
+def test_model_call_metrics_capture_usage_without_payload_or_key(monkeypatch, tmp_path):
+    monkeypatch.setenv('DEEPSEEK_API_KEY', 'test-secret')
+    monkeypatch.setenv('ZHILIAN_INPUT_PRICE_PER_MILLION', '1')
+    monkeypatch.setenv('ZHILIAN_OUTPUT_PRICE_PER_MILLION', '2')
+    store = Store(tmp_path / 'data')
+    w = store.create('metrics', create_demo(tmp_path / 'files'))
+    first = w['claims'][0]
+
+    def fake_post(url, **kwargs):
+        content = {'suggestions': [{'claim_id': first['id'], 'refs': first['refs'], 'reason': 'match'}]}
+        return httpx.Response(200, json={
+            'choices': [{'message': {'content': json.dumps(content)}}],
+            'usage': {'prompt_tokens': 11, 'completion_tokens': 7, 'total_tokens': 18},
+        })
+
+    monkeypatch.setattr(httpx, 'post', fake_post)
+    result = llm.suggest_links(w['claims'], w['facts'])
+    metrics = llm.consume_last_call_metrics()
+    assert len(result) == 1
+    assert metrics['outcome'] == 'succeeded'
+    assert metrics['prompt_tokens'] == 11 and metrics['completion_tokens'] == 7
+    assert metrics['total_tokens'] == 18 and metrics['estimated_cost_cny'] == 0.000025
+    assert 'test-secret' not in json.dumps(metrics)
+
+
+def test_semantic_sentence_recall_returns_only_validated_sentence_keys(monkeypatch):
+    monkeypatch.setenv('DEEPSEEK_API_KEY', 'test-secret')
+    blocks = [{'file_id': 'doc', 'location': 'p0', 'text': '公司实现营收125万元。普通说明。'}]
+
+    def fake_post(url, **kwargs):
+        payload = json.loads(kwargs['json']['messages'][1]['content'])
+        assert payload['blocks'][0]['block_id'] == 'doc::p0'
+        assert '125' not in payload['blocks'][0]['text']
+        body = {'sentences': [
+            {'block_id': 'doc::p0', 'sentence_index': 0, 'reason': '包含数量结论'},
+            {'block_id': 'invented', 'sentence_index': 0, 'reason': 'discard'},
+            {'block_id': 'doc::p0', 'sentence_index': '0', 'reason': 'discard'},
+        ]}
+        return httpx.Response(200, json={'choices': [{'message': {'content': json.dumps(body)}}],
+                                  'usage': {'prompt_tokens': 10, 'completion_tokens': 4, 'total_tokens': 14}})
+
+    monkeypatch.setattr(httpx, 'post', fake_post)
+    result = llm.suggest_claim_sentences(blocks)
+    assert result == [{'block_id': 'doc::p0', 'sentence_index': 0, 'reason': '包含数量结论'}]
+    assert llm.consume_last_call_metrics()['total_tokens'] == 14
 
 
 def test_model_error_does_not_expose_provider_body(monkeypatch):

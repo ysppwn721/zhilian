@@ -26,7 +26,7 @@ def config():
         backend = 'deepseek' if configured['enabled'] else 'off'
     if backend not in ('deepseek', 'off'):
         backend = 'off'
-    return {'enabled': backend == 'deepseek' and configured['enabled'],
+    return {'enabled': backend == 'deepseek' and configured['enabled'] and llm.remote_allowed(),
             'backend': backend, 'model': configured['model'],
             'key_configured': configured['key_configured']}
 

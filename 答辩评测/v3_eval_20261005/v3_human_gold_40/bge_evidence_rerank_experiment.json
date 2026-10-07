@@ -1,0 +1,167 @@
+{
+  "method": "BGE raw score + metric/period/unit/value evidence",
+  "development_dataset": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\v3_real_value_20261005\\benchmark_v3.jsonl",
+  "human_gold_dataset": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\v3_eval_20261005\\v3_human_gold_40\\human_gold.jsonl",
+  "weight_selection": "fixed grid selected on programmatic v3 only",
+  "base_bge_development": {
+    "weights": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "quote_top1": 0.6888888888888889,
+    "growth_exact": 0.6338983050847458,
+    "growth_f1": 0.8016949152542374,
+    "metrics": {
+      "by_task": {
+        "growth_set": {
+          "claims": 295,
+          "source_set_exact_match": 0.6338983050847458,
+          "source_set_completeness_recall": 0.8016949152542373,
+          "source_set_precision": 0.8016949152542373,
+          "ambiguous_at_top2_boundary": 0
+        },
+        "quote_current": {
+          "claims": 45,
+          "top1_accuracy": 0.6888888888888889,
+          "error_association_rate": 0.3111111111111111,
+          "ambiguous_top1": 0
+        }
+      },
+      "by_variant": {
+        "literal": {
+          "quote_claims": 34,
+          "quote_top1_accuracy": 0.6470588235294118,
+          "growth_claims": 233,
+          "growth_set_exact_match": 0.6652360515021459
+        },
+        "synonym": {
+          "quote_claims": 11,
+          "quote_top1_accuracy": 0.8181818181818182,
+          "growth_claims": 62,
+          "growth_set_exact_match": 0.5161290322580645
+        }
+      }
+    }
+  },
+  "best_development": {
+    "weights": [
+      2.0,
+      0.75,
+      0.5,
+      2.25
+    ],
+    "quote_top1": 0.9111111111111111,
+    "growth_exact": 0.8271186440677966,
+    "growth_f1": 0.9084745762711864,
+    "metrics": {
+      "by_task": {
+        "growth_set": {
+          "claims": 295,
+          "source_set_exact_match": 0.8271186440677966,
+          "source_set_completeness_recall": 0.9084745762711864,
+          "source_set_precision": 0.9084745762711864,
+          "ambiguous_at_top2_boundary": 0
+        },
+        "quote_current": {
+          "claims": 45,
+          "top1_accuracy": 0.9111111111111111,
+          "error_association_rate": 0.0888888888888889,
+          "ambiguous_top1": 0
+        }
+      },
+      "by_variant": {
+        "literal": {
+          "quote_claims": 34,
+          "quote_top1_accuracy": 0.9117647058823529,
+          "growth_claims": 233,
+          "growth_set_exact_match": 0.8283261802575107
+        },
+        "synonym": {
+          "quote_claims": 11,
+          "quote_top1_accuracy": 0.9090909090909091,
+          "growth_claims": 62,
+          "growth_set_exact_match": 0.8225806451612904
+        }
+      }
+    }
+  },
+  "base_bge_human_gold": {
+    "weights": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "quote_top1": 0.631578947368421,
+    "growth_exact": 0.5555555555555556,
+    "growth_f1": 0.7222222222222222,
+    "metrics": {
+      "by_task": {
+        "quote_current": {
+          "claims": 19,
+          "top1_accuracy": 0.631578947368421,
+          "error_association_rate": 0.368421052631579,
+          "ambiguous_top1": 0
+        },
+        "growth_set": {
+          "claims": 18,
+          "source_set_exact_match": 0.5555555555555556,
+          "source_set_completeness_recall": 0.7222222222222222,
+          "source_set_precision": 0.7222222222222222,
+          "ambiguous_at_top2_boundary": 0
+        }
+      },
+      "by_variant": {
+        "literal": {
+          "quote_claims": 19,
+          "quote_top1_accuracy": 0.631578947368421,
+          "growth_claims": 18,
+          "growth_set_exact_match": 0.5555555555555556
+        }
+      }
+    }
+  },
+  "heldout_human_gold": {
+    "weights": [
+      2.0,
+      0.75,
+      0.5,
+      2.25
+    ],
+    "quote_top1": 0.8947368421052632,
+    "growth_exact": 0.7777777777777778,
+    "growth_f1": 0.8611111111111112,
+    "metrics": {
+      "by_task": {
+        "quote_current": {
+          "claims": 19,
+          "top1_accuracy": 0.8947368421052632,
+          "error_association_rate": 0.10526315789473684,
+          "ambiguous_top1": 0
+        },
+        "growth_set": {
+          "claims": 18,
+          "source_set_exact_match": 0.7777777777777778,
+          "source_set_completeness_recall": 0.8611111111111112,
+          "source_set_precision": 0.8611111111111112,
+          "ambiguous_at_top2_boundary": 0
+        }
+      },
+      "by_variant": {
+        "literal": {
+          "quote_claims": 19,
+          "quote_top1_accuracy": 0.8947368421052632,
+          "growth_claims": 18,
+          "growth_set_exact_match": 0.7777777777777778
+        }
+      }
+    }
+  },
+  "caveats": [
+    "开发集标签是程序化弱标签；只用于选择固定权重，不作为人工准确率。",
+    "人工 Gold 仅 37 条可评分题，3 条人工拒答；结果用于方向判断，不代表全行业泛化。",
+    "这是离线排序实验，尚未接入生产 BGE 路由。"
+  ]
+}

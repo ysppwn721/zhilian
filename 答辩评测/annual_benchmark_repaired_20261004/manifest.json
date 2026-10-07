@@ -1,0 +1,362 @@
+{
+  "dataset": "C:\\Users\\Administrator\\Desktop\\华北五省设计\\答辩评测\\annual_benchmark_repaired_20261004\\benchmark.jsonl",
+  "rows": 14450,
+  "claims": 1275,
+  "reports": 36,
+  "companies": 19,
+  "task_counts": {
+    "quote_current": 425,
+    "quote_prior": 425,
+    "growth_set": 425
+  },
+  "variant_counts": {
+    "literal": 864,
+    "controlled_alias": 411
+  },
+  "period_positive_claims": {
+    "quote_current": 425,
+    "quote_prior": 425
+  },
+  "source_set_growth_claims": 425,
+  "position_0_positive_rate": 0.117647,
+  "frozen_source_sha256_before": "71c60205167aca6e13db48063e546f79e71f2840f3668197b01b983f4298a1f0",
+  "reports_detail": [
+    {
+      "file": "000615_奥园美谷科技股份有限公司2023年年度报告更正后.pdf",
+      "code": "000615",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 33,
+      "controlled_alias_metrics": 3,
+      "sha256": "8765ec6005caba324cab68fea15a95d576535c21e58e2e97ddeff45f76932bc6"
+    },
+    {
+      "file": "000930_2023年年度报告更正后.pdf",
+      "code": "000930",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "d0ce35a53b3dafb1cdafdd77d6ea18189580e82ae2ef55e5428b643a56996af0"
+    },
+    {
+      "file": "002097_2020年年度报告全文更新后.pdf",
+      "code": "002097",
+      "year": 2020,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "4fb71064bb8a96db4aeaaa5c468994a7383133828429240a34d5ae04053d5471"
+    },
+    {
+      "file": "002097_2021年年度报告全文更新后.pdf",
+      "code": "002097",
+      "year": 2021,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "fa81e3e9850f17799fc095bd31910e96031e5271b666e95320782a2613bdfa0a"
+    },
+    {
+      "file": "002097_2022年年度报告更新后.pdf",
+      "code": "002097",
+      "year": 2022,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "343bd2c983d2014eca6c5145bedb46a523564ddb148597c9ea727509ccb634b5"
+    },
+    {
+      "file": "002097_2023年年度报告全文更新后.pdf",
+      "code": "002097",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "802abf3837579593cd09839e7d7bae8da60f3cfb3a292eed5acf13e66b0ace2e"
+    },
+    {
+      "file": "002388_2023年年度报告更正后.pdf",
+      "code": "002388",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 33,
+      "controlled_alias_metrics": 3,
+      "sha256": "1b28a2920f6d746af4013a284f82b7dbd5ace29b9ca490f543a8ae6af605d733"
+    },
+    {
+      "file": "002413_2023年年度报告更新后.pdf",
+      "code": "002413",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "3eb72a588a5bc2a7f567fde6f12dfb9fec4c87dbd1c1cbe1e3ba0350f2a47d71"
+    },
+    {
+      "file": "002425_凯撒中国文化股份有限公司2021年年度报告更正后.pdf",
+      "code": "002425",
+      "year": 2021,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "65aba73ab68941b7c463f7c1f2c9858ae7e25b59556ccfd22b9131905c6a0d2c"
+    },
+    {
+      "file": "002425_凯撒中国文化股份有限公司2022年年度报告更正后.pdf",
+      "code": "002425",
+      "year": 2022,
+      "metrics": 8,
+      "claims": 33,
+      "controlled_alias_metrics": 3,
+      "sha256": "52d60b22091dc735459d954ca5e3f8b74f289f0026d23715ba2a4d6b92e8c11d"
+    },
+    {
+      "file": "002425_凯撒中国文化股份有限公司2023年年度报告更正后.pdf",
+      "code": "002425",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "4faad652134aba091ea13f04f01b62c532ac662244460b262e5ca51886efeabd"
+    },
+    {
+      "file": "002569_2019年年度报告全文更正后.pdf",
+      "code": "002569",
+      "year": 2019,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "07ab5ad1c5da6b92d114b8e5649e31fc73953c6a813f680aad4175e660f2bea2"
+    },
+    {
+      "file": "002569_2021年年度报告全文补充更正后.pdf",
+      "code": "002569",
+      "year": 2021,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "e2f2b203652c2aeb028b87308805c73ee5ea41b65561711395c605a3d257858a"
+    },
+    {
+      "file": "002569_2022年年度报告更正后.pdf",
+      "code": "002569",
+      "year": 2022,
+      "metrics": 8,
+      "claims": 33,
+      "controlled_alias_metrics": 3,
+      "sha256": "d76013eeb08bd938398d8b03c3941476fe263f5822e04316973bed8a3ee2af82"
+    },
+    {
+      "file": "002569_2022年年度报告补充更正后.pdf",
+      "code": "002569",
+      "year": 2022,
+      "metrics": 8,
+      "claims": 33,
+      "controlled_alias_metrics": 3,
+      "sha256": "50fd459c4aedc79fe393ec7cf036cf8e79476217336e7bac94c934c223ac30fb"
+    },
+    {
+      "file": "002569_2023年年度报告更正后.pdf",
+      "code": "002569",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 33,
+      "controlled_alias_metrics": 3,
+      "sha256": "15b60effbf4bc1bc93d5408b11cedeb5463088e0d68b8aa4d327263afeecdb6c"
+    },
+    {
+      "file": "002569_2023年年度报告补充更正后.pdf",
+      "code": "002569",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 33,
+      "controlled_alias_metrics": 3,
+      "sha256": "87419f3056532c1a6844bfd913c55e95283166fb4f23996de11b7d74f176b268"
+    },
+    {
+      "file": "002598_2023年年度报告全文更新后.pdf",
+      "code": "002598",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "770b6c1cb33da69584a56f701986a584769d9a8cb6cf988ce0094f6ab8cc6889"
+    },
+    {
+      "file": "002808_2019年年度报告更新后.pdf",
+      "code": "002808",
+      "year": 2019,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "32c0dd555f36fa34c9cfb9a2c421eac361e73a9f6a146695f0fd8a1dbaaa065e"
+    },
+    {
+      "file": "002808_2020年年度报告更新后.pdf",
+      "code": "002808",
+      "year": 2020,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "ed170434c150604601f53da3c25d01f0b5a68b2722850421b365e3c8c6b10014"
+    },
+    {
+      "file": "002808_2021年年度报告更新后.pdf",
+      "code": "002808",
+      "year": 2021,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "37d6393838ac94bbf80d62a21b8f84c27432a67f3822f94a19dcf7025b0ddb35"
+    },
+    {
+      "file": "002808_2022年年度报告更新后.pdf",
+      "code": "002808",
+      "year": 2022,
+      "metrics": 8,
+      "claims": 33,
+      "controlled_alias_metrics": 3,
+      "sha256": "2831fbc213c9bfa6d069f1442480509f1eb320235ec01047876968b584eb44a8"
+    },
+    {
+      "file": "002808_2023年年度报告更新后.pdf",
+      "code": "002808",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 33,
+      "controlled_alias_metrics": 3,
+      "sha256": "cc21dd94bfac77ee617892f33f222bb4ebcdf35fac1c7bed49d64230d18a710c"
+    },
+    {
+      "file": "002825_上海纳尔实业股份有限公司2023年年度报告更正后.pdf",
+      "code": "002825",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 33,
+      "controlled_alias_metrics": 3,
+      "sha256": "6a29c6a1c3149de1b5c5182f70a661bddd84f78b798d6fc60064f68304135bac"
+    },
+    {
+      "file": "300149_2022年年度报告更新后.pdf",
+      "code": "300149",
+      "year": 2022,
+      "metrics": 8,
+      "claims": 42,
+      "controlled_alias_metrics": 6,
+      "sha256": "250f76a9cea9436e2fa919535baf36ba0c0c2bc6ad58bb67c4dd6ef16d2bd21d"
+    },
+    {
+      "file": "300149_2023年年度报告更新后.pdf",
+      "code": "300149",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 42,
+      "controlled_alias_metrics": 6,
+      "sha256": "482bc1388d659b451b2b4aa5c1eecf53e1c1c0a0bd1d58d880e28ee480abd269"
+    },
+    {
+      "file": "300632_2022年年度报告更正后.pdf",
+      "code": "300632",
+      "year": 2022,
+      "metrics": 8,
+      "claims": 39,
+      "controlled_alias_metrics": 5,
+      "sha256": "38854296e87ba2d9df93a771122cdabbfb50eab51357eb6e64cac8d9ba0508f8"
+    },
+    {
+      "file": "300632_2023年年度报告更正后.pdf",
+      "code": "300632",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 39,
+      "controlled_alias_metrics": 5,
+      "sha256": "878185d1503dadca2b618d77da50c0e2390cb4f3ae87d644428e8df29820ec12"
+    },
+    {
+      "file": "600080_金花企业集团股份有限公司2023年年度报告更正版.pdf",
+      "code": "600080",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "8b20e633b8bf5c858a4a71a402928eec99d452127bec0f07f9caa48990b48df8"
+    },
+    {
+      "file": "600165_ST宁科2022年年度报告2024年12月修订.pdf",
+      "code": "600165",
+      "year": 2022,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "8892da6df0b5a67edcbb45dfd12c51c8c01ec45bf598e5b0cfb67e1ed968988b"
+    },
+    {
+      "file": "600165_ST宁科2023年年度报告2024年12月修订.pdf",
+      "code": "600165",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 33,
+      "controlled_alias_metrics": 3,
+      "sha256": "fbe21675283ea0ddbdcb524b4c27efe5ec5102ba833988bba132ea899d787c3c"
+    },
+    {
+      "file": "600187_2023年年度报告修订版.pdf",
+      "code": "600187",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 33,
+      "controlled_alias_metrics": 3,
+      "sha256": "bcc81b41e1526db30af2e9ce7bc3211fb4a065bd83dc494def3302bd7ded70df"
+    },
+    {
+      "file": "603839_安正时尚集团股份有限公司2023年年度报告更正后.pdf",
+      "code": "603839",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "d76aa663c537bd41df94562f0e69ecf054f4a204cd68726de6fc92ff6964b634"
+    },
+    {
+      "file": "688152_麒麟信安2023年年度报告更正后.pdf",
+      "code": "688152",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 33,
+      "controlled_alias_metrics": 3,
+      "sha256": "c4f606c1ee8cc3cb0113339bf9c32aab366d4060674322f00ee783c472fb381d"
+    },
+    {
+      "file": "836263_2023年年度报告更正后.pdf",
+      "code": "836263",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "a12f4b916597b6f22c0df262b3cecb9ce53c69d35c59a07fc6d2f79ad9b14a04"
+    },
+    {
+      "file": "873576_2023年年度报告更正后.pdf",
+      "code": "873576",
+      "year": 2023,
+      "metrics": 8,
+      "claims": 36,
+      "controlled_alias_metrics": 4,
+      "sha256": "55af3cfdc542a67ad0027e1190aa06fd32ebf8aa028219a31404b081f6e4e4f6"
+    }
+  ],
+  "programmatic": true,
+  "label_limitations": [
+    "Labels are generated from parsed PDF text and known field construction, not human annotation.",
+    "The PDF parser infers some units; reporting scope remains unverified.",
+    "Controlled aliases are weakly labeled diagnostics and need manual validation before gold claims.",
+    "This is a corrected diagnostic derivative of the existing held-out reports, not a new external corpus."
+  ],
+  "construction": {
+    "same_subject_same_period_other_metric_distractors": true,
+    "single_source_current_and_prior_balanced": true,
+    "candidate_order_seed": 20261004,
+    "growth_metric": "top-2 source-set exact match and completeness"
+  }
+}
