@@ -31,7 +31,9 @@ for _s in (sys.stdout, sys.stderr):
 ROOT = Path(__file__).resolve().parent.parent
 DEST = ROOT / 'docs' / '软著登记'
 SOFTWARE = '知链跨文档结论验证与增量修复软件'
-VERSION = 'V0.2.1'
+# 版本号不带 V，与申请表填报一致（官方：有无 V 以申请表为准）
+VERSION = '0.2.1'
+OWNER = '林子钧'
 LINES_PER_PAGE = 50
 PAGES = 30
 # 交给 PDF 生成器的每页行数。

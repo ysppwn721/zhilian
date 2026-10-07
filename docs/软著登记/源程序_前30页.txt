@@ -1,4 +1,4 @@
-—— 第 1 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 1 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
 // ===== 文件：run.py =====
 import os
 import uvicorn
@@ -51,7 +51,7 @@ from . import __version__
 from . import ocr, quota, reranker
 
 
-—— 第 2 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 2 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
 from .pdf_revised_export import available_docx_backends
 from .store import Store, now
 from .office import digest
@@ -104,7 +104,7 @@ class RevisionRequest(BaseModel):
 class ModelModeRequest(RevisionRequest):
 
 
-—— 第 3 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 3 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
     mode: Literal['rules', 'local', 'hybrid', 'api', 'api_only']
 class OcrRunRequest(RevisionRequest):
     image_ids: list[str] | None = Field(default=None, max_length=500)
@@ -157,7 +157,7 @@ def create_app(data_dir=None):
                 pass
 
 
-—— 第 4 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 4 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
             if not valid:
                 return JSONResponse({'detail': '请使用用户名 zhilian 与部署密码登录'}, status_code=401,
                                     headers={'WWW-Authenticate': 'Basic realm="Zhilian", charset="UTF-8"'})
@@ -210,7 +210,7 @@ def create_app(data_dir=None):
             # 线上演示显式请求语义改写夹具；默认 API 保持兼容，便于离线
 
 
-—— 第 5 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 5 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
             # 集成测试和第三方调用继续使用稳定的确定性样例。
             semantic_demo = request.query_params.get('semantic', '').lower() in ('1', 'true', 'yes', 'on')
             return store.create('销售分析 · 演示项目', create_demo(tmp, semantic_demo=semantic_demo), demo=True)
@@ -263,7 +263,7 @@ def create_app(data_dir=None):
             path = Path(tmp) / filename
 
 
-—— 第 6 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 6 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
             total = 0
             try:
                 with path.open('wb') as out:
@@ -316,7 +316,7 @@ def create_app(data_dir=None):
                     try:
 
 
-—— 第 7 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 7 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
                         result = await run_in_threadpool(store.append_documents, wid, current_revision, [path])
                         current_revision = result['revision']
                         accepted.append({'name': path.name, 'batch': result.get('batch')})
@@ -369,7 +369,7 @@ def create_app(data_dir=None):
     def set_derivations(wid: str, body: DerivationsRequest):
 
 
-—— 第 8 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 8 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
         return store.set_derivations(wid, body.revision, [i.model_dump() for i in body.derivations])
     @app.delete('/api/projects/{wid}/derivations/{rid}')
     def remove_derivation(wid: str, rid: str, revision: int):
@@ -422,7 +422,7 @@ def create_app(data_dir=None):
         with store.lock:
 
 
-—— 第 9 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 9 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
             ws = store.read(wid)
             store.verify(ws, body.revision)
             ws['suggestions'] = result
@@ -475,7 +475,7 @@ def create_app(data_dir=None):
         with store.lock:
 
 
-—— 第 10 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 10 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
             ws = store.read(wid)
             store.verify(ws, ws['revision'])
             image = next((i for i in ws.get('images', []) if i['id'] == iid), None)
@@ -528,7 +528,7 @@ def create_app(data_dir=None):
             return FileResponse(path, filename=item.get('name', path.name), media_type='application/pdf')
 
 
-—— 第 11 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 11 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
     @app.get('/api/projects/{wid}/pdf-revisions/{index}/manifest')
     def download_revised_manifest(wid: str, index: int):
         with store.lock:
@@ -581,7 +581,7 @@ from __future__ import annotations
 import hashlib
 
 
-—— 第 12 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 12 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
 import math
 import re
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
@@ -634,7 +634,7 @@ GENERIC_SUBJECTS = ('总计', '整体', '全部')
 # 期间是封闭词表，同义写法属于确定性规则该覆盖的范围：真实文档写"报告期/本年/
 
 
-—— 第 13 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 13 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
 # 去年同期"，而事实表只写"本期/上期"。不归一化会让上期与本期同分并列，一条普通
 # 数值引用被判成"口径不唯一"，甚至让阈值/增长率拿不到唯一来源。
 PERIOD_SYNONYMS = {
@@ -687,7 +687,7 @@ def build_index(facts):
             token_ids.setdefault(alias, set()).add(fact['id'])
 
 
-—— 第 14 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 14 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
     return {'token_ids': token_ids}
 _INDEX_CACHE = {}
 _INDEX_CACHE_MAX = 8
@@ -740,7 +740,7 @@ def best_facts(text, facts, *, period=None, index=None):
         if fact.get('subject', '') not in GENERIC_SUBJECTS:
 
 
-—— 第 15 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 15 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
             score += 4
         if fact['period'] and period_in_text(fact['period'], text):
             score += 3
@@ -793,7 +793,7 @@ def extract_claims(block, facts, index=None):
         # 年报有两种稳定写法：带比较期间（同比增长25%），以及在同一
 
 
-—— 第 16 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 16 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
         # 句子中直接写“产量增加179.79%”。后者只有在动词后紧跟百分比
         # 时才启用，避免把普通叙述中的“增加”误识别成增长率论断。
         ('growth', r'(?:(?:较上期|环比|较上年|比上年|同比)\s*|'
@@ -846,7 +846,7 @@ def extract_claims(block, facts, index=None):
             legacy_kind[sentence_index] = 'growth'
 
 
-—— 第 17 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 17 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
         elif re.search(patterns[1][1], sentence_text):
             legacy_kind[sentence_index] = 'ranking'
         elif re.search(patterns[2][1], sentence_text):
@@ -899,7 +899,7 @@ def extract_claims(block, facts, index=None):
             spec = {'span': [growth.start(1), growth.end()],
 
 
-—— 第 18 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 18 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
                     'reported': float(number(growth[2])) if growth[2] else 0.0,
                     'qualitative': growth[2] is None, 'direction': direction_word}
             if not comparison_explicit:
@@ -952,7 +952,7 @@ def extract_claims(block, facts, index=None):
                 legacy_assigned.add(sentence_index)
 
 
-—— 第 19 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 19 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
                 source_key = stable_id(block['file_id'], block['location'], kind, legacy_id_index[sentence_index])
             else:
                 source_key = stable_id(block['file_id'], block['location'], 'compound-v2', compound_counter, kind)
@@ -1005,7 +1005,7 @@ def check(claim, facts):
             replacement = format(displayed, 'f')
 
 
-—— 第 20 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 20 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
             expected = replace_span(old, s['span'], replacement)
             calculation = f"按原文 {decimals} 位小数四舍五入：{refs[0]['value']} {refs[0]['unit']} = {replacement} {s['unit']}"
         elif k == 'growth':
@@ -1058,7 +1058,7 @@ def check(claim, facts):
             ok = truth == s['reported_positive']
 
 
-—— 第 21 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 21 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
             expected = replace_span(old, s['span'], s['positive'] if truth else s['negative'])
             calculation = f"{fmt(value)}{unit} {s['op']} {fmt(limit)}{unit} → {'成立' if truth else '不成立'}"
         elif k == 'chart':
@@ -1111,7 +1111,7 @@ def inspect(workspace):
 """Local persistent workspaces and transactional versions."""
 
 
-—— 第 22 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 22 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
 from __future__ import annotations
 import copy
 import json
@@ -1164,7 +1164,7 @@ class Store:
         if not metrics:
 
 
-—— 第 23 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 23 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
             return
         entry = copy.deepcopy(metrics)
         entry['node'] = node
@@ -1217,7 +1217,7 @@ class Store:
                 if not gate['allowed']:
 
 
-—— 第 24 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 24 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
                     result['semantic_status'] = 'quota_blocked'
                     result['semantic_claims_sent'] = 0
                     ws['audit'].append({'time': now(), 'event': '模型额度用尽',
@@ -1270,7 +1270,7 @@ class Store:
         # 基础事实与完整事实分开保存：Excel 只承载基础事实，派生事实由表达式
 
 
-—— 第 25 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 25 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
         # 定义，既不能被写回 Excel，也不能被直接改数值。
         source_path = folder / source['stored_name']
         ws['fact_quality'] = inspect_fact_source(source_path)
@@ -1323,7 +1323,7 @@ class Store:
                           overrides=overrides, previous=previous)
 
 
-—— 第 26 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 26 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
         ws['graph'] = {
             # 派生值是 Decimal，落盘前必须转 float，否则 json.dumps 会拒绝序列化。
             'derived': [{'id': f['id'], 'op': f['op'], 'inputs': f['inputs'], 'unit': f['unit'],
@@ -1376,7 +1376,7 @@ class Store:
             return self._rescan_and_commit(ws, '定义派生事实',
 
 
-—— 第 27 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 27 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
                                            f'共{len(ws["derivations"])}项派生事实；引用完整性校验通过')
     def remove_derivation(self, wid, revision, rid):
         with self.lock:
@@ -1429,7 +1429,7 @@ class Store:
                     mime = ocr.IMAGE_EXTENSIONS[ext]
 
 
-—— 第 28 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 28 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
                     stored = 'images/' + img_id + '.' + ocr.MIME_EXT.get(mime, 'bin')
                     path = current / stored
                     path.parent.mkdir(exist_ok=True)
@@ -1482,7 +1482,7 @@ class Store:
                              'word': Path(conversion['word']).name,
 
 
-—— 第 29 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 29 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
                              'excel': Path(conversion['excel']).name})
             result = self.create(name, generated, allow_empty_facts=not bool(conversion.get('facts')),
                                  pdf_import=True)
@@ -1535,7 +1535,7 @@ class Store:
                 raise ValueError(f'项目文档总数不能超过{max_total}份')
 
 
-—— 第 30 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 30 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
             existing_names = {d['name'] for d in ws['documents']}
             if existing_names.intersection(names):
                 raise ValueError('项目中已有同名文件，请重命名后再追加')
@@ -1588,7 +1588,7 @@ class Store:
                             image_path.parent.mkdir(exist_ok=True)
 
 
-—— 第 31 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 31 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
                             image_path.write_bytes(item.pop('blob'))
                             item.update(stored_name=stored, sha256=digest(image_path), ocr_text=None,
                                         ocr_status='pending', ocr_error=None)
@@ -1641,7 +1641,7 @@ class Store:
         result['model_mode'] = llm.mode(ws)
 
 
-—— 第 32 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 32 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
         result['model_mode_label'] = llm.mode_label(result['model_mode'])
         result['model_mode_source'] = 'project' if ws.get('model_mode') in llm.LLM_MODES else 'server'
         with llm.using_mode(result['model_mode']):
@@ -1694,7 +1694,7 @@ class Store:
             item['download_url'] = f'/api/projects/{ws["id"]}/pdf-revisions/{index}'
 
 
-—— 第 33 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 33 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
             item['manifest_url'] = f'/api/projects/{ws["id"]}/pdf-revisions/{index}/manifest'
         result.setdefault('images', [])
         for item in result['images']:
@@ -1747,7 +1747,7 @@ class Store:
             settings = ocr.config()
 
 
-—— 第 34 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 34 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
             if not selected or not settings['enabled']:
                 return self.public(ws)
             paths = {i['id']: self.image_path(ws, i) for i in selected}
@@ -1800,7 +1800,7 @@ class Store:
                 image = images[item['image_id']]
 
 
-—— 第 35 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 35 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（前 30 页） ——
                 text = item['text'].strip()
                 block = {k: image[k] for k in ('file_id', 'location', 'label')}
                 block.update(image_id=image['id'], text=text, source='ocr')

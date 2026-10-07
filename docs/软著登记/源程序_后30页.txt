@@ -1,4 +1,4 @@
-—— 第 1 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 1 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     monkeypatch.setenv('DEEPSEEK_API_KEY', 'test-secret')
     def post(*a, **k):
         if error in ('401', '500'):
@@ -51,7 +51,7 @@ def test_readonly_and_version_roundtrip(project, monkeypatch):
     assert next(r for r in ws['checks'] if r.get('ocr'))['status'] == 'consistent'
 
 
-—— 第 2 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 2 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     assert store.image_path(store.read(ws['id']), store.read(ws['id'])['images'][0]).is_file()
 def test_reconfirm_replaces_and_unverifiable_needs_review(project, monkeypatch):
     store, ws = project
@@ -104,7 +104,7 @@ def test_revision_guards_and_atomic_confirmation(project, monkeypatch):
     enable(monkeypatch)
 
 
-—— 第 3 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 3 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     ws = store.ocr_run(ws['id'], state['revision'], [state['images'][0]['id']])
     before = store.read(ws['id'])
     with pytest.raises(ValueError, match='先运行'):
@@ -157,7 +157,7 @@ def test_conflicting_same_page_facts_are_quarantined():
         {"id": "c", "source_page": 70, "metric": "营业成本", "period": "本期",
 
 
-—— 第 4 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 4 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
          "value": 12_610_339_015.64, "unit": "元", "source_table": 2, "source_row": 8},
     ]
     accepted, conflicts = _quarantine_conflicting_facts(facts)
@@ -210,7 +210,7 @@ def test_export_pdf_to_office_creates_provenance_files(tmp_path, monkeypatch):
     assert json.loads((tmp_path / "out" / "annual_report_转换清单.json").read_text(encoding="utf-8"))["facts"] == 1
 
 
-—— 第 5 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 5 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     from openpyxl import load_workbook
     workbook = load_workbook(excel, read_only=True, data_only=True)
     assert workbook["事实候选"]["A2"].value == "pdf-p1-t1-r2-current"
@@ -263,7 +263,7 @@ def test_store_keeps_original_pdf_and_archives_it(tmp_path, monkeypatch):
     source = tmp_path / "source.pdf"
 
 
-—— 第 6 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 6 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     source.write_bytes(b"pdf-origin")
     def fake_export(pdf_path, output_dir, subject=None):
         paths = create_demo(output_dir)
@@ -316,7 +316,7 @@ def test_store_exports_independent_revised_pdf_and_manifest(tmp_path, monkeypatc
     from zhilian.demo import create_demo
 
 
-—— 第 7 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 7 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     from zhilian.store import Store
     import zhilian.store as store_module
     source = tmp_path / "source.pdf"
@@ -369,7 +369,7 @@ def test_visual_overlay_writes_a_new_pdf_and_replaces_text(tmp_path):
     source = tmp_path / "source.pdf"
 
 
-—— 第 8 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 8 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     output = tmp_path / "overlay.pdf"
     _make_pdf(source)
     result = overlay_replace_pdf(source, output, page_number=1, old="125", new="130")
@@ -422,7 +422,7 @@ def test_manifest_records_independent_revision_and_hashes(tmp_path):
     manifest = build_revised_pdf_manifest(
 
 
-—— 第 9 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 9 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
         original,
         {"pdf": str(revised), "docx": "edited.docx", "backend": "microsoft_word"},
         verification,
@@ -475,7 +475,7 @@ def test_preflight_defaults_to_errata_when_font_coverage_is_unknown(tmp_path):
     _make_pdf(source, ["Revenue for current period is 125 CNY."])
 
 
-—— 第 10 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 10 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     result = pdf_writeback.preflight_pdf_writeback(
         source,
         [{"page": 1, "old": "125", "new": "130", "anchor": "营收"}],
@@ -528,7 +528,7 @@ def test_scanned_or_empty_pdf_rejects_writeback(tmp_path):
         [{"page": 1, "old": "125", "new": "130"}],
 
 
-—— 第 11 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 11 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     )
     assert result["decision"] == "reject"
     assert any("文字层" in reason for reason in result["reasons"])
@@ -581,7 +581,7 @@ def test_errata_markdown_keeps_original_untouched(tmp_path):
     _make_pdf(source, ["Revenue for current period is 125 CNY."])
 
 
-—— 第 12 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 12 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     preflight = pdf_writeback.preflight_pdf_writeback(
         source, [{"page": 1, "old": "125", "new": "130"}]
     )
@@ -634,7 +634,7 @@ def write_dataset(root: Path, *, ready=True, labels=True, balanced=True):
             encoding="utf-8",
 
 
-—— 第 13 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 13 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
         )
 def run(source: Path, out: Path) -> int:
     import sys
@@ -687,7 +687,7 @@ def isolated(tmp_path, monkeypatch):
 @pytest.fixture
 
 
-—— 第 14 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 14 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
 def project(tmp_path):
     store = Store(tmp_path / 'data')
     return store, store.create('限额测试', create_demo(tmp_path / 'files'), True)
@@ -740,7 +740,7 @@ def test_global_limit_blocks_every_visitor(project, monkeypatch):
     assert len(calls) == 1
 
 
-—— 第 15 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 15 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     # 换一个访客也应被全局预算拦住
     token = quota.identify('另一个访客')
     try:
@@ -793,7 +793,7 @@ def test_visitor_identity_follows_cloudflare_header():
 识别率约 0.5%（580 条含数字句子中仅 3 条）。本文件锁定已补齐的那部分能力，
 
 
-—— 第 16 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 16 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
 并明确记录仍未覆盖的部分，避免再次出现「合成语料 100% = 真实泛化能力」的误判。
 """
 import pytest
@@ -846,7 +846,7 @@ def test_original_display_precision_and_currency_conversion(text, value, status)
 def test_quote_vocabulary_variants_are_recognized(text):
 
 
-—— 第 17 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 17 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     """年报常见连接词和标题式金额应进入论断层。"""
     assert kinds(text) == ['quote']
 # ---- 增长率用词 ----------------------------------------------------------
@@ -899,7 +899,7 @@ def test_bare_percentage_requires_user_to_complete_comparison_period():
     assert '比较基准未明确' in claim['issue']
 
 
-—— 第 18 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 18 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
 # ---- 阈值用词 ------------------------------------------------------------
 @pytest.mark.parametrize('text', [
     '支出未超过预算',
@@ -952,7 +952,7 @@ def test_new_metric_does_not_inherit_growth_source():
         assert next(c for c in claims if c['kind'] == 'growth')['refs'] == []
 
 
-—— 第 19 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 19 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
 // ===== 文件：tests/test_report.py =====
 from copy import deepcopy
 from zipfile import ZipFile
@@ -1005,7 +1005,7 @@ def test_confirmed_but_unrepaired_is_not_deliverable(project):
     store, ws = project
 
 
-—— 第 20 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 20 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     ws = confirm_all(store, ws)
     ws = store.change(ws['id'], ws['revision'], {'sales_current': 90})
     report = build_report(ws)
@@ -1058,7 +1058,7 @@ def test_unverifiable_todos_are_grouped(project, case, title):
         claim['refs'] = []
 
 
-—— 第 21 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 21 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     elif case == 'count':
         claim['refs'] = ['sales_prev', 'sales_current']
     elif case == 'scope':
@@ -1111,7 +1111,7 @@ def test_reranker_accepts_calibrated_candidate():
     result = reranker.choose(scores, min_score=-2.0, min_margin=0.3)
 
 
-—— 第 22 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 22 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     assert result['action'] == 'link'
     assert result['refs'] == ['a']
 // ===== 文件：tests/test_review_agents.py =====
@@ -1164,7 +1164,7 @@ def test_semantic_audit_is_metadata_only_and_logged(tmp_path, monkeypatch):
         seen['groups'] = groups
 
 
-—— 第 23 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 23 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
         claims = groups[0]['claims']
         by_file = {}
         for item in claims:
@@ -1217,7 +1217,7 @@ CASES = [
     ('A产品出货量达80件', ['product_a']),
 
 
-—— 第 24 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 24 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     ('本期开支为80万元', ['spending']),
     ('本期费用为80万元', ['spending']),
     ('本期计划金额为100万元', ['budget']),
@@ -1270,7 +1270,7 @@ def test_preview_is_read_only_and_keeps_true_claims(tmp_path):
     assert result['summary']['changed_facts'] == 1
 
 
-—— 第 25 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 25 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     assert result['summary']['affected_claims'] > 0
     assert any(a['after_status'] == 'inconsistent' for a in result['affected'])
     assert all(a['claim_id'] in {c['id'] for c in ws['claims']} for a in result['affected'])
@@ -1323,7 +1323,7 @@ def test_read_only_tools_and_json_serialization(tmp_path):
     assert facts['facts']
 
 
-—— 第 26 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 26 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     assert parsed['claims']
     assert isinstance(parsed['warnings'], list)
     checked = tools.invoke(store, 'verify_claim', {
@@ -1376,7 +1376,7 @@ from openpyxl.chart import BarChart, PieChart, Reference
 from openpyxl.styles import PatternFill
 
 
-—— 第 27 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 27 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
 from zhilian.office import update_workbook
 def make_book(path, with_charts=True, with_fill=True):
     wb = load_workbook() if False else None  # 显式建新簿，避免依赖模板
@@ -1429,7 +1429,7 @@ def test_update_workbook_keeps_charts_and_styles(tmp_path):
     assert 'FFEEAA' in styles, '单元格样式在更新后丢失'
 
 
-—— 第 28 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 28 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     assert 's="' in sheet_xml(dst), '单元格的样式索引被抹掉了'
 def test_update_workbook_does_not_touch_unrelated_cells(tmp_path):
     src = make_book(tmp_path / 'src.xlsx', with_charts=False, with_fill=False)
@@ -1482,7 +1482,7 @@ def test_delete_project_removes_workspace_and_all_versions(project, tmp_path):
     assert folder.is_dir()
 
 
-—— 第 29 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 29 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     result = store.delete(w['id'])
     assert result == {'id': w['id'], 'name': '测试项目', 'deleted': True}
     assert not folder.exists()
@@ -1535,7 +1535,7 @@ def test_changed_dependency_can_remain_true(project):
 def test_unconfirmed_and_stale_revision_rejected(project):
 
 
-—— 第 30 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 30 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     store, w = project
     w = store.change(w['id'], w['revision'], {'sales_current': 90})
     with pytest.raises(ValueError, match='来源已确认'):
@@ -1588,7 +1588,7 @@ def test_api_workflow_and_boundary(tmp_path, monkeypatch):
     monkeypatch.delenv('ZHILIAN_ACCESS_PASSWORD', raising=False)
 
 
-—— 第 31 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 31 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     from zhilian.app import create_app
     client = TestClient(create_app(tmp_path / 'api'))
     assert client.get('/').status_code == 200
@@ -1641,7 +1641,7 @@ def test_append_document_batch_keeps_one_excel_and_scans_new_files(tmp_path):
 def test_append_documents_api_rejects_excel_and_supports_batch(tmp_path, monkeypatch):
 
 
-—— 第 32 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 32 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     monkeypatch.delenv('ZHILIAN_ACCESS_PASSWORD', raising=False)
     from zhilian.app import create_app
     app = create_app(tmp_path / 'api')
@@ -1694,7 +1694,7 @@ def test_append_documents_api_tolerant_mode_keeps_good_files_and_reports_bad(tmp
     assert response.status_code == 200, response.text
 
 
-—— 第 33 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 33 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     result = response.json()
     assert result['batch']['status'] == 'partial'
     assert result['batch']['count'] == 1 and result['batch']['rejected'] == 1
@@ -1747,7 +1747,7 @@ def test_append_documents_api_tolerant_mode_all_bad_does_not_change_project(tmp_
         f"/api/projects/{w['id']}/documents",
 
 
-—— 第 34 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 34 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
         data={'revision': w['revision'], 'continue_on_error': 'true'},
         files=[('files', (bad.name, bad.read_bytes(), 'application/octet-stream'))],
     )
@@ -1800,7 +1800,7 @@ def test_external_excel_import_repair_and_undo(tmp_path, monkeypatch):
 def test_external_excel_semantic_change_rejected(project, tmp_path):
 
 
-—— 第 35 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（后 30 页） ——
+—— 第 35 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 0.2.1（后 30 页） ——
     store, w = project
     path = create_demo(tmp_path / 'external')[0]
     wb = load_workbook(path)

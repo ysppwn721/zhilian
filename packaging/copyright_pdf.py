@@ -40,7 +40,12 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / 'docs' / '软著登记'
 DEST = SRC / 'PDF'
 SOFTWARE = '知链跨文档结论验证与增量修复软件'
-VERSION = 'V0.2.1'
+# 版本号不带 V：官方填表说明规定「鉴别材料页眉的软件版本号应与申请表符合一致，
+# 但有无 V 以申请表中填报为准」，申请表中填 0.2.1，故此处一致写 0.2.1。
+VERSION = '0.2.1'
+# 著作权人署名：软著要求「程序和文档中出现的权利人署名、软件名称及软件版本号
+# 应当与其他申请文件相应内容一致」，故页脚统一印权利人。
+OWNER = '林子钧'
 
 PAGE_W, PAGE_H = A4
 M_LEFT, M_RIGHT = 52, 52
@@ -130,7 +135,7 @@ def make_pdf(path: Path, header: str, lines: list[str], *,
             y -= leading
 
         c.setFont(font, 7.5)
-        c.drawCentredString(PAGE_W / 2, 30, f'{SOFTWARE} {VERSION}')
+        c.drawCentredString(PAGE_W / 2, 30, f'{SOFTWARE} {VERSION}　著作权人：{OWNER}')
         c.showPage()
     c.save()
     return {'file': path.name, 'pages': total, 'rendered_lines': len(rendered),
@@ -200,6 +205,20 @@ def main() -> int:
             print(f'        [提示] 目标 {TARGET_PAGES} 页，实际 {info["pages"]} 页')
     else:
         print('  [跳过] 缺少源程序前/后 30 页文本，先运行 packaging/copyright_materials.py')
+
+    # 文档与登记信息表
+    for out, label, src, size, leading, mpp in jobs:
+        p = SRC / src
+        if not p.is_file():
+            print(f'  [跳过] 缺少 {src}')
+            continue
+        info = make_pdf(DEST / out, f'{SOFTWARE} {VERSION} · {label}',
+                        p.read_text(encoding='utf-8', errors='replace').splitlines(),
+                        font=body, bold=bold, size=size, leading=leading,
+                        min_per_page=mpp, title=f'{SOFTWARE} {VERSION} {label}')
+        print(f'  OK  {info["file"]:32} {info["pages"]:>3} 页 · '
+              f'每页 ≥{mpp} 行（实际最少 {info["actual_min"]} 行）· '
+              f'{info["bytes"]/1024:>7.1f} KB')
 
     print()
     print(f'→ {DEST.relative_to(ROOT)}')
