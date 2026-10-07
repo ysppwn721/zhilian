@@ -1,4 +1,4 @@
-—— 第 1 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 1 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
 // ===== 文件：run.py =====
 import os
 import uvicorn
@@ -51,7 +51,7 @@ from . import __version__
 from . import ocr, quota, reranker
 
 
-—— 第 2 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 2 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
 from .pdf_revised_export import available_docx_backends
 from .store import Store, now
 from .office import digest
@@ -104,7 +104,7 @@ class RevisionRequest(BaseModel):
 class ModelModeRequest(RevisionRequest):
 
 
-—— 第 3 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 3 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
     mode: Literal['rules', 'local', 'hybrid', 'api', 'api_only']
 class OcrRunRequest(RevisionRequest):
     image_ids: list[str] | None = Field(default=None, max_length=500)
@@ -157,7 +157,7 @@ def create_app(data_dir=None):
                 pass
 
 
-—— 第 4 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 4 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
             if not valid:
                 return JSONResponse({'detail': '请使用用户名 zhilian 与部署密码登录'}, status_code=401,
                                     headers={'WWW-Authenticate': 'Basic realm="Zhilian", charset="UTF-8"'})
@@ -210,7 +210,7 @@ def create_app(data_dir=None):
             # 线上演示显式请求语义改写夹具；默认 API 保持兼容，便于离线
 
 
-—— 第 5 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 5 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
             # 集成测试和第三方调用继续使用稳定的确定性样例。
             semantic_demo = request.query_params.get('semantic', '').lower() in ('1', 'true', 'yes', 'on')
             return store.create('销售分析 · 演示项目', create_demo(tmp, semantic_demo=semantic_demo), demo=True)
@@ -263,7 +263,7 @@ def create_app(data_dir=None):
             path = Path(tmp) / filename
 
 
-—— 第 6 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 6 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
             total = 0
             try:
                 with path.open('wb') as out:
@@ -316,7 +316,7 @@ def create_app(data_dir=None):
                     try:
 
 
-—— 第 7 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 7 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
                         result = await run_in_threadpool(store.append_documents, wid, current_revision, [path])
                         current_revision = result['revision']
                         accepted.append({'name': path.name, 'batch': result.get('batch')})
@@ -369,7 +369,7 @@ def create_app(data_dir=None):
     def set_derivations(wid: str, body: DerivationsRequest):
 
 
-—— 第 8 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 8 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
         return store.set_derivations(wid, body.revision, [i.model_dump() for i in body.derivations])
     @app.delete('/api/projects/{wid}/derivations/{rid}')
     def remove_derivation(wid: str, rid: str, revision: int):
@@ -422,7 +422,7 @@ def create_app(data_dir=None):
         with store.lock:
 
 
-—— 第 9 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 9 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
             ws = store.read(wid)
             store.verify(ws, body.revision)
             ws['suggestions'] = result
@@ -475,7 +475,7 @@ def create_app(data_dir=None):
         with store.lock:
 
 
-—— 第 10 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 10 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
             ws = store.read(wid)
             store.verify(ws, ws['revision'])
             image = next((i for i in ws.get('images', []) if i['id'] == iid), None)
@@ -528,7 +528,7 @@ def create_app(data_dir=None):
             return FileResponse(path, filename=item.get('name', path.name), media_type='application/pdf')
 
 
-—— 第 11 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 11 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
     @app.get('/api/projects/{wid}/pdf-revisions/{index}/manifest')
     def download_revised_manifest(wid: str, index: int):
         with store.lock:
@@ -581,7 +581,7 @@ from __future__ import annotations
 import hashlib
 
 
-—— 第 12 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 12 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
 import math
 import re
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
@@ -634,7 +634,7 @@ GENERIC_SUBJECTS = ('总计', '整体', '全部')
 # 期间是封闭词表，同义写法属于确定性规则该覆盖的范围：真实文档写"报告期/本年/
 
 
-—— 第 13 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 13 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
 # 去年同期"，而事实表只写"本期/上期"。不归一化会让上期与本期同分并列，一条普通
 # 数值引用被判成"口径不唯一"，甚至让阈值/增长率拿不到唯一来源。
 PERIOD_SYNONYMS = {
@@ -687,7 +687,7 @@ def build_index(facts):
             token_ids.setdefault(alias, set()).add(fact['id'])
 
 
-—— 第 14 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 14 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
     return {'token_ids': token_ids}
 _INDEX_CACHE = {}
 _INDEX_CACHE_MAX = 8
@@ -740,7 +740,7 @@ def best_facts(text, facts, *, period=None, index=None):
         if fact.get('subject', '') not in GENERIC_SUBJECTS:
 
 
-—— 第 15 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 15 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
             score += 4
         if fact['period'] and period_in_text(fact['period'], text):
             score += 3
@@ -793,7 +793,7 @@ def extract_claims(block, facts, index=None):
         # 年报有两种稳定写法：带比较期间（同比增长25%），以及在同一
 
 
-—— 第 16 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 16 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
         # 句子中直接写“产量增加179.79%”。后者只有在动词后紧跟百分比
         # 时才启用，避免把普通叙述中的“增加”误识别成增长率论断。
         ('growth', r'(?:(?:较上期|环比|较上年|比上年|同比)\s*|'
@@ -846,7 +846,7 @@ def extract_claims(block, facts, index=None):
             legacy_kind[sentence_index] = 'growth'
 
 
-—— 第 17 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 17 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
         elif re.search(patterns[1][1], sentence_text):
             legacy_kind[sentence_index] = 'ranking'
         elif re.search(patterns[2][1], sentence_text):
@@ -899,7 +899,7 @@ def extract_claims(block, facts, index=None):
             spec = {'span': [growth.start(1), growth.end()],
 
 
-—— 第 18 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 18 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
                     'reported': float(number(growth[2])) if growth[2] else 0.0,
                     'qualitative': growth[2] is None, 'direction': direction_word}
             if not comparison_explicit:
@@ -952,7 +952,7 @@ def extract_claims(block, facts, index=None):
                 legacy_assigned.add(sentence_index)
 
 
-—— 第 19 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 19 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
                 source_key = stable_id(block['file_id'], block['location'], kind, legacy_id_index[sentence_index])
             else:
                 source_key = stable_id(block['file_id'], block['location'], 'compound-v2', compound_counter, kind)
@@ -1005,7 +1005,7 @@ def check(claim, facts):
             replacement = format(displayed, 'f')
 
 
-—— 第 20 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 20 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
             expected = replace_span(old, s['span'], replacement)
             calculation = f"按原文 {decimals} 位小数四舍五入：{refs[0]['value']} {refs[0]['unit']} = {replacement} {s['unit']}"
         elif k == 'growth':
@@ -1058,7 +1058,7 @@ def check(claim, facts):
             ok = truth == s['reported_positive']
 
 
-—— 第 21 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 21 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
             expected = replace_span(old, s['span'], s['positive'] if truth else s['negative'])
             calculation = f"{fmt(value)}{unit} {s['op']} {fmt(limit)}{unit} → {'成立' if truth else '不成立'}"
         elif k == 'chart':
@@ -1111,7 +1111,7 @@ def inspect(workspace):
 """Local persistent workspaces and transactional versions."""
 
 
-—— 第 22 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 22 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
 from __future__ import annotations
 import copy
 import json
@@ -1164,7 +1164,7 @@ class Store:
         if not metrics:
 
 
-—— 第 23 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 23 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
             return
         entry = copy.deepcopy(metrics)
         entry['node'] = node
@@ -1217,7 +1217,7 @@ class Store:
                 if not gate['allowed']:
 
 
-—— 第 24 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 24 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
                     result['semantic_status'] = 'quota_blocked'
                     result['semantic_claims_sent'] = 0
                     ws['audit'].append({'time': now(), 'event': '模型额度用尽',
@@ -1270,7 +1270,7 @@ class Store:
         # 基础事实与完整事实分开保存：Excel 只承载基础事实，派生事实由表达式
 
 
-—— 第 25 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 25 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
         # 定义，既不能被写回 Excel，也不能被直接改数值。
         source_path = folder / source['stored_name']
         ws['fact_quality'] = inspect_fact_source(source_path)
@@ -1323,7 +1323,7 @@ class Store:
                           overrides=overrides, previous=previous)
 
 
-—— 第 26 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 26 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
         ws['graph'] = {
             # 派生值是 Decimal，落盘前必须转 float，否则 json.dumps 会拒绝序列化。
             'derived': [{'id': f['id'], 'op': f['op'], 'inputs': f['inputs'], 'unit': f['unit'],
@@ -1376,7 +1376,7 @@ class Store:
             return self._rescan_and_commit(ws, '定义派生事实',
 
 
-—— 第 27 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 27 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
                                            f'共{len(ws["derivations"])}项派生事实；引用完整性校验通过')
     def remove_derivation(self, wid, revision, rid):
         with self.lock:
@@ -1429,7 +1429,7 @@ class Store:
                     mime = ocr.IMAGE_EXTENSIONS[ext]
 
 
-—— 第 28 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 28 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
                     stored = 'images/' + img_id + '.' + ocr.MIME_EXT.get(mime, 'bin')
                     path = current / stored
                     path.parent.mkdir(exist_ok=True)
@@ -1482,7 +1482,7 @@ class Store:
                              'word': Path(conversion['word']).name,
 
 
-—— 第 29 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 29 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
                              'excel': Path(conversion['excel']).name})
             result = self.create(name, generated, allow_empty_facts=not bool(conversion.get('facts')),
                                  pdf_import=True)
@@ -1535,7 +1535,7 @@ class Store:
                 raise ValueError(f'项目文档总数不能超过{max_total}份')
 
 
-—— 第 30 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+—— 第 30 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
             existing_names = {d['name'] for d in ws['documents']}
             if existing_names.intersection(names):
                 raise ValueError('项目中已有同名文件，请重命名后再追加')
@@ -1586,4 +1586,229 @@ class Store:
                             stored = 'images/' + item['id'] + '.' + ocr.MIME_EXT.get(item['mime'], 'bin')
                             image_path = target / stored
                             image_path.parent.mkdir(exist_ok=True)
+
+
+—— 第 31 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+                            image_path.write_bytes(item.pop('blob'))
+                            item.update(stored_name=stored, sha256=digest(image_path), ocr_text=None,
+                                        ocr_status='pending', ocr_error=None)
+                            ws.setdefault('images', []).append(item)
+                if len(ws.get('blocks', [])) == before_blocks and len(ws.get('images', [])) == before_images:
+                    raise ValueError('追加文件没有可处理的正文、幻灯片文字或图片')
+                ws['generation'] = generation
+                ws['revision'] += 1
+                ws['last_repair'] = None
+                self.invalidate_reviews(ws)
+                ws.setdefault('batches', []).append({'id': batch_id, 'status': 'done',
+                    'created_at': now(), 'documents': [d['id'] for d in new_documents],
+                    'count': len(new_documents), 'revision': ws['revision']})
+                ws['audit'].append({'time': now(), 'event': '追加文档',
+                                    'detail': f'批次 {batch_id}；新增{len(new_documents)}份文档；等待关联确认'})
+                (target / 'previous-state.json').write_text(json.dumps(previous, ensure_ascii=False), encoding='utf-8')
+                self.write(ws)
+                result = self.public(ws)
+                result['batch'] = {'id': batch_id, 'status': 'done', 'count': len(new_documents),
+                                   'revision': ws['revision']}
+                return result
+            except Exception:
+                shutil.rmtree(target, ignore_errors=True)
+                raise
+    def batch(self, wid, batch_id):
+        with self.lock:
+            ws = self.read(wid)
+            item = next((b for b in ws.get('batches', []) if b.get('id') == batch_id), None)
+            if not item:
+                raise FileNotFoundError('批次不存在')
+            return copy.deepcopy(item)
+    def public(self, ws):
+        result = copy.deepcopy(ws)
+        result.setdefault('model_calls', [])
+        # Do not expose request payloads or credentials. The ledger contains
+        # only provider metadata, usage counters, timing and outcome.
+        result['model_call_summary'] = {
+            'total': len(result['model_calls']),
+            'remote': sum(i.get('provider') != 'local-reranker' for i in result['model_calls']),
+            'local': sum(i.get('provider') == 'local-reranker' for i in result['model_calls']),
+            'succeeded': sum(i.get('outcome') == 'succeeded' for i in result['model_calls']),
+            'failed': sum(i.get('outcome') in {'failed', 'invalid_response'} for i in result['model_calls']),
+            'prompt_tokens': sum(int(i.get('prompt_tokens') or 0) for i in result['model_calls']),
+            'completion_tokens': sum(int(i.get('completion_tokens') or 0) for i in result['model_calls']),
+            'estimated_cost_cny': (round(sum(float(i['estimated_cost_cny']) for i in result['model_calls']
+                                             if i.get('estimated_cost_cny') is not None), 8)
+                                   if any(i.get('estimated_cost_cny') is not None for i in result['model_calls'])
+                                   else None),
+        }
+        result['model_mode'] = llm.mode(ws)
+
+
+—— 第 32 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+        result['model_mode_label'] = llm.mode_label(result['model_mode'])
+        result['model_mode_source'] = 'project' if ws.get('model_mode') in llm.LLM_MODES else 'server'
+        with llm.using_mode(result['model_mode']):
+            result['ocr_enabled'] = ocr.config()['enabled']
+        # Pure-API comparisons must not display unconfirmed rule guesses as
+        # accepted evidence. Keep stored hypotheses for switching back later.
+        if result['model_mode'] == 'api_only':
+            for claim in result['claims']:
+                if not claim['confirmed'] and claim['kind'] != 'chart':
+                    claim['refs'] = []
+        result['checks'], result['summary'] = inspect(result)
+        result['claims'].extend(copy.deepcopy(ws.get('ocr_claims', [])))
+        for claim in ws.get('ocr_claims', []):
+            checked = dict(check(claim, ws['facts']), ocr=True, confirmed=claim.get('confirmed', False))
+            if checked['status'] == 'unverifiable':
+                checked['code'] = 'needs_review'
+            result['checks'].append(checked)
+            result['summary']['claims'] += 1
+            result['summary'][checked['status']] += 1
+            result['summary']['pending'] += not checked['confirmed']
+            # 图片论断（source='ocr'）无法回写，不进入可修复计数。
+            result['summary']['repairable'] += (not checked['ocr']) and checked['confirmed'] and checked['status'] == 'inconsistent'
+        result['diagnosis'], result['diagnosis_summary'] = diagnose(result, result['checks'])
+        # 解释仅适用于生成时的版本；数据更新、确认、修复及撤销后使用当前模板。
+        explanation_audit = next((a for a in reversed(ws['audit']) if a['event'] == '诊断解释'), {})
+        if explanation_audit.get('revision') != ws['revision']:
+            result['diagnosis_explanations'] = {}
+        segments = unmatched_spans(ws['blocks'], ws['claims'])
+        segments.extend(unmatched_spans(ws.get('ocr_blocks', []), ws.get('ocr_claims', [])))
+        result['unmatched_segments'] = segments
+        result['summary']['unmatched_segments'] = len(segments)
+        # Keep the original block count for clients that used the first API.
+        result['summary']['unmatched_blocks'] = sum(not any(c['file_id'] == b['file_id'] and c['location'] == b['location'] for c in ws['claims']) for b in ws['blocks'])
+        # 派生事实与实际使用的值表是过程数据，不重复下发给前端。
+        result.pop('source_facts', None)
+        result.pop('graph_values', None)
+        result['summary'].update(self.graph_summary(ws))
+        quality = result.get('fact_quality') or {}
+        result['summary']['fact_quality_status'] = quality.get('status', 'unknown')
+        result['summary']['fact_quality_issues'] = len(quality.get('issues') or [])
+        for d in result['documents']:
+            d.pop('stored_name', None)
+            d['download_url'] = f'/api/projects/{ws["id"]}/files/{d["id"]}'
+        for index, origin in enumerate(result.get('pdf_origins', [])):
+            origin.pop('stored_name', None)
+            origin['download_url'] = f'/api/projects/{ws["id"]}/pdf-origins/{index}'
+        for index, item in enumerate(result.get('pdf_revisions', [])):
+            item.pop('stored_name', None)
+            item.pop('manifest_stored_name', None)
+            item['download_url'] = f'/api/projects/{ws["id"]}/pdf-revisions/{index}'
+
+
+—— 第 33 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+            item['manifest_url'] = f'/api/projects/{ws["id"]}/pdf-revisions/{index}/manifest'
+        result.setdefault('images', [])
+        for item in result['images']:
+            item.pop('stored_name', None)
+            item['image_url'] = f'/api/projects/{ws["id"]}/images/{item["id"]}'
+        return result
+    def set_model_mode(self, wid, revision, selected):
+        if selected not in llm.LLM_MODES:
+            raise ValueError('无效的模型模式')
+        with self.lock:
+            ws = self.read(wid)
+            self.verify(ws, revision)
+            previous = llm.mode(ws)
+            if previous == selected and ws.get('model_mode') == selected:
+                return self.public(ws)
+            ws['model_mode'] = selected
+            ws['suggestions'] = []
+            ws['diagnosis_explanations'] = {}
+            if ws.get('agent'):
+                # Retain trace and audit, but never approve stale candidates.
+                ws['agent'].update(phase='idle', pending=None)
+            ws['revision'] += 1
+            self.invalidate_reviews(ws, '模型模式已变化，请重新运行审计')
+            ws['audit'].append({'time': now(), 'event': '切换模型模式',
+                                'detail': f'{previous} → {selected}；旧候选待办失效，已确认来源和文件版本保留'})
+            self.write(ws)
+            return self.public(ws)
+    def image_path(self, ws, image):
+        """图片读取和确认前校验抽取时的摘要。"""
+        path = self.folder(ws['id']) / ws['generation'] / image['stored_name']
+        if digest(path) != image['sha256']:
+            raise ValueError('图片在抽取后发生变化，已停止操作，请重新导入')
+        return path
+    def ocr_run(self, wid, revision, image_ids=None):
+        with self.lock:
+            ws = self.read(wid)
+            self.verify(ws, revision)
+            selected = llm.mode(ws)
+        with llm.using_mode(selected):
+            return self._ocr_run(wid, revision, image_ids)
+    def _ocr_run(self, wid, revision, image_ids=None):
+        with self.lock:
+            ws = self.read(wid)
+            self.verify(ws, revision)
+            images = {i['id']: i for i in ws.get('images', [])}
+            if image_ids is not None and any(i not in images for i in image_ids):
+                raise ValueError('图片不存在或不属于当前项目')
+            selected = [i for i in images.values() if (image_ids is None or i['id'] in image_ids)
+                        and i['ocr_status'] in ('pending', 'failed')]
+            settings = ocr.config()
+
+
+—— 第 34 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+            if not selected or not settings['enabled']:
+                return self.public(ws)
+            paths = {i['id']: self.image_path(ws, i) for i in selected}
+        # 网络请求不持锁；提交前重新校验版本，避免覆盖其他窗口的修改。
+        results = {}
+        for item in selected:
+            gate = quota.check()
+            if not gate['allowed']:
+                results[item['id']] = ('failed', None, gate['reason'])
+                continue
+            quota.consume()
+            try:
+                text = ocr.ocr_image(paths[item['id']], item['mime'])
+                results[item['id']] = ('done', text, None)
+            except ValueError as exc:
+                error = str(exc) if str(exc) in (ocr.DISABLED, ocr.UNSUPPORTED, ocr.FAILED) else ocr.FAILED
+                results[item['id']] = ('failed', None, error)
+        with self.lock:
+            ws = self.read(wid)
+            self.verify(ws, revision)
+            for item in ws.get('images', []):
+                if item['id'] not in results:
+                    continue
+                self.image_path(ws, item)
+                item['ocr_status'], item['ocr_text'], item['ocr_error'] = results[item['id']]
+                ws['audit'].append({'time': now(), 'event': 'OCR 识别',
+                                    'detail': f'{item["label"]}；后端 {settings["backend"]}；模型 {settings["model"]}；'
+                                              + ('完成，等待人工核对' if item['ocr_status'] == 'done' else '失败，未确认文字不参与验证')})
+            ws['revision'] += 1
+            self.write(ws)
+            return self.public(ws)
+    def ocr_confirm(self, wid, revision, items):
+        with self.lock:
+            ws = self.read(wid)
+            self.verify(ws, revision)
+            images = {i['id']: i for i in ws.get('images', [])}
+            ids = [i.get('image_id') for i in items]
+            if not ids or len(set(ids)) != len(ids) or any(i not in images for i in ids):
+                raise ValueError('请选择当前项目的图片，且不可重复确认')
+            for item in items:
+                image = images[item['image_id']]
+                if image['ocr_status'] == 'pending':
+                    raise ValueError('请先运行 OCR，再核对文字')
+                if not isinstance(item.get('text'), str) or not item['text'].strip() or len(item['text']) > ocr.MAX_TEXT:
+                    raise ValueError('确认文字不能为空，且不能超过20000字')
+                self.image_path(ws, image)
+            blocks = [b for b in ws.get('ocr_blocks', []) if b['image_id'] not in ids]
+            claims = [c for c in ws.get('ocr_claims', []) if c['image_id'] not in ids]
+            for item in items:
+                image = images[item['image_id']]
+
+
+—— 第 35 页 / 共 35 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+                text = item['text'].strip()
+                block = {k: image[k] for k in ('file_id', 'location', 'label')}
+                block.update(image_id=image['id'], text=text, source='ocr')
+                blocks.append(block)
+                for claim in extract_claims(block, ws['facts']):
+                    # 图片论断只做只读核验：文字写在图片像素里，程序无法回写，
+                    # 因此 repairable=False 且不计入可修复统计；人工核对的是图片文字本身，
+                    # 它到事实 ID 的来源关联仍是候选，不能通过 links 接口确认，故 confirmed=False。
+                    claim.update(extraction='OCR识别', source='ocr', repairable=False, image_id=image['id'], confirmed=False)
+                    claims.append(claim)
 

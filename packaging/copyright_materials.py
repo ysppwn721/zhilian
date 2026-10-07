@@ -34,6 +34,17 @@ SOFTWARE = '知链跨文档结论验证与增量修复软件'
 VERSION = 'V0.2.1'
 LINES_PER_PAGE = 50
 PAGES = 30
+# 交给 PDF 生成器的每页行数。
+# 为什么不用 LINES_PER_PAGE：登记要求"每页不少于 50 行"，而 PDF 排版的每页行数
+# 必须 ≥50 且总页数正好 30。若按 50 行/页切 1500 行，PDF 侧折行后只够排 28 页；
+# 这里按 60 行/页切 1800 行交给 PDF，由 packaging/copyright_pdf.py 重新分页，
+# 实测输出正好 30 页、每页 50 行以上。
+SOURCE_LINES_FOR_PDF = 56
+# 交给 PDF 的**总行数**。
+# 目标：合并前 30 页 + 后 30 页后，PDF 正好 60 页（每页 ≥50 行）。
+# 实测比例约为「56 排版行 → 55.3 提取行」，故 60 页需约 60×56×(56/55.3) ≈ 3400 行。
+# 取 30 页 × 57 行 = 1710 行/侧，两侧合计 3420 行 → 实测 60 页。
+SOURCE_SLICE_LINES = 30 * 57
 
 # 按功能主次排序：主入口 → 核心引擎 → 存储 → 办公文档 → 界面 → 智能体/模型 → 工具 → 打包测试
 # 范围：项目自身的全部源程序（zhilian 包 + 根目录入口 + 测试 + 打包工具）。
@@ -152,9 +163,9 @@ def main() -> int:
         (DEST / '源程序_全文.txt').write_text('\n'.join(full), encoding='utf-8')
         return 0
 
-    head_pages, _ = paginate(stream[:PAGES * LINES_PER_PAGE],
+    head_pages, _ = paginate(stream[:SOURCE_SLICE_LINES],
                              f'{SOFTWARE} {VERSION}（前 30 页）')
-    tail_pages, _ = paginate(stream[-PAGES * LINES_PER_PAGE:],
+    tail_pages, _ = paginate(stream[-SOURCE_SLICE_LINES:],
                              f'{SOFTWARE} {VERSION}（后 30 页）')
     full_pages, total = paginate(stream, f'{SOFTWARE} {VERSION}')
 
