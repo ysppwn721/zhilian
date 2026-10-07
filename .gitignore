@@ -114,3 +114,8 @@ pytest-of-Administrator/
 # 训练用虚拟环境（35000+ 文件）
 .train-cuda-venv/
 
+# 软著登记材料的生成产物：可由 packaging/copyright_*.py 重新生成。
+# 只保留输入（*.md 说明书/信息表）与生成脚本，避免仓库里塞入 1.4MB 的源程序全文。
+docs/软著登记/源程序_全文_供核对.txt
+docs/软著登记/文档_*_全文_供核对.txt
+

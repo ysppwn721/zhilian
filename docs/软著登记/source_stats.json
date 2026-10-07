@@ -1,0 +1,303 @@
+{
+  "by_language": {
+    "Python": {
+      "files": 153,
+      "lines": 28017,
+      "blank": 3326,
+      "comment": 817,
+      "code": 23874,
+      "bytes": 1336272
+    },
+    "Shell": {
+      "files": 11,
+      "lines": 754,
+      "blank": 88,
+      "comment": 136,
+      "code": 530,
+      "bytes": 30952
+    },
+    "INI": {
+      "files": 1,
+      "lines": 6,
+      "blank": 0,
+      "comment": 3,
+      "code": 3,
+      "bytes": 278
+    },
+    "Markdown": {
+      "files": 135,
+      "lines": 16930,
+      "blank": 4908,
+      "comment": 2423,
+      "code": 9599,
+      "bytes": 1034841
+    },
+    "Batch": {
+      "files": 4,
+      "lines": 43,
+      "blank": 0,
+      "comment": 0,
+      "code": 43,
+      "bytes": 1620
+    },
+    "PowerShell": {
+      "files": 5,
+      "lines": 87,
+      "blank": 3,
+      "comment": 7,
+      "code": 77,
+      "bytes": 4572
+    },
+    "TOML": {
+      "files": 1,
+      "lines": 10,
+      "blank": 1,
+      "comment": 4,
+      "code": 5,
+      "bytes": 728
+    },
+    "JSON": {
+      "files": 388,
+      "lines": 267467,
+      "blank": 0,
+      "comment": 0,
+      "code": 267467,
+      "bytes": 8718275
+    },
+    "YAML": {
+      "files": 2,
+      "lines": 99,
+      "blank": 5,
+      "comment": 3,
+      "code": 91,
+      "bytes": 2759
+    },
+    "HTML": {
+      "files": 8,
+      "lines": 1610,
+      "blank": 84,
+      "comment": 41,
+      "code": 1485,
+      "bytes": 110253
+    },
+    "CSS": {
+      "files": 5,
+      "lines": 3724,
+      "blank": 41,
+      "comment": 92,
+      "code": 3591,
+      "bytes": 118625
+    },
+    "JavaScript": {
+      "files": 4,
+      "lines": 2162,
+      "blank": 15,
+      "comment": 14,
+      "code": 2133,
+      "bytes": 265718
+    },
+    "SVG": {
+      "files": 44,
+      "lines": 1077,
+      "blank": 9,
+      "comment": 0,
+      "code": 1068,
+      "bytes": 104981
+    }
+  },
+  "code_languages": {
+    "Python": {
+      "files": 153,
+      "lines": 28017,
+      "blank": 3326,
+      "comment": 817,
+      "code": 23874,
+      "bytes": 1336272
+    },
+    "Shell": {
+      "files": 11,
+      "lines": 754,
+      "blank": 88,
+      "comment": 136,
+      "code": 530,
+      "bytes": 30952
+    },
+    "Batch": {
+      "files": 4,
+      "lines": 43,
+      "blank": 0,
+      "comment": 0,
+      "code": 43,
+      "bytes": 1620
+    },
+    "PowerShell": {
+      "files": 5,
+      "lines": 87,
+      "blank": 3,
+      "comment": 7,
+      "code": 77,
+      "bytes": 4572
+    },
+    "HTML": {
+      "files": 8,
+      "lines": 1610,
+      "blank": 84,
+      "comment": 41,
+      "code": 1485,
+      "bytes": 110253
+    },
+    "CSS": {
+      "files": 5,
+      "lines": 3724,
+      "blank": 41,
+      "comment": 92,
+      "code": 3591,
+      "bytes": 118625
+    },
+    "JavaScript": {
+      "files": 4,
+      "lines": 2162,
+      "blank": 15,
+      "comment": 14,
+      "code": 2133,
+      "bytes": 265718
+    },
+    "SVG": {
+      "files": 44,
+      "lines": 1077,
+      "blank": 9,
+      "comment": 0,
+      "code": 1068,
+      "bytes": 104981
+    }
+  },
+  "source_files": 234,
+  "source_lines": 37474,
+  "source_code_lines": 32801,
+  "source_bytes": 1972993,
+  "pages_at_50_lines": 749,
+  "all_files_count": 761,
+  "all_lines": 321986,
+  "core_python_modules": [
+    {
+      "path": "zhilian\\store.py",
+      "lang": "Python",
+      "lines": 1094,
+      "bytes": 62835
+    },
+    {
+      "path": "packaging\\evaluate_current_gold_api_vs_route.py",
+      "lang": "Python",
+      "lines": 983,
+      "bytes": 49200
+    },
+    {
+      "path": "zhilian\\agent.py",
+      "lang": "Python",
+      "lines": 764,
+      "bytes": 41009
+    },
+    {
+      "path": "zhilian\\office.py",
+      "lang": "Python",
+      "lines": 631,
+      "bytes": 32823
+    },
+    {
+      "path": "zhilian\\app.py",
+      "lang": "Python",
+      "lines": 600,
+      "bytes": 28136
+    },
+    {
+      "path": "packaging\\build_candidates_v2.py",
+      "lang": "Python",
+      "lines": 588,
+      "bytes": 27946
+    },
+    {
+      "path": "zhilian\\engine.py",
+      "lang": "Python",
+      "lines": 562,
+      "bytes": 30488
+    },
+    {
+      "path": "zhilian\\pdf_writeback.py",
+      "lang": "Python",
+      "lines": 537,
+      "bytes": 24623
+    },
+    {
+      "path": "packaging\\build_audit_report.py",
+      "lang": "Python",
+      "lines": 521,
+      "bytes": 29265
+    },
+    {
+      "path": "zhilian\\pdf_office_export.py",
+      "lang": "Python",
+      "lines": 482,
+      "bytes": 22445
+    },
+    {
+      "path": "packaging\\build_v3_benchmark.py",
+      "lang": "Python",
+      "lines": 467,
+      "bytes": 21492
+    },
+    {
+      "path": "packaging\\audit_annual_corpus.py",
+      "lang": "Python",
+      "lines": 462,
+      "bytes": 20326
+    },
+    {
+      "path": "zhilian\\pdf_ingest.py",
+      "lang": "Python",
+      "lines": 403,
+      "bytes": 20937
+    },
+    {
+      "path": "packaging\\build_api_route_artifacts.py",
+      "lang": "Python",
+      "lines": 394,
+      "bytes": 26373
+    },
+    {
+      "path": "packaging\\collect_annual_reports.py",
+      "lang": "Python",
+      "lines": 392,
+      "bytes": 18947
+    },
+    {
+      "path": "tests\\test_agent.py",
+      "lang": "Python",
+      "lines": 388,
+      "bytes": 19160
+    },
+    {
+      "path": "zhilian\\graph.py",
+      "lang": "Python",
+      "lines": 387,
+      "bytes": 18046
+    },
+    {
+      "path": "tests\\test_workflow.py",
+      "lang": "Python",
+      "lines": 377,
+      "bytes": 18015
+    },
+    {
+      "path": "zhilian\\pdf_revised_export.py",
+      "lang": "Python",
+      "lines": 352,
+      "bytes": 17390
+    },
+    {
+      "path": "zhilian\\llm.py",
+      "lang": "Python",
+      "lines": 339,
+      "bytes": 18159
+    }
+  ]
+}

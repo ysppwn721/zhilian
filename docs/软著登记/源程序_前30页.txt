@@ -1,0 +1,1589 @@
+—— 第 1 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+// ===== 文件：run.py =====
+import os
+import uvicorn
+from zhilian.app import load_environment
+if __name__ == '__main__':
+    load_environment()
+    host = os.getenv('ZHILIAN_HOST', '127.0.0.1')
+    if host not in ('127.0.0.1', 'localhost', '::1') and not os.getenv('ZHILIAN_ACCESS_PASSWORD'):
+        raise SystemExit('Public/LAN binding requires ZHILIAN_ACCESS_PASSWORD. See README.md.')
+    uvicorn.run('zhilian.app:app', host=host, port=int(os.getenv('ZHILIAN_PORT', '8765')))
+// ===== 文件：zhilian/__init__.py =====
+"""知链：跨文档结论验证与增量修复。
+版本号的唯一真源是仓库根目录的 `VERSION` 文件。此前版本字面量散落在 app.py 的
+下载白名单、两份 PyInstaller spec、Inno Setup 脚本、CI 工作流、站点页面与启动
+脚本共 6 处，漏改任一处就会出现"页面写着新版本、下载文件名还是旧版本"或下载
+404（下载白名单是精确匹配）。运行 `python packaging/sync_version.py` 传播，
+`--check` 供 CI 拦截漂移。
+"""
+from pathlib import Path
+_VERSION_FILE = Path(__file__).resolve().parent.parent / 'VERSION'
+def _read_version():
+    try:
+        # utf-8-sig：容忍编辑器在 VERSION 开头写入 BOM。
+        text = _VERSION_FILE.read_text(encoding='utf-8-sig').strip()
+    except OSError:
+        return '0.0.0'
+    return text or '0.0.0'
+__version__ = _read_version()
+// ===== 文件：zhilian/app.py =====
+"""知链 HTTP API and static workbench."""
+from __future__ import annotations
+import base64
+import hmac
+import json
+import os
+import re
+import tempfile
+from pathlib import Path
+from typing import Literal
+from urllib.parse import urlparse
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
+from starlette.concurrency import run_in_threadpool
+from .demo import create_demo
+from .llm import (config, mode, mode_label, using_mode, remote_allowed, suggest_links,
+                  explain_diagnosis, consume_last_call_metrics)
+from . import __version__
+from . import ocr, quota, reranker
+
+
+—— 第 2 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+from .pdf_revised_export import available_docx_backends
+from .store import Store, now
+from .office import digest
+from .report import build_report
+from .agent import (run_agent, decide, agent_status, run_cross_document_audit,
+                     run_repair_plan)
+BASE = Path(__file__).resolve().parent.parent
+DOWNLOAD_ROOT = Path(os.getenv('ZHILIAN_DOWNLOAD_DIR', str(BASE / 'downloads'))).resolve()
+# 下载白名单按精确文件名匹配，任何一处版本号漏改都会直接 404。因此版本号只在这里
+# 出现一次（取自 VERSION 文件），所有带版本的产物名由它插值生成——"发布新版本"
+# 变成改 VERSION 一个文件，而不是在 10 个文件名字符串里找 0.2.1。
+_V = __version__
+PUBLIC_DOWNLOADS = {
+    f'知链_v{_V}_Windows安装版.exe',
+    f'知链_v{_V}_Windows免安装.zip',
+    f'知链_v{_V}_跨平台构建包.zip',
+    f'Zhilian-{_V}-linux-x86_64.tar.gz',
+    f'Zhilian-{_V}-linux-x86_64-glibc228.tar.gz',
+    f'Zhilian-{_V}-linux-x86_64-src.tar.gz',
+    f'知链_源代码_v{_V}.zip',
+    '知链事实表模板.xlsx',
+    'Zhilian-bge-reranker-v2-m3-onnx-int8.zip',
+    'Zhilian-bge-reranker-v2-m3-onnx-int8.tar.gz',
+}
+def load_environment():
+    """Simple KEY=VALUE file; no interpolation, execution, or secret logging."""
+    env = Path(os.getenv('ZHILIAN_CONFIG_FILE', str(BASE / '.env'))).expanduser()
+    if env.exists():
+        for raw in env.read_text(encoding='utf-8-sig').splitlines():
+            line = raw.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            key, value = line.split('=', 1)
+            if re.fullmatch(r'[A-Z][A-Z0-9_]*', key.strip()):
+                os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+class Link(BaseModel):
+    claim_id: str
+    refs: list[str] = Field(max_length=2000)
+class LinksRequest(BaseModel):
+    revision: int
+    links: list[Link] = Field(max_length=500)
+class ChangeRequest(BaseModel):
+    revision: int
+    values: dict[str, float]
+class RepairRequest(BaseModel):
+    revision: int
+    claim_ids: list[str] = Field(max_length=500)
+class RevisionRequest(BaseModel):
+    revision: int
+class ModelModeRequest(RevisionRequest):
+
+
+—— 第 3 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+    mode: Literal['rules', 'local', 'hybrid', 'api', 'api_only']
+class OcrRunRequest(RevisionRequest):
+    image_ids: list[str] | None = Field(default=None, max_length=500)
+class OcrItem(BaseModel):
+    image_id: str
+    text: str = Field(min_length=1, max_length=20000)
+class OcrConfirmRequest(RevisionRequest):
+    items: list[OcrItem] = Field(min_length=1, max_length=500)
+class AgentDecisionRequest(BaseModel):
+    revision: int
+    decisions: list[dict] = Field(min_length=1, max_length=1)
+class Derivation(BaseModel):
+    id: str = Field(min_length=1, max_length=80)
+    expr: str = Field(min_length=1, max_length=500)
+    unit: str = Field('', max_length=16)
+    label: str = Field('', max_length=80)
+class DerivationsRequest(BaseModel):
+    revision: int
+    derivations: list[Derivation] = Field(max_length=2000)
+def create_app(data_dir=None):
+    load_environment()
+    store = Store(data_dir or os.getenv('ZHILIAN_DATA_DIR', str(BASE / '.zhilian')))
+    app = FastAPI(title='知链', version=__version__, description='跨文档结论验证与增量修复')
+    app.state.store = store
+    quota.configure(store.root / 'quota.json')
+    @app.middleware('http')
+    async def boundary(request: Request, call_next):
+        # 访客标识必须在处理函数之前落到上下文里：限额按访客计数，
+        # 且演示环境位于 Cloudflare 之后，真实来源 IP 只在请求头上。
+        token = quota.identify(quota.client_key(
+            request.headers, request.client.host if request.client else '-'))
+        try:
+            return await _boundary(request, call_next)
+        finally:
+            quota.release(token)
+    async def _boundary(request: Request, call_next):
+        # Public, allow-listed release assets are served without the workbench
+        # Basic Auth prompt.  No directory listing or arbitrary file path is
+        # exposed; all other routes keep the normal authentication boundary.
+        if request.url.path.startswith('/downloads/'):
+            return await call_next(request)
+        password = os.getenv('ZHILIAN_ACCESS_PASSWORD', '')
+        if password:
+            valid = False
+            try:
+                scheme, token = request.headers.get('authorization', '').split(' ', 1)
+                user, supplied = base64.b64decode(token, validate=True).decode().split(':', 1)
+                valid = scheme.lower() == 'basic' and hmac.compare_digest(supplied.encode(), password.encode()) and user == 'zhilian'
+            except (ValueError, UnicodeError):
+                pass
+
+
+—— 第 4 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+            if not valid:
+                return JSONResponse({'detail': '请使用用户名 zhilian 与部署密码登录'}, status_code=401,
+                                    headers={'WWW-Authenticate': 'Basic realm="Zhilian", charset="UTF-8"'})
+        if request.method not in ('GET', 'HEAD', 'OPTIONS'):
+            origin = request.headers.get('origin')
+            if origin and urlparse(origin).netloc != request.headers.get('host'):
+                return JSONResponse({'detail': '拒绝跨站修改请求'}, status_code=403)
+        response = await call_next(request)
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['Referrer-Policy'] = 'same-origin'
+        response.headers['X-Frame-Options'] = 'DENY'
+        if request.url.path.startswith('/api/'):
+            response.headers['Cache-Control'] = 'no-store'
+        return response
+    @app.exception_handler(ValueError)
+    async def invalid(request, exc):
+        return JSONResponse({'detail': str(exc)}, status_code=400)
+    @app.exception_handler(FileNotFoundError)
+    async def missing(request, exc):
+        return JSONResponse({'detail': '项目或文件不存在'}, status_code=404)
+    @app.get('/api/health')
+    def health():
+        return {'status': 'ok', 'version': __version__, 'model': config(),
+                'model_mode': mode(), 'model_mode_label': mode_label(),
+                'ocr': ocr.config(),
+                'local_reranker': reranker.status(),
+                'quota': quota.config(),
+                'auto_export': os.getenv('ZHILIAN_AUTO_EXPORT', '').strip().lower() in ('1', 'true'),
+                'password_protected': bool(os.getenv('ZHILIAN_ACCESS_PASSWORD')),
+                'pdf_backends': available_docx_backends()}
+    @app.get('/downloads/{filename}')
+    def public_download(filename: str):
+        if filename not in PUBLIC_DOWNLOADS:
+            raise HTTPException(status_code=404, detail='下载文件不存在')
+        path = (DOWNLOAD_ROOT / filename).resolve()
+        if DOWNLOAD_ROOT not in path.parents or not path.is_file():
+            raise HTTPException(status_code=404, detail='下载文件不存在')
+        return FileResponse(path, filename=filename,
+                            headers={'Cache-Control': 'public, max-age=86400'})
+    @app.get('/api/quota')
+    def quota_state():
+        """只读额度查询：演示时可直接展示"还剩多少次模型调用"。"""
+        return {**quota.config(), **quota.snapshot()}
+    @app.get('/api/projects')
+    def projects():
+        return store.list()
+    @app.post('/api/projects/demo')
+    def demo(request: Request):
+        with tempfile.TemporaryDirectory() as tmp:
+            # 线上演示显式请求语义改写夹具；默认 API 保持兼容，便于离线
+
+
+—— 第 5 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+            # 集成测试和第三方调用继续使用稳定的确定性样例。
+            semantic_demo = request.query_params.get('semantic', '').lower() in ('1', 'true', 'yes', 'on')
+            return store.create('销售分析 · 演示项目', create_demo(tmp, semantic_demo=semantic_demo), demo=True)
+    @app.get('/api/template')
+    def template():
+        folder = store.root / '_templates'
+        if not (folder / '业务数据.xlsx').exists():
+            create_demo(folder)
+        return FileResponse(folder / '业务数据.xlsx', filename='知链事实表模板.xlsx')
+    @app.post('/api/projects')
+    async def upload(name: str = Form('新项目'), files: list[UploadFile] = File(...)):
+        if len(files) > 10:
+            raise ValueError('最多上传10份文件')
+        paths, total, names = [], 0, set()
+        with tempfile.TemporaryDirectory() as tmp:
+            try:
+                for f in files:
+                    filename = (f.filename or '').replace('\\', '/').split('/')[-1]
+                    if not filename or filename in names or Path(filename).suffix.lower() not in ('.xlsx', '.docx', '.pptx', *ocr.IMAGE_EXTENSIONS):
+                        raise ValueError('文件名重复或类型不受支持，仅接受xlsx、docx、pptx或图片文件(png/jpg/gif/webp/bmp/tiff)')
+                    if len(filename) > 150 or any(c in filename for c in '<>:"|?*'):
+                        raise ValueError('文件名无效或过长')
+                    names.add(filename)
+                    path = Path(tmp) / filename
+                    with path.open('wb') as out:
+                        while chunk := await f.read(1024 * 1024):
+                            total += len(chunk)
+                            if total > 30 * 1024 * 1024:
+                                raise ValueError('每批上传总大小不超过30MB')
+                            out.write(chunk)
+                    paths.append(path)
+                return await run_in_threadpool(store.create, name, paths)
+            finally:
+                for f in files:
+                    await f.close()
+    @app.post('/api/projects/from-pdf')
+    async def upload_pdf_project(name: str = Form('PDF 导入项目'), subject: str = Form(''), file: UploadFile = File(...)):
+        """Convert one PDF to Word/Excel sources, then create an Office project.
+        The original PDF is retained for provenance but is never treated as an
+        editable project document.  PDFs with no usable structured facts are
+        rejected with a message directing the user to review the generated
+        intermediate files first.
+        """
+        filename = (file.filename or '').replace('\\', '/').split('/')[-1]
+        if Path(filename).suffix.lower() != '.pdf':
+            raise ValueError('请选择 .pdf 文件')
+        if len(filename) > 150 or any(c in filename for c in '<>:"|?*'):
+            raise ValueError('PDF 文件名无效或过长')
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / filename
+
+
+—— 第 6 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+            total = 0
+            try:
+                with path.open('wb') as out:
+                    while chunk := await file.read(1024 * 1024):
+                        total += len(chunk)
+                        if total > 100 * 1024 * 1024:
+                            raise ValueError('PDF 不超过100MB')
+                        out.write(chunk)
+                return await run_in_threadpool(store.create_from_pdf, name, path, subject.strip() or None)
+            finally:
+                await file.close()
+    @app.post('/api/projects/{wid}/documents')
+    async def append_documents(wid: str, revision: int = Form(...), files: list[UploadFile] = File(...),
+                               continue_on_error: bool = Form(False)):
+        """Append a bounded batch of Word/PPT/image files to an existing project.
+        The Excel source remains the project's single source of truth and is
+        deliberately rejected here.  Clients can upload dozens of documents by
+        repeating this endpoint; each request is committed as one transaction.
+        """
+        max_batch = int(os.getenv('ZHILIAN_MAX_APPEND_BATCH', '50'))
+        if len(files) > max_batch:
+            raise ValueError(f'单批最多追加{max_batch}份文档，请分批上传')
+        paths, total, names = [], 0, set()
+        with tempfile.TemporaryDirectory() as tmp:
+            try:
+                for f in files:
+                    filename = (f.filename or '').replace('\\', '/').split('/')[-1]
+                    suffix = Path(filename).suffix.lower()
+                    if not filename or filename in names or suffix not in ('.docx', '.pptx', *ocr.IMAGE_EXTENSIONS):
+                        raise ValueError('追加批次只接受docx、pptx或图片文件，不允许再次上传xlsx')
+                    if len(filename) > 150 or any(c in filename for c in '<>:"|?*'):
+                        raise ValueError('文件名无效或过长')
+                    names.add(filename)
+                    path = Path(tmp) / filename
+                    with path.open('wb') as out:
+                        while chunk := await f.read(1024 * 1024):
+                            total += len(chunk)
+                            if total > 100 * 1024 * 1024:
+                                raise ValueError('每批追加总大小不超过100MB')
+                            out.write(chunk)
+                    paths.append(path)
+                if not continue_on_error:
+                    return await run_in_threadpool(store.append_documents, wid, revision, paths)
+                # Tolerant mode commits each file as its own transaction.  A
+                # corrupt or duplicate document is reported while successful
+                # files remain available and can be reviewed immediately.
+                current_revision = revision
+                accepted, rejected = [], []
+                for path in paths:
+                    try:
+
+
+—— 第 7 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+                        result = await run_in_threadpool(store.append_documents, wid, current_revision, [path])
+                        current_revision = result['revision']
+                        accepted.append({'name': path.name, 'batch': result.get('batch')})
+                    except Exception as exc:
+                        rejected.append({'name': path.name, 'reason': str(exc) or type(exc).__name__})
+                with store.lock:
+                    state = store.public(store.read(wid))
+                state['batch'] = {
+                    'status': 'partial' if rejected and accepted else ('failed' if rejected else 'done'),
+                    'count': len(accepted), 'rejected': len(rejected),
+                    'revision': current_revision,
+                }
+                state['batch_results'] = {'accepted': accepted, 'rejected': rejected}
+                return state
+            finally:
+                for f in files:
+                    await f.close()
+    @app.get('/api/projects/{wid}/batches/{batch_id}')
+    def batch_status(wid: str, batch_id: str):
+        return store.batch(wid, batch_id)
+    @app.get('/api/projects/{wid}')
+    def get_project(wid: str):
+        with store.lock:
+            return store.public(store.read(wid))
+    @app.delete('/api/projects/{wid}')
+    def delete_project(wid: str):
+        """Delete a project selected from 我的项目 after client confirmation."""
+        return store.delete(wid)
+    @app.get('/api/projects/{wid}/report')
+    def report(wid: str):
+        with store.lock:
+            ws = store.read(wid)
+            store.verify(ws, ws['revision'])
+            return {'revision': ws['revision'], 'report': build_report(ws)}
+    @app.post('/api/projects/{wid}/links')
+    def confirm(wid: str, body: LinksRequest):
+        return store.confirm(wid, body.revision, [i.model_dump() for i in body.links])
+    @app.post('/api/projects/{wid}/facts')
+    def change(wid: str, body: ChangeRequest):
+        return store.change(wid, body.revision, body.values)
+    @app.get('/api/projects/{wid}/derivations')
+    def list_derivations(wid: str):
+        with store.lock:
+            ws = store.read(wid)
+            derivations = store.derivations_of(ws)
+            return {'revision': ws['revision'], 'derivations': derivations.records,
+                    'order': derivations.order, 'cycles': derivations.cycles,
+                    'graph': ws.get('graph') or {}}
+    @app.post('/api/projects/{wid}/derivations')
+    def set_derivations(wid: str, body: DerivationsRequest):
+
+
+—— 第 8 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+        return store.set_derivations(wid, body.revision, [i.model_dump() for i in body.derivations])
+    @app.delete('/api/projects/{wid}/derivations/{rid}')
+    def remove_derivation(wid: str, rid: str, revision: int):
+        return store.remove_derivation(wid, revision, rid)
+    async def uploaded_source(wid, revision, file, operation):
+        try:
+            if Path(file.filename or '').suffix.lower() != '.xlsx':
+                raise ValueError('请选择保存后的 .xlsx 文件')
+            with tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / 'updated.xlsx'
+                total = 0
+                with path.open('wb') as out:
+                    while chunk := await file.read(1024 * 1024):
+                        total += len(chunk)
+                        if total > 30 * 1024 * 1024:
+                            raise ValueError('更新表不超过30MB')
+                        out.write(chunk)
+                return await run_in_threadpool(operation, wid, revision, path)
+        finally:
+            await file.close()
+    @app.post('/api/projects/{wid}/source/preview')
+    async def preview_source(wid: str, revision: int = Form(...), file: UploadFile = File(...)):
+        return await uploaded_source(wid, revision, file, store.preview_source)
+    @app.post('/api/projects/{wid}/source')
+    async def import_source(wid: str, revision: int = Form(...), file: UploadFile = File(...)):
+        return await uploaded_source(wid, revision, file, store.import_source)
+    @app.post('/api/projects/{wid}/repair')
+    def repair(wid: str, body: RepairRequest):
+        return store.repair(wid, body.revision, body.claim_ids)
+    @app.post('/api/projects/{wid}/undo')
+    def undo(wid: str, body: RevisionRequest):
+        return store.undo(wid, body.revision)
+    @app.post('/api/projects/{wid}/suggest')
+    def suggestions(wid: str, body: RevisionRequest):
+        with store.lock:
+            ws = store.read(wid)
+            store.verify(ws, body.revision)
+            selected = mode(ws)
+        with using_mode(selected):
+            if not remote_allowed():
+                raise ValueError(f'当前为 {selected} 模式，不允许调用远程 API')
+            eligible = [c for c in ws['claims'] if not c['confirmed'] and c['kind'] != 'chart']
+            if eligible and config()['enabled'] and len(ws['facts']) <= 150:
+                gate = quota.check()
+                if not gate['allowed']:
+                    raise ValueError(gate['reason'])
+                quota.consume()
+            result = suggest_links(ws['claims'], ws['facts'])
+            call_metrics = consume_last_call_metrics()
+        with store.lock:
+
+
+—— 第 9 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+            ws = store.read(wid)
+            store.verify(ws, body.revision)
+            ws['suggestions'] = result
+            store.append_model_call(ws, call_metrics, node='link_agent', mode_value=selected,
+                                    candidates_returned=len(result))
+            ws['revision'] += 1
+            ws['audit'].append({'time': now(), 'event': '模型建议', 'detail': f'模型 {config()["model"]} 提出{len(result)}项建议，尚未确认'})
+            store.write(ws)
+            return store.public(ws)
+    @app.post('/api/projects/{wid}/diagnosis/explain')
+    def diagnosis_explain(wid: str, body: RevisionRequest):
+        with store.lock:
+            ws = store.read(wid)
+            store.verify(ws, body.revision)
+            records = store.public(ws)['diagnosis']
+            selected = mode(ws)
+        with using_mode(selected):
+            can_call = remote_allowed() and config()['enabled'] and bool(records)
+            if can_call:
+                gate = quota.check()
+                if not gate['allowed']:
+                    raise ValueError(gate['reason'])
+                quota.consume()
+            explanations = explain_diagnosis(records)
+            call_metrics = consume_last_call_metrics()
+        with store.lock:
+            ws = store.read(wid)
+            store.verify(ws, body.revision)
+            ws['diagnosis_explanations'] = explanations
+            store.append_model_call(ws, call_metrics, node='diagnosis_agent', mode_value=selected,
+                                    candidates_returned=len(explanations))
+            ws['revision'] += 1
+            ws['audit'].append({'time': now(), 'event': '诊断解释',
+                                'revision': ws['revision'],
+                                'detail': (f'模型 {config()["model"]} 返回{len(explanations)}项解释；未返回的项使用确定性模板'
+                                           if can_call
+                                           else ('未配置 DeepSeek，使用确定性模板，未调用模型'
+                                                 if not config()['enabled']
+                                                 else f'当前为 {selected} 模式，使用确定性模板，未调用远程模型'))})
+            store.write(ws)
+            return store.public(ws)
+    @app.post('/api/projects/{wid}/ocr/run')
+    def ocr_run(wid: str, body: OcrRunRequest):
+        return store.ocr_run(wid, body.revision, body.image_ids)
+    @app.post('/api/projects/{wid}/ocr/confirm')
+    def ocr_confirm(wid: str, body: OcrConfirmRequest):
+        return store.ocr_confirm(wid, body.revision, [i.model_dump() for i in body.items])
+    @app.get('/api/projects/{wid}/images/{iid}')
+    def image_download(wid: str, iid: str):
+        with store.lock:
+
+
+—— 第 10 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+            ws = store.read(wid)
+            store.verify(ws, ws['revision'])
+            image = next((i for i in ws.get('images', []) if i['id'] == iid), None)
+            if not image:
+                raise HTTPException(404, '图片不存在')
+            path = store.image_path(ws, image)
+            media_type = image['mime'] if image['mime'] in ocr.MIME_EXT else 'application/octet-stream'
+            return FileResponse(path, media_type=media_type,
+                                headers={'Content-Security-Policy': "default-src 'none'; sandbox"})
+    @app.get('/api/projects/{wid}/files/{fid}')
+    def download(wid: str, fid: str):
+        ws = store.read(wid)
+        store.verify(ws, ws['revision'])
+        d = next((d for d in ws['documents'] if d['id'] == fid), None)
+        if not d:
+            raise HTTPException(404, '文件不存在')
+        return FileResponse(store.folder(wid) / ws['generation'] / d['stored_name'], filename=d['name'])
+    @app.get('/api/projects/{wid}/pdf-origins/{index}')
+    def download_pdf_origin(wid: str, index: int):
+        with store.lock:
+            ws = store.read(wid)
+            store.verify(ws, ws['revision'])
+            origins = ws.get('pdf_origins', [])
+            if index < 0 or index >= len(origins):
+                raise HTTPException(404, '原始 PDF 不存在')
+            origin = origins[index]
+            path = store.folder(wid) / ws['generation'] / origin['stored_name']
+            if not path.is_file() or digest(path) != origin.get('sha256'):
+                raise HTTPException(409, '原始 PDF 校验失败，请重新导入')
+            return FileResponse(path, filename=origin['name'], media_type='application/pdf')
+    @app.post('/api/projects/{wid}/pdf-revised')
+    def export_revised_pdf(wid: str, body: RevisionRequest):
+        """Generate an independent PDF from the current Word revision."""
+        return store.export_revised_pdf(wid, body.revision)
+    @app.get('/api/projects/{wid}/pdf-revisions/{index}')
+    def download_revised_pdf(wid: str, index: int):
+        with store.lock:
+            ws = store.read(wid)
+            store.verify(ws, ws['revision'])
+            items = ws.get('pdf_revisions', [])
+            if index < 0 or index >= len(items):
+                raise HTTPException(404, '修订版 PDF 不存在')
+            item = items[index]
+            verification = item.get('verification') or {}
+            if verification.get('status') != 'passed':
+                raise HTTPException(409, '修订版 PDF 未通过严格视觉一致性验收，请先查看转换清单和差异页')
+            path = store.folder(wid) / ws['generation'] / item.get('stored_name', '')
+            if not path.is_file():
+                raise HTTPException(404, '修订版 PDF 不存在')
+            return FileResponse(path, filename=item.get('name', path.name), media_type='application/pdf')
+
+
+—— 第 11 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+    @app.get('/api/projects/{wid}/pdf-revisions/{index}/manifest')
+    def download_revised_manifest(wid: str, index: int):
+        with store.lock:
+            ws = store.read(wid)
+            store.verify(ws, ws['revision'])
+            items = ws.get('pdf_revisions', [])
+            if index < 0 or index >= len(items):
+                raise HTTPException(404, '修订版 PDF 清单不存在')
+            item = items[index]
+            path = store.folder(wid) / ws['generation'] / item.get('manifest_stored_name', '')
+            if not path.is_file():
+                raise HTTPException(404, '修订版 PDF 清单不存在')
+            return FileResponse(path, filename=path.name, media_type='application/json')
+    @app.post('/api/projects/{wid}/agent/run')
+    def agent_run(wid: str, body: RevisionRequest):
+        return run_agent(store, wid, body.revision)
+    @app.post('/api/projects/{wid}/model-mode')
+    def set_model_mode(wid: str, body: ModelModeRequest):
+        return store.set_model_mode(wid, body.revision, body.mode)
+    @app.post('/api/projects/{wid}/agent/decide')
+    def agent_decide(wid: str, body: AgentDecisionRequest):
+        return decide(store, wid, body.revision, body.decisions)
+    @app.get('/api/projects/{wid}/agent/status')
+    def get_agent_status(wid: str):
+        return agent_status(store, wid)
+    @app.post('/api/projects/{wid}/review/cross-document')
+    def cross_document_review(wid: str, body: RevisionRequest):
+        return run_cross_document_audit(store, wid, body.revision)
+    @app.post('/api/projects/{wid}/review/repair-plan')
+    def repair_plan(wid: str, body: RevisionRequest):
+        return run_repair_plan(store, wid, body.revision)
+    @app.get('/api/projects/{wid}/export')
+    def export(wid: str):
+        return FileResponse(store.archive(wid), filename='知链成果与核验记录.zip', media_type='application/zip')
+    @app.post('/api/projects/{wid}/export-local')
+    def export_local(wid: str, body: RevisionRequest):
+        with store.lock:
+            ws = store.read(wid)
+            store.verify(ws, body.revision)
+        return store.export_local(wid)
+    @app.get('/')
+    def index():
+        return FileResponse(BASE / 'web' / 'index.html')
+    app.mount('/static', StaticFiles(directory=BASE / 'web'), name='static')
+    return app
+app = create_app()
+// ===== 文件：zhilian/engine.py =====
+"""Deterministic, typed claim checks. No eval, generated code or model arithmetic."""
+from __future__ import annotations
+import hashlib
+
+
+—— 第 12 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+import math
+import re
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+KINDS = {'quote': '数值引用', 'growth': '增长率', 'ranking': '排名', 'threshold': '阈值', 'chart': '图表'}
+EXTRACTION_VERSION = 7
+UNITS = {'元': ('currency', Decimal(1)), '万元': ('currency', Decimal(10000)),
+         '亿元': ('currency', Decimal(100000000)), '件': ('count', Decimal(1)),
+         '人': ('people', Decimal(1)), 'CNY': ('currency', Decimal(1)),
+         '%': ('percentage', Decimal(1))}
+# 允许千分位逗号：真实年报普遍写作 3,379.37 万元，旧规则只认连续数字。
+NUM = r'-?\d{1,3}(?:,\d{3})+(?:\.\d+)?|-?\d+(?:\.\d+)?'
+UNIT = r'亿元|万元|元|件|人|CNY|%'
+def number(value) -> Decimal:
+    if isinstance(value, bool):
+        raise ValueError('布尔值不能作为数值')
+    text = str(value).strip()
+    # 去千分位。仅当逗号确实按三位分组时才剥离，避免误改 "1,23" 这类异常输入。
+    if re.fullmatch(r'-?\d{1,3}(?:,\d{3})+(?:\.\d+)?', text):
+        text = text.replace(',', '')
+    try:
+        n = Decimal(text)
+    except (InvalidOperation, ValueError):
+        raise ValueError('请输入有效数字')
+    if not n.is_finite() or abs(n) > Decimal('1e15'):
+        raise ValueError('数字必须有限且绝对值不超过 10^15')
+    return n
+def fmt(value) -> str:
+    n = number(value).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)
+    return format(n, 'f').rstrip('0').rstrip('.') if '.' in format(n, 'f') else str(n)
+def convert(value, unit, target):
+    if unit == target:
+        return number(value)
+    a, b = UNITS.get(unit), UNITS.get(target)
+    if not a or not b or a[0] != b[0]:
+        raise ValueError(f'单位不兼容：{unit} 与 {target}')
+    return number(value) * a[1] / b[1]
+class CheckError(ValueError):
+    """带分类码的核验失败。
+    旧实现靠比对错误文案字符串来判断分类，任何一处提示文案被润色
+    （例如"请"改成"您"）都会让分类静默退化为 needs_review，进而影响
+    前端诊断分组与报告分组。分类改走结构化字段后不再与文案耦合。
+    """
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.code = code
+def stable_id(*parts):
+    return hashlib.sha256('|'.join(map(str, parts)).encode()).hexdigest()[:18]
+# 主体为这些值时不参与定位：它们描述的是"整体"，任何句子都可能命中。
+GENERIC_SUBJECTS = ('总计', '整体', '全部')
+# 期间是封闭词表，同义写法属于确定性规则该覆盖的范围：真实文档写"报告期/本年/
+
+
+—— 第 13 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+# 去年同期"，而事实表只写"本期/上期"。不归一化会让上期与本期同分并列，一条普通
+# 数值引用被判成"口径不唯一"，甚至让阈值/增长率拿不到唯一来源。
+PERIOD_SYNONYMS = {
+    '本期': ('本期', '本报告期', '报告期内', '报告期', '本年度', '本年', '当期', '今年'),
+    '上期': ('上期', '上年度同期', '上年同期', '去年同期', '上年度', '上年', '去年'),
+}
+# 只扩充定义相同的名称。营业总收入、主营收入、现金等价物、研发投入
+# 均有独立会计口径，不能因词面相似合并；这些仍交给语义候选与用户确认。
+METRIC_ALIASES_BY_CANONICAL = {
+    '营业收入': ('营业收入', '营收'),
+    '资产总计': ('资产总计', '总资产'),
+    '总资产': ('资产总计', '总资产'),
+    '负债总计': ('负债总计', '总负债'),
+    '总负债': ('负债总计', '总负债'),
+    '员工人数': ('员工人数', '员工总数'),
+    '员工总数': ('员工人数', '员工总数'),
+}
+def metric_aliases(metric):
+    """Return the closed lexical alias set for one fact metric."""
+    metric = str(metric or '')
+    if metric in METRIC_ALIASES_BY_CANONICAL:
+        return METRIC_ALIASES_BY_CANONICAL[metric]
+    return (metric,) if metric else ()
+def period_in_text(period, text):
+    """事实的期间是否在文本中以任意同义写法出现。"""
+    return any(word in text for word in PERIOD_SYNONYMS.get(period, (period,)) if word)
+def _descriptors(fact):
+    """一条事实的**定位**描述符：指标与非泛指主体。
+    期间刻意不放进这里。旧实现中期间只参与加分，不参与"能否匹配"；
+    把它列为必需项会让「A产品销量最高」这类没写期间的句子匹配不到任何事实。
+    需要按期间收窄时由 best_facts(period=...) 显式过滤。
+    """
+    keys = []
+    if fact.get('metric'):
+        keys.append(fact['metric'])
+    if fact.get('subject') and fact['subject'] not in GENERIC_SUBJECTS:
+        keys.append(fact['subject'])
+    return keys
+def build_index(facts):
+    """描述符 → 事实ID 的反向索引。
+    原实现每段文本都遍历全部事实做子串包含判断，一段的开销是
+    O(事实数 × 描述符数)。索引把"哪些事实可能相关"提前算好，
+    长文档导入时每段只需检查命中描述符所涉及的事实。
+    """
+    token_ids = {}
+    for fact in facts:
+        for key in _descriptors(fact):
+            token_ids.setdefault(key, set()).add(fact['id'])
+        for alias in metric_aliases(fact.get('metric')):
+            token_ids.setdefault(alias, set()).add(fact['id'])
+
+
+—— 第 14 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+    return {'token_ids': token_ids}
+_INDEX_CACHE = {}
+_INDEX_CACHE_MAX = 8
+def facts_index(facts, bypass_cache=False):
+    """按描述符构造（并可复用）反向索引。改数值不影响索引，描述符变化时自动重建。
+    键是指纹，因此命中条件是"这张事实表的指纹已在缓存里"。旧实现写成
+    `entry['size'] != len(facts)`——指纹相同则事实条数必然相同，这个比较永远为
+    假，真正的失效场景（同条数不同描述符）反而漏网；同时 `> 8` 的整表清空让
+    连续处理 9 张不同事实表后缓存归零，跨请求基本零命中。
+    """
+    if bypass_cache:
+        return build_index(facts)
+    fingerprint = hash(tuple(sorted(
+        (f['id'], f.get('metric', ''), f.get('subject', ''), f.get('period', '')) for f in facts)))
+    entry = _INDEX_CACHE.get(fingerprint)
+    if entry is None:
+        entry = build_index(facts)
+        if len(_INDEX_CACHE) >= _INDEX_CACHE_MAX:
+            _INDEX_CACHE.clear()
+        _INDEX_CACHE[fingerprint] = entry
+    return entry
+def best_facts(text, facts, *, period=None, index=None):
+    """找出文本对应的唯一事实来源。
+    语义与旧实现一致：指标、非泛指主体都必须出现在文本中（至少含指标），
+    期间出现时额外加分；period 是额外的显式过滤条件。多条并列时返回全部
+    候选，由上层判为"口径不唯一"并转人工确认。
+    """
+    if not text:
+        return []
+    index = index or build_index(facts)
+    token_ids = index['token_ids']
+    hit_tokens = [token for token in token_ids if token in text]
+    if hit_tokens:
+        wanted = set()
+        for token in hit_tokens:
+            wanted |= token_ids[token]
+        candidates = [f for f in facts if f['id'] in wanted]
+    else:
+        candidates = facts
+    scored = []
+    for fact in candidates:
+        keys = _descriptors(fact)
+        if not keys or not any(alias in text for alias in metric_aliases(fact.get('metric'))):
+            continue
+        if fact.get('subject') and fact['subject'] not in GENERIC_SUBJECTS and fact['subject'] not in text:
+            continue
+        if period and fact['period'] != period:
+            continue
+        score = 5
+        if fact.get('subject', '') not in GENERIC_SUBJECTS:
+
+
+—— 第 15 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+            score += 4
+        if fact['period'] and period_in_text(fact['period'], text):
+            score += 3
+        scored.append((score, fact))
+    if not scored:
+        return []
+    top = max(s for s, _ in scored)
+    return [f for s, f in scored if s == top]
+def ranking_cohort(metric, facts):
+    """排名称谓的可比集合：同指标、同期间的同一口径组。
+    排名只有在比较集合完整时才有意义。集合不足两条时必须把"待补齐"暴露给
+    用户，而不是把单条事实当成"最高"的依据；因此抽取和人工候选共用这一处
+    逻辑，避免两边各写一份判断。
+    """
+    if not metric:
+        return []
+    return [f['id'] for f in facts if f['metric'] == metric and f['period'] == '本期']
+def growth_pair(metric, facts):
+    """增长率所需的同口径上期/本期配对；只有两侧各唯一时才成立。
+    与 ranking_cohort 同理：增长率论断的证据是一对事实，不是一条。当文本只提供
+    了其中一侧的线索时，用它的指标在事实表里补另一侧，避免把"无法确定"直接推成
+    无候选的死结——人工需要看到一个可勾选的配对。
+    """
+    if not metric:
+        return []
+    prev = [f['id'] for f in facts if f['metric'] == metric and f['period'] == '上期']
+    curr = [f['id'] for f in facts if f['metric'] == metric and f['period'] == '本期']
+    return [prev[0], curr[0]] if len(prev) == 1 and len(curr) == 1 else []
+def growth_pairs(facts):
+    """事实表里所有"上期+本期"齐全的指标配对，按指标去重后返回。
+    增长率句子常常只写「较上期增长25%」，上下文里也没有指标名，此时规则无法确定
+    它指哪个指标。与其给出零候选（界面上无任何可勾选项、decide 直接报错），不如把
+    事实表里所有成对的指标作为候选交给人工，每条都带确定性核验结论。
+    """
+    pairs = []
+    for metric in dict.fromkeys(f.get('metric') for f in facts):
+        pair = growth_pair(metric, facts)
+        if pair:
+            pairs.append((metric, pair))
+    return pairs
+def extract_claims(block, facts, index=None):
+    """Extract separate, non-overlapping assertions, retaining their exact text anchors."""
+    result = []
+    context = ''
+    # 每段只构造/复用一次索引，避免对每条事实重复扫描文本。
+    index = index or facts_index(facts)
+    patterns = [
+        # 真实年报用「较上年/同比/比上年」，且动词常用「增加/减少」而非「增长/下降」。
+        # 旧规则只认「较上期|环比」+「增长|下降|持平」，导致年报语料识别率为 0。
+        # 年报有两种稳定写法：带比较期间（同比增长25%），以及在同一
+
+
+—— 第 16 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+        # 句子中直接写“产量增加179.79%”。后者只有在动词后紧跟百分比
+        # 时才启用，避免把普通叙述中的“增加”误识别成增长率论断。
+        ('growth', r'(?:(?:较上期|环比|较上年|比上年|同比)\s*|'
+                  r'(?=(?:增长|下降|持平|增加|减少|上升)(?!率)\s*(?:' + NUM + r')\s*%))'
+                  r'(增长|下降|持平|增加|减少|上升)(?!率)(?:\s*(' + NUM + r')\s*%)?(?!\s*\d)'),
+        ('ranking', r'(.+?)(销售额|销量|收入|支出|得分)(?:并列)?最高'),
+        ('threshold', r'(未超过|不超过|超过|不少于|低于|高于)\s*(' + NUM + r')\s*(' + UNIT + r')'),
+        ('budget', r'支出(未超过|不超过|超过)预算'),
+        # 年报中的数值引用连接词远多于“为/是/达到”。连接词允许和数字之间
+        # 有少量空白；末尾的“无连接词”分支覆盖“营业收入125万元”这类
+        # 标题式写法。阈值模式排在前面，因此“超过120万元”仍优先识别为阈值。
+        ('quote', r'(?:(?:约为|实现了|录得了|增至|高达|实现|录得|共计|合计|完成|累计|近|为|是|达到|达|is)\s*|'
+                  r'(?=(?:' + NUM + r')\s*(?:亿元|万元|元|件|人|CNY)(?!\w)))('
+                  + NUM + r')\s*(' + UNIT + r')'),
+    ]
+    candidate_matches = []
+    sentence_meta = []
+    for sentence_index, sentence in enumerate(re.finditer(r'[^。！？；;\n]+', block['text'])):
+        sentence_meta.append(sentence.group())
+        matches = sorted((m.start(), m.end(), kind, m)
+                         for kind, pattern in patterns for m in re.finditer(pattern, sentence.group()))
+        previous_end = 0
+        for marker_start, marker_end, kind, match in matches:
+            if marker_start < previous_end:
+                continue
+            prefix = sentence.group()[previous_end:marker_start]
+            # A comma or connector belongs to neither adjacent assertion. Text after
+            # the final predicate remains uncovered instead of inheriting its status.
+            offset = max(prefix.rfind('，'), prefix.rfind(',')) + 1
+            leading = prefix[offset:]
+            trim = re.match(r'^[\s、]*(?:(?:并且|而且|同时|以及|且|并)[\s、]*)?', leading).end()
+            local_start = previous_end + offset + trim
+            start = sentence.start() + local_start
+            end = sentence.start() + marker_end
+            text = block['text'][start:end]
+            leading_punctuation = len(text) - len(text.lstrip(' \t、，,'))
+            if leading_punctuation:
+                start += leading_punctuation
+                text = text[leading_punctuation:]
+            local_match = re.search(dict(patterns)[kind], text)
+            candidate_matches.append((sentence_index, start, end, text, kind, local_match))
+            previous_end = marker_end
+    # The old extractor produced one claim per sentence. Preserve those IDs when
+    # the old primary kind is still present, while assigning deterministic IDs to
+    # additional assertions introduced by compound extraction.
+    legacy_kind, legacy_id_index = {}, {}
+    legacy_counter = 0
+    for sentence_index, sentence_text in enumerate(sentence_meta):
+        if re.search(patterns[0][1], sentence_text):
+            legacy_kind[sentence_index] = 'growth'
+
+
+—— 第 17 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+        elif re.search(patterns[1][1], sentence_text):
+            legacy_kind[sentence_index] = 'ranking'
+        elif re.search(patterns[2][1], sentence_text):
+            legacy_kind[sentence_index] = 'threshold'
+        elif re.search(patterns[3][1], sentence_text):
+            legacy_kind[sentence_index] = 'budget'
+        elif re.search(patterns[4][1], sentence_text):
+            legacy_kind[sentence_index] = 'quote'
+        if legacy_kind.get(sentence_index):
+            legacy_id_index[sentence_index] = legacy_counter
+            legacy_counter += 1
+    compound_counter, legacy_assigned = 0, set()
+    # 同一段文本在一次抽取里会被反复求来源：算 source_text 时一次、按期间各一次、
+    # 每个论断分支又一次、循环末尾还有一次。best_facts 每次都要遍历候选事实做
+    # 子串判断，于是单段的开销按论断数线性放大。这里按 (文本, 期间) 记忆本轮结果——
+    # 事实与索引在函数内是常量，记忆化不改变语义，只去掉重复计算。
+    resolved = {}
+    def resolve(text, period=None):
+        key = (text, period)
+        hit = resolved.get(key)
+        if hit is None:
+            hit = best_facts(text, facts, period=period, index=index)
+            resolved[key] = hit
+        return hit
+    for sentence_index, start, end, text, marker_kind, match in candidate_matches:
+        refs, spec, kind, issue = [], {}, None, ''
+        # Only an elided predicate can inherit a metric from preceding context.
+        # A newly named, uncovered metric must not borrow the preceding source.
+        source_text = text if resolve(text) or match.start() > 0 else context
+        if marker_kind == 'growth':
+            growth = match
+            kind = 'growth'
+            comparison_explicit = bool(re.match(r'(?:较上期|环比|较上年|比上年|同比)', growth.group()))
+            curr = resolve(source_text, '本期')
+            prev = resolve(source_text, '上期')
+            suggested = []
+            if len(curr) == len(prev) == 1:
+                refs = [prev[0]['id'], curr[0]['id']]
+            else:
+                issue = '未唯一确定同口径的上期与本期数据，请确认关联'
+                # 只要有一侧唯一，就能用它的指标把另一侧补出来，作为人工候选；
+                # 否则这条论断在界面上会变成"零选项"的死结（无法勾选、无法确认）。
+                known = curr or prev
+                if len(known) == 1:
+                    suggested = growth_pair(known[0]['metric'], facts)
+            # 方向词扩展：年报用「增加/减少/上升」，旧字典只有「增长/下降/持平」。
+            # 同时用 number() 而非 float()，以支持千分位数值。
+            direction_word = {'增长': 1, '增加': 1, '上升': 1,
+                              '下降': -1, '减少': -1, '持平': 0}[growth[1]]
+            spec = {'span': [growth.start(1), growth.end()],
+
+
+—— 第 18 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+                    'reported': float(number(growth[2])) if growth[2] else 0.0,
+                    'qualitative': growth[2] is None, 'direction': direction_word}
+            if not comparison_explicit:
+                # “增加25%”没有明说相对哪一期，不能静默假设上期。
+                # 保留抽取锚点，但必须由用户补全比较基准与两侧事实。
+                spec['comparison_period_explicit'] = False
+                refs = []
+                issue = '增长率的比较基准未明确，请确认同口径的两期来源'
+            if suggested:
+                spec['suggested_refs'] = suggested
+            if direction_word < 0:
+                spec['reported'] = -abs(spec['reported'])
+        elif marker_kind == 'ranking':
+            rank = match
+            kind = 'ranking'
+            metric = rank[2]
+            refs = ranking_cohort(metric, facts)
+            spec = {'metric': metric, 'winners': rank[1].strip().split('、'), 'span': [rank.start(), rank.end()]}
+            issue = '' if len(refs) >= 2 else '排名至少需要两个可比较对象'
+        elif marker_kind == 'threshold':
+            threshold = match
+            kind = 'threshold'
+            fs = resolve(source_text)
+            refs = [fs[0]['id']] if len(fs) == 1 else []
+            positive, negative, op = ('超过', '未超过', '>')
+            if threshold[1] in ('不少于', '低于'):
+                positive, negative, op = ('不少于', '低于', '>=')
+            spec = {'limit': float(number(threshold[2])), 'unit': threshold[3], 'positive': positive,
+                    'negative': negative, 'op': op, 'reported_positive': threshold[1] == positive,
+                    'span': [threshold.start(1), threshold.end(1)]}
+        elif marker_kind == 'budget':
+            kind = 'threshold'
+            # Resolve each side from an explicit metric phrase; both period and
+            # metric are required so similarly named facts stay ambiguous.
+            fs1, fs2 = resolve('本期支出'), resolve('本期预算')
+            refs = [fs1[0]['id'], fs2[0]['id']] if len(fs1) == len(fs2) == 1 else []
+            m = match
+            spec = {'positive': '超过', 'negative': '未超过', 'op': '>', 'reported_positive': m[1] == '超过', 'span': [m.start(), m.end()]}
+            spec['span'] = [m.start(1), m.end(1)]
+        elif marker_kind == 'quote':
+            quote = match
+            kind = 'quote'
+            fs = resolve(text)
+            refs = [fs[0]['id']] if len(fs) == 1 else []
+            spec = {'reported': float(number(quote[1])), 'unit': quote[2], 'span': [quote.start(1), quote.end(1)]}
+        if kind:
+            if not refs:
+                issue = issue or '未找到唯一来源，需手动关联事实'
+            if legacy_kind.get(sentence_index) == kind and sentence_index not in legacy_assigned:
+                legacy_assigned.add(sentence_index)
+
+
+—— 第 19 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+                source_key = stable_id(block['file_id'], block['location'], kind, legacy_id_index[sentence_index])
+            else:
+                source_key = stable_id(block['file_id'], block['location'], 'compound-v2', compound_counter, kind)
+            compound_counter += 1
+            result.append({'id': source_key,
+                           'file_id': block['file_id'], 'location': block['location'], 'label': block['label'],
+                           'original': text, 'start': start, 'end': end,
+                           'kind': kind, 'refs': refs, 'spec': spec, 'confirmed': False,
+                           'extraction': '规则识别', 'issue': issue})
+        context = text if resolve(text) else context
+    return result
+def unmatched_spans(blocks, claims):
+    """Return uncovered prose, including gaps in otherwise recognized paragraphs."""
+    result = []
+    for block in blocks:
+        ranges = sorted((c['start'], c['end']) for c in claims if c['kind'] != 'chart'
+                        and c['file_id'] == block['file_id'] and c['location'] == block['location'])
+        offset = 0
+        for start, end in ranges + [(len(block['text']), len(block['text']))]:
+            raw = block['text'][offset:start]
+            text = raw.strip(' \t\r\n。！？；;，,、')
+            if text and not re.fullmatch(r'(?:并且|而且|同时|以及|且|并)', text):
+                leading = len(raw) - len(raw.lstrip(' \t\r\n。！？；;，,、'))
+                result.append(dict(block, text=text, start=offset + leading, end=start))
+            offset = max(offset, end)
+    return result
+def replace_span(text, span, replacement):
+    return text[:span[0]] + replacement + text[span[1]:]
+def check(claim, facts):
+    byid = {f['id']: f for f in facts}
+    out = {'claim_id': claim['id'], 'status': 'unverifiable', 'code': 'needs_review', 'expected': None, 'reason': '', 'evidence': []}
+    try:
+        refs = [byid[i] for i in claim['refs']]
+        out['evidence'] = [{k: f.get(k) for k in ('id', 'subject', 'metric', 'period', 'value', 'unit', 'scope', 'sheet', 'cell')} for f in refs]
+        if not refs or any(f.get('value') is None for f in refs):
+            raise CheckError('missing_data', '来源缺失或数值不可计算')
+        k, s, old = claim['kind'], claim['spec'], claim['original']
+        expected, ok, calculation = old, False, ''
+        if k == 'quote':
+            if len(refs) != 1:
+                raise CheckError(None, '数值引用必须关联一个事实')
+            value = convert(refs[0]['value'], refs[0]['unit'], s['unit'])
+            raw = old[s['span'][0]:s['span'][1]]
+            numeric_span = bool(re.fullmatch(r'(?:' + NUM + r')', raw))
+            decimals = len(raw.split('.', 1)[1]) if numeric_span and '.' in raw else 0 if numeric_span else 2
+            precision = Decimal(1).scaleb(-decimals)
+            displayed = value.quantize(precision, rounding=ROUND_HALF_UP)
+            reported = number(raw) if numeric_span else number(s['reported'])
+            ok = displayed == reported
+            replacement = format(displayed, 'f')
+
+
+—— 第 20 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+            expected = replace_span(old, s['span'], replacement)
+            calculation = f"按原文 {decimals} 位小数四舍五入：{refs[0]['value']} {refs[0]['unit']} = {replacement} {s['unit']}"
+        elif k == 'growth':
+            if len(refs) != 2:
+                raise CheckError(None, '增长率需要上期、本期两个事实')
+            a, b = refs
+            if any(a[x] != b[x] for x in ('subject', 'metric', 'scope')) or a['period'] != '上期' or b['period'] != '本期':
+                raise CheckError('scope_mismatch', '增长率的主体、指标、口径或上期本期顺序不一致')
+            before, after = number(a['value']), convert(b['value'], b['unit'], a['unit'])
+            if before <= 0:
+                raise CheckError('needs_review', '上期数值必须大于零；零值或负基期转人工复核')
+            rate = (after - before) / before * 100
+            rounded = rate.quantize(Decimal('.01'), rounding=ROUND_HALF_UP)
+            if s.get('qualitative'):
+                direction = 1 if rate > 0 else -1 if rate < 0 else 0
+                ok = direction == s['direction']
+                wording = {1: '增长', -1: '下降', 0: '持平'}[direction]
+            else:
+                ok = rounded == number(s['reported']).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)
+                wording = '持平' if rounded == 0 else ('增长' if rounded > 0 else '下降') + fmt(abs(rounded)) + '%'
+            expected = replace_span(old, s['span'], wording)
+            calculation = f'({fmt(after)} − {fmt(before)}) / {fmt(before)} × 100 = {fmt(rate)}%'
+        elif k == 'ranking':
+            if len(refs) < 2:
+                raise CheckError('source_conflict', '排名至少需要两个对象')
+            first = refs[0]
+            if any(any(f[x] != first[x] for x in ('metric', 'period', 'scope')) for f in refs):
+                raise CheckError('scope_mismatch', '排名对象的指标、期间或统计口径不一致')
+            if len({f['subject'] for f in refs}) != len(refs):
+                raise CheckError('source_conflict', '排名对象重复，请核对比较集合')
+            values = [convert(f['value'], f['unit'], first['unit']) for f in refs]
+            winners = [f['subject'] for f, v in zip(refs, values) if v == max(values)]
+            ok = set(winners) == set(s['winners'])
+            target = '、'.join(winners) + s['metric'] + ('并列最高' if len(winners) > 1 else '最高')
+            expected = replace_span(old, s['span'], target)
+            calculation = '；'.join(f"{f['subject']} {fmt(v)}{first['unit']}" for f, v in zip(refs, values)) + '（仅针对已确认的比较集合）'
+        elif k == 'threshold':
+            if 'limit' in s:
+                if len(refs) != 1:
+                    raise CheckError(None, '固定阈值需要一个事实')
+                value, limit, unit = convert(refs[0]['value'], refs[0]['unit'], s['unit']), number(s['limit']), s['unit']
+            else:
+                if len(refs) != 2:
+                    raise CheckError(None, '支出与预算需要两个事实')
+                a, b = refs
+                if any(a[x] != b[x] for x in ('subject', 'period', 'scope')) or a['metric'] != '支出' or b['metric'] != '预算':
+                    raise CheckError('scope_mismatch', '支出与预算的主体、期间、口径或指标不一致')
+                value, limit, unit = number(a['value']), convert(b['value'], b['unit'], a['unit']), a['unit']
+            truth = value > limit if s['op'] == '>' else value >= limit
+            ok = truth == s['reported_positive']
+
+
+—— 第 21 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+            expected = replace_span(old, s['span'], s['positive'] if truth else s['negative'])
+            calculation = f"{fmt(value)}{unit} {s['op']} {fmt(limit)}{unit} → {'成立' if truth else '不成立'}"
+        elif k == 'chart':
+            if len(refs) != len(s['values']):
+                raise CheckError('source_conflict', '图表关联数量与原始类别不一致')
+            values = [convert(f['value'], f['unit'], s['unit']) for f in refs]
+            if any(f['metric'] != refs[0]['metric'] or f['scope'] != refs[0]['scope'] or f['subject'] != refs[0]['subject'] for f in refs):
+                raise CheckError('scope_mismatch', '图表系列的指标、主体或口径不一致')
+            if [f['period'] for f in refs] != s['categories']:
+                raise CheckError('scope_mismatch', '图表类别与来源期间不匹配')
+            ok = all(number(x) == y for x, y in zip(s['values'], values))
+            expected = s['series'] + '：' + '，'.join(f'{c} {fmt(v)}{s["unit"]}' for c, v in zip(s['categories'], values))
+            calculation = '按已确认的系列与类别重建原生图表数据'
+        else:
+            raise CheckError('needs_review', '不支持的论断类型')
+        out.update(status='consistent' if ok else 'inconsistent',
+                   code='consistent' if ok else 'inconsistent',
+                   expected=old if ok else expected, reason=calculation)
+    except (ValueError, KeyError, IndexError, InvalidOperation, TypeError) as exc:
+        reason = str(exc)
+        out['reason'] = reason
+        # 分类取结构化错误码，不再比对提示文案。兜底为 missing_data 的理由：
+        # 本项目里核验无法进行，主要就是"该有的来源没有或不可计算"；
+        # 多给了来源（引用数量超出该论断所需）才单独归为 source_count。
+        # 引用指向不存在的事实时同样归为 missing_data——那是最根本的缺失。
+        code = getattr(exc, 'code', None)
+        if code is None:
+            code = 'missing_data'
+            if claim['kind'] == 'quote':
+                code = 'source_count' if len(claim['refs']) > 1 else 'missing_data'
+            elif claim['kind'] == 'threshold' and 'limit' in claim.get('spec', {}):
+                code = 'source_count' if len(claim['refs']) > 1 else 'missing_data'
+            elif claim['kind'] in ('growth', 'chart'):
+                expected = 2 if claim['kind'] == 'growth' else len(claim.get('spec', {}).get('values', []))
+                code = 'source_count' if len(claim['refs']) > expected else 'missing_data'
+        if any(i not in byid for i in claim['refs']):
+            code = 'missing_data'
+        out['code'] = code
+    return out
+def inspect(workspace):
+    checks = [dict(check(c, workspace['facts']), confirmed=c['confirmed']) for c in workspace['claims']]
+    summary = {'claims': len(checks), 'consistent': 0, 'inconsistent': 0, 'unverifiable': 0,
+               'pending': 0, 'repairable': 0, 'documents': len(workspace['documents']), 'facts': len(workspace['facts'])}
+    for r in checks:
+        summary[r['status']] += 1
+        summary['pending'] += not r['confirmed']
+        summary['repairable'] += r['confirmed'] and r['status'] == 'inconsistent'
+    return checks, summary
+// ===== 文件：zhilian/store.py =====
+"""Local persistent workspaces and transactional versions."""
+
+
+—— 第 22 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+from __future__ import annotations
+import copy
+import json
+import os
+import re
+import shutil
+import tempfile
+import threading
+import uuid
+from contextlib import contextmanager
+from datetime import datetime, timezone
+from decimal import Decimal
+from pathlib import Path
+from zipfile import ZipFile, ZIP_DEFLATED
+from .engine import extract_claims, facts_index, inspect, check, number, unmatched_spans
+from .graph import Derivations, compute, impact
+from .diagnose import diagnose
+from .report import build_report
+from .office import (read_facts, inspect_fact_source, read_document, read_images,
+                     digest, apply_document, update_workbook)
+from .pdf_office_export import export_pdf_to_office
+from .pdf_revised_export import (build_revised_pdf_manifest, compare_pdf_visual_fidelity,
+                                 export_docx_to_pdf, verify_revised_pdf)
+from . import ocr, llm, quota
+from . import review
+def now():
+    return datetime.now(timezone.utc).isoformat()
+class Store:
+    def __init__(self, root):
+        self.root = Path(root)
+        self.root.mkdir(parents=True, exist_ok=True)
+        self.lock = threading.RLock()
+    def folder(self, wid):
+        if not re.fullmatch(r'[a-f0-9]{32}', wid):
+            raise ValueError('无效的项目ID')
+        return self.root / wid
+    def read(self, wid):
+        path = self.folder(wid) / 'state.json'
+        if not path.is_file():
+            raise FileNotFoundError('项目不存在')
+        return json.loads(path.read_text(encoding='utf-8'))
+    def write(self, ws):
+        folder = self.folder(ws['id'])
+        tmp = folder / 'state.tmp'
+        tmp.write_text(json.dumps(ws, ensure_ascii=False, indent=2, allow_nan=False), encoding='utf-8')
+        os.replace(tmp, folder / 'state.json')
+    @staticmethod
+    def append_model_call(ws, metrics, *, node, mode_value=None, candidates_returned=0):
+        """Attach a secret-free model ledger entry to a workspace."""
+        if not metrics:
+
+
+—— 第 23 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+            return
+        entry = copy.deepcopy(metrics)
+        entry['node'] = node
+        if mode_value:
+            entry['mode'] = mode_value
+        entry['candidates_returned'] = int(candidates_returned or 0)
+        entry['at'] = now()
+        ws.setdefault('model_calls', []).append(entry)
+    @staticmethod
+    def invalidate_reviews(ws, reason='工作区内容已变化，请重新运行审计'):
+        """Mark review snapshots stale whenever evidence or claims change."""
+        for key in ('cross_audit', 'repair_plan'):
+            snapshot = ws.get(key)
+            if isinstance(snapshot, dict):
+                snapshot['stale'] = True
+                snapshot['stale_reason'] = reason
+    def list(self):
+        out = []
+        for path in self.root.glob('*/state.json'):
+            try:
+                ws = json.loads(path.read_text(encoding='utf-8'))
+                out.append({k: ws[k] for k in ('id', 'name', 'created_at', 'revision')})
+            except (ValueError, KeyError):
+                continue
+        return sorted(out, key=lambda x: x['created_at'], reverse=True)
+    def delete(self, wid):
+        """Permanently remove one workspace and its generated file versions."""
+        with self.lock:
+            folder = self.folder(wid)
+            state = folder / 'state.json'
+            if not state.is_file():
+                raise FileNotFoundError('项目不存在')
+            # folder() accepts only a full project UUID, so this cannot resolve
+            # to the data root. Refuse symlinks as an extra containment guard.
+            if folder.is_symlink():
+                raise ValueError('项目目录无效，拒绝删除')
+            name = json.loads(state.read_text(encoding='utf-8')).get('name', '未命名项目')
+            shutil.rmtree(folder)
+            return {'id': wid, 'name': name, 'deleted': True}
+    def cross_document_audit(self, wid, revision):
+        """Run the read-only cross-document audit and persist its evidence snapshot."""
+        with self.lock:
+            ws = self.read(wid)
+            self.verify(ws, revision)
+            result = review.audit_documents(ws)
+            semantic_mode = llm.mode(ws)
+            if semantic_mode in {'hybrid', 'api'} and llm.config()['enabled'] and result.get('semantic_groups'):
+                semantic_outcome = 'succeeded'
+                gate = quota.check()
+                if not gate['allowed']:
+
+
+—— 第 24 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+                    result['semantic_status'] = 'quota_blocked'
+                    result['semantic_claims_sent'] = 0
+                    ws['audit'].append({'time': now(), 'event': '模型额度用尽',
+                                        'detail': f'跨文档语义审计未执行：{gate["reason"]}'})
+                else:
+                    quota.consume()
+                    try:
+                        with llm.using_mode(semantic_mode):
+                            proposals, sent = review.semantic_findings(ws, result)
+                        review.add_semantic_findings(ws, result, proposals)
+                        result['semantic_status'] = 'completed'
+                        result['semantic_claims_sent'] = sent
+                    except Exception:
+                        semantic_outcome = 'failed'
+                        result['semantic_status'] = 'failed'
+                        result['semantic_claims_sent'] = sum(len(g.get('claims', [])) for g in result.get('semantic_groups', []))
+                        ws['audit'].append({'time': now(), 'event': '跨文档语义审计降级',
+                                            'detail': '模型不可用；保留确定性审计结果'})
+                    metrics = llm.consume_last_call_metrics() or {
+                        'provider': llm.config()['provider'], 'model': llm.config()['model'],
+                        'duration_ms': 0, 'outcome': semantic_outcome,
+                        'prompt_tokens': 0, 'completion_tokens': 0, 'total_tokens': 0,
+                        'estimated_cost_cny': None,
+                    }
+                    self.append_model_call(ws, metrics, node='audit_agent', mode_value=semantic_mode,
+                                           candidates_returned=sum(1 for f in result['findings'] if f.get('source') == 'model'))
+            elif not result.get('semantic_groups'):
+                result['semantic_status'] = 'no_cross_file_groups'
+            result['created_at'] = now()
+            ws['cross_audit'] = result
+            ws['audit'].append({'time': now(), 'event': '跨文档审计',
+                                'detail': f'归并 {len(result["groups"])} 组；发现 {len(result["findings"])} 项疑点；仅生成只读证据'})
+            self.write(ws)
+            return self.public(ws)
+    def build_repair_plan(self, wid, revision):
+        """Build a structured, approval-gated plan without changing Office files."""
+        with self.lock:
+            ws = self.read(wid)
+            self.verify(ws, revision)
+            plan = review.repair_plan(ws)
+            plan['agent'] = 'repair_planning_agent'
+            plan['created_at'] = now()
+            ws['repair_plan'] = plan
+            ws['audit'].append({'time': now(), 'event': '生成修复计划',
+                                'detail': f'{plan["summary"]["total"]} 项；高风险 {plan["summary"]["high_risk"]} 项；等待用户批准'})
+            self.write(ws)
+            return self.public(ws)
+    def scan(self, ws, folder, old_claims=()):
+        source = next(d for d in ws['documents'] if d['kind'] == 'xlsx')
+        # 基础事实与完整事实分开保存：Excel 只承载基础事实，派生事实由表达式
+
+
+—— 第 25 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+        # 定义，既不能被写回 Excel，也不能被直接改数值。
+        source_path = folder / source['stored_name']
+        ws['fact_quality'] = inspect_fact_source(source_path)
+        base = read_facts(source_path, source['id'], allow_empty=bool(ws.get('allow_empty_facts')))
+        ws['source_facts'] = base
+        previous_values = ws.get('graph_values')
+        ws['facts'] = self.build_facts(base, ws, previous=previous_values)
+        claims, blocks, old = [], [], {c['id']: c for c in old_claims}
+        # 事实定位索引一次构造、全程复用，避免每个正文块重新构造。
+        index = facts_index(ws['facts'])
+        for d in ws['documents']:
+            d['sha256'] = digest(folder / d['stored_name'])
+            if d['kind'] == 'xlsx' or '.' + d['kind'] in ocr.IMAGE_EXTENSIONS:
+                continue
+            max_blocks = 20000 if ws.get('pdf_import') else 2000
+            bs, cs, warnings = read_document(folder / d['stored_name'], d['id'], ws['facts'], max_blocks=max_blocks)
+            d['warnings'] = warnings
+            blocks.extend(bs)
+            for block in bs:
+                cs.extend(extract_claims(block, ws['facts'], index=index))
+            for c in cs:
+                previous = old.get(c['id'])
+                if previous:
+                    # 论断 ID 锚点记忆保留同位置的已确认来源；link_rules 仅为不同论断提供偏好。
+                    available = {f['id'] for f in ws['facts']}
+                    if all(r in available for r in previous['refs']):
+                        c['refs'] = previous['refs']
+                        c['confirmed'] = previous['confirmed']
+                        c['extraction'] = previous['extraction']
+                claims.append(c)
+        ws['claims'], ws['blocks'] = claims, blocks
+        # 级联标记只对触发它的那一次变更有效，扫完即清，避免后续操作误报。
+        ws['graph_changed'] = []
+        return ws
+    # ---- 事实依赖图 --------------------------------------------------------
+    def derivations_of(self, ws):
+        return Derivations(ws.get('derivations') or [])
+    def build_facts(self, base, ws, previous=None, overrides=None):
+        """在基础事实之上按拓扑序算出派生事实，返回合并后的完整事实表。
+        论断与图表都可以引用派生事实（如「利润」「成本占比」），
+        因此合并结果才是 engine.check() 应该看到的完整事实集合。
+        """
+        derivations = self.derivations_of(ws)
+        if not derivations.records:
+            ws['graph'] = {'derived': [], 'errors': {}, 'details': {}, 'affected': [],
+                           'changed': [], 'radius': 0.0, 'cycles': []}
+            ws['graph_values'] = {}
+            return list(base)
+        outcome = compute(base, derivations, changed=ws.get('graph_changed') or [],
+                          overrides=overrides, previous=previous)
+
+
+—— 第 26 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+        ws['graph'] = {
+            # 派生值是 Decimal，落盘前必须转 float，否则 json.dumps 会拒绝序列化。
+            'derived': [{'id': f['id'], 'op': f['op'], 'inputs': f['inputs'], 'unit': f['unit'],
+                         'metric': f['metric'], 'value': float(f['value'])} for f in outcome['facts']
+                        if f.get('derived')],
+            'errors': outcome['errors'], 'details': outcome['details'],
+            'affected': outcome['affected'], 'changed': outcome['changed'],
+            'radius': round(outcome['radius'], 4),
+            'cycles': [c for c in derivations.cycles],
+        }
+        # 保存本轮值供下一次变更比对：没有它就无法判断派生值究竟有没有变。
+        ws['graph_values'] = {k: (float(v) if isinstance(v, Decimal) else v)
+                              for k, v in outcome['values'].items()}
+        return [dict(f, value=float(f['value'])) if f.get('derived') and f.get('value') is not None else f
+                for f in outcome['facts']]
+    def save_derivations(self, ws, records):
+        """替换派生定义前先完整校验，非法定义不写盘。"""
+        derivations = Derivations(records)
+        base_ids = {f['id'] for f in ws.get('source_facts') or ws['facts']}
+        problems = derivations.validate(base_ids)
+        if problems:
+            raise ValueError('；'.join(problems))
+        ws['derivations'] = derivations.records
+        return derivations
+    def graph_summary(self, ws):
+        graph = ws.get('graph') or {}
+        return {'derived': len(graph.get('derived') or []),
+                'errors': len(graph.get('errors') or {}),
+                'affected': len(graph.get('affected') or []),
+                'radius': graph.get('radius', 0.0),
+                'cycles': len(graph.get('cycles') or [])}
+    def last_impact(self, ws, changed_ids):
+        """本次变更的级联结果：真正变化的派生事实、直接影响与间接受影响的论断。"""
+        derivations = self.derivations_of(ws)
+        grouped = impact(derivations, ws['claims'], changed_ids) if derivations.records else {
+            'direct': [c['id'] for c in ws['claims'] if set(c['refs']) & set(changed_ids)],
+            'indirect': [], 'affected_facts': [], 'total': 0}
+        graph = ws.get('graph') or {}
+        return {'changed_facts': changed_ids,
+                'changed_derived': graph.get('changed') or [],
+                'affected_facts': grouped['affected_facts'],
+                'direct_claims': grouped['direct'],
+                'indirect_claims': grouped['indirect'],
+                'radius': graph.get('radius', 0.0)}
+    def set_derivations(self, wid, revision, records):
+        with self.lock:
+            ws = self.read(wid)
+            self.verify(ws, revision)
+            self.save_derivations(ws, records)
+            return self._rescan_and_commit(ws, '定义派生事实',
+
+
+—— 第 27 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+                                           f'共{len(ws["derivations"])}项派生事实；引用完整性校验通过')
+    def remove_derivation(self, wid, revision, rid):
+        with self.lock:
+            ws = self.read(wid)
+            self.verify(ws, revision)
+            derivations = self.derivations_of(ws)
+            derivations.remove(rid)
+            ws['derivations'] = derivations.records
+            return self._rescan_and_commit(ws, '删除派生事实', rid)
+    def _rescan_and_commit(self, ws, event, detail):
+        """派生定义变化后在原目录上重扫并落盘：不产生新 generation。"""
+        self.scan(ws, self.folder(ws['id']) / ws['generation'], ws['claims'])
+        self.invalidate_reviews(ws)
+        ws['revision'] += 1
+        ws['last_repair'] = None
+        ws['audit'].append({'time': now(), 'event': event, 'detail': detail})
+        self.write(ws)
+        return self.public(ws)
+    def create(self, name, paths, demo=False, allow_empty_facts=False, pdf_import=False):
+        with self.lock:
+            if len(paths) < 2 or len(paths) > 10 or sum(Path(p).suffix.lower() == '.xlsx' for p in paths) != 1:
+                raise ValueError('请选择一份Excel数据源和至少一份Word/PPT或图片文件，最多10份文件')
+            wid = uuid.uuid4().hex
+            folder = self.folder(wid)
+            current = folder / 'v0'
+            current.mkdir(parents=True)
+        ws = {'id': wid, 'name': name.strip()[:100] or '未命名项目', 'created_at': now(),
+              'revision': 0, 'generation': 'v0', 'demo': demo, 'documents': [],
+              'history': [], 'audit': [], 'model_calls': [], 'last_repair': None, 'link_rules': []}
+        if allow_empty_facts:
+            ws['allow_empty_facts'] = True
+        if pdf_import:
+            ws['pdf_import'] = True
+        try:
+            for i, path in enumerate(paths):
+                path = Path(path)
+                fid = uuid.uuid4().hex[:16]
+                stored = f'{fid}{path.suffix.lower()}'
+                shutil.copyfile(path, current / stored)
+                ws['documents'].append({'id': fid, 'name': path.name, 'kind': path.suffix.lower()[1:],
+                                        'stored_name': stored, 'warnings': []})
+            self.scan(ws, current)
+            ws['images'], ws['ocr_blocks'], ws['ocr_claims'] = [], [], []
+            for document in ws['documents']:
+                if document['kind'] == 'xlsx':
+                    continue
+                ext = '.' + document['kind']
+                if ext in ocr.IMAGE_EXTENSIONS:
+                    img_id = 'img' + uuid.uuid4().hex[:16]
+                    mime = ocr.IMAGE_EXTENSIONS[ext]
+
+
+—— 第 28 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+                    stored = 'images/' + img_id + '.' + ocr.MIME_EXT.get(mime, 'bin')
+                    path = current / stored
+                    path.parent.mkdir(exist_ok=True)
+                    shutil.copyfile(current / document['stored_name'], path)
+                    ws['images'].append({'id': img_id, 'file_id': document['id'],
+                                        'location': json.dumps(['image']), 'label': document['name'],
+                                        'mime': mime, 'stored_name': stored, 'sha256': digest(path),
+                                        'ocr_text': None, 'ocr_status': 'pending', 'ocr_error': None})
+                else:
+                    images, warnings = read_images(current / document['stored_name'], document['id'])
+                    document['warnings'].extend(warnings)
+                    for item in images:
+                        stored = 'images/' + item['id'] + '.' + ocr.MIME_EXT.get(item['mime'], 'bin')
+                        path = current / stored
+                        path.parent.mkdir(exist_ok=True)
+                        path.write_bytes(item.pop('blob'))
+                        item.update(stored_name=stored, sha256=digest(path), ocr_text=None,
+                                    ocr_status='pending', ocr_error=None)
+                        ws['images'].append(item)
+            if not ws['blocks'] and not ws['images']:
+                raise ValueError('成果文件没有可处理的正文或幻灯片文字')
+            ws['audit'].append({'time': now(), 'event': '导入文件', 'detail': f'{len(paths)}份文件；关联尚待人工确认'})
+            self.write(ws)
+            return self.public(ws)
+        except Exception:
+            shutil.rmtree(folder)
+            raise
+    def create_from_pdf(self, name, pdf_path, subject=None):
+        """Create an Office-backed project from a PDF without editing the PDF.
+        The generated DOCX/XLSX become the project documents.  The original
+        PDF is retained under ``pdf_origins`` for provenance and archive export,
+        but is intentionally not scanned as an editable Office document.
+        """
+        source = Path(pdf_path)
+        if source.suffix.lower() != '.pdf':
+            raise ValueError('请选择 PDF 文件')
+        if not source.is_file():
+            raise FileNotFoundError(source)
+        with tempfile.TemporaryDirectory() as tmp:
+            backend = os.getenv('ZHILIAN_PDF_DOCX_BACKEND', '').strip().lower()
+            conversion_kwargs = {'subject': subject}
+            if backend:
+                conversion_kwargs['docx_backend'] = backend
+            conversion = export_pdf_to_office(source, tmp, **conversion_kwargs)
+            if not conversion.get('facts') and not conversion.get('text_layer_pages'):
+                raise ValueError('PDF 未检测到可提取文字层；网页端暂不支持扫描件 OCR，请先使用 OCR 工具处理后再导入')
+            generated = [Path(conversion['excel']), Path(conversion['word'])]
+            manifest = dict(conversion)
+            manifest.update({'source_pdf': source.name,
+                             'word': Path(conversion['word']).name,
+
+
+—— 第 29 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+                             'excel': Path(conversion['excel']).name})
+            result = self.create(name, generated, allow_empty_facts=not bool(conversion.get('facts')),
+                                 pdf_import=True)
+        with self.lock:
+            ws = self.read(result['id'])
+            ws.setdefault('pdf_revisions', [])
+            current = self.folder(ws['id']) / ws['generation']
+            origin_dir = current / 'pdf_origins'
+            origin_dir.mkdir(parents=True, exist_ok=True)
+            source_hash = digest(source)
+            safe_name = re.sub(r'[<>:"|?*\\/]', '_', source.name).strip() or 'source.pdf'
+            stored_name = f'pdf_origins/{source_hash[:16]}_{safe_name}'
+            shutil.copyfile(source, current / stored_name)
+            ws.setdefault('pdf_origins', []).append({
+                'name': source.name, 'stored_name': stored_name,
+                'sha256': source_hash, 'manifest': manifest,
+            })
+            ws['audit'].append({'time': now(), 'event': 'PDF 转 Office 导入',
+                                'detail': f'原 PDF 保留；生成 Word/Excel；事实 {manifest.get("facts", 0)} 条'})
+            self.write(ws)
+            result = self.public(ws)
+            result['pdf_conversion'] = manifest
+            return result
+    def append_documents(self, wid, revision, paths):
+        """Append a batch of result documents to an existing Excel project.
+        The operation is transactional: the current generation is copied to a
+        new generation, new documents are parsed there, and state is written
+        only after the complete batch has scanned successfully.  This keeps a
+        failed large upload from leaving half an imported project.
+        """
+        paths = [Path(p) for p in paths]
+        max_batch = int(os.getenv('ZHILIAN_MAX_APPEND_BATCH', '50'))
+        max_total = int(os.getenv('ZHILIAN_MAX_PROJECT_DOCUMENTS', '500'))
+        if not paths:
+            raise ValueError('请至少选择一份Word、PPT或图片文件')
+        if len(paths) > max_batch:
+            raise ValueError(f'单批最多追加{max_batch}份文档，请分批上传')
+        allowed = {'.docx', '.pptx', *ocr.IMAGE_EXTENSIONS}
+        if any(p.suffix.lower() not in allowed for p in paths):
+            raise ValueError('追加接口只接受Word、PPT或图片文件，不允许再次上传Excel')
+        names = [p.name for p in paths]
+        if any(not p.is_file() for p in paths):
+            raise ValueError('上传文件不存在或无法读取')
+        if len(set(names)) != len(names) or any(not n or len(n) > 150 or any(c in n for c in '<>:"|?*') for n in names):
+            raise ValueError('文件名重复、无效或过长')
+        with self.lock:
+            ws = self.read(wid)
+            self.verify(ws, revision)
+            if len(ws.get('documents', [])) + len(paths) > max_total:
+                raise ValueError(f'项目文档总数不能超过{max_total}份')
+
+
+—— 第 30 页 / 共 30 页 | 知链跨文档结论验证与增量修复软件 V0.2.1（前 30 页） ——
+            existing_names = {d['name'] for d in ws['documents']}
+            if existing_names.intersection(names):
+                raise ValueError('项目中已有同名文件，请重命名后再追加')
+            existing_hashes = {d.get('sha256') for d in ws['documents']}
+            incoming_hashes = [digest(p) for p in paths]
+            if any(h in existing_hashes for h in incoming_hashes):
+                raise ValueError('项目中已有相同内容的文件，请勿重复导入')
+            batch_id = 'b' + uuid.uuid4().hex[:16]
+            previous = copy.deepcopy(ws)
+            root = self.folder(wid)
+            generation = 'v' + uuid.uuid4().hex[:12]
+            target = root / generation
+            shutil.copytree(root / ws['generation'], target)
+            try:
+                new_documents = []
+                for path in paths:
+                    fid = uuid.uuid4().hex[:16]
+                    stored = f'{fid}{path.suffix.lower()}'
+                    shutil.copyfile(path, target / stored)
+                    document = {'id': fid, 'name': path.name, 'kind': path.suffix.lower()[1:],
+                                'stored_name': stored, 'warnings': [], 'batch_id': batch_id}
+                    ws['documents'].append(document)
+                    new_documents.append(document)
+                before_blocks = len(ws.get('blocks', []))
+                before_images = len(ws.get('images', []))
+                self.scan(ws, target, previous.get('claims', []))
+                # Only extract assets for the newly appended documents. Existing
+                # image descriptors were copied with the generation.
+                for document in new_documents:
+                    if document['kind'] == 'xlsx':
+                        continue
+                    ext = '.' + document['kind']
+                    if ext in ocr.IMAGE_EXTENSIONS:
+                        img_id = 'img' + uuid.uuid4().hex[:16]
+                        mime = ocr.IMAGE_EXTENSIONS[ext]
+                        stored = 'images/' + img_id + '.' + ocr.MIME_EXT.get(mime, 'bin')
+                        image_path = target / stored
+                        image_path.parent.mkdir(exist_ok=True)
+                        shutil.copyfile(target / document['stored_name'], image_path)
+                        ws.setdefault('images', []).append({'id': img_id, 'file_id': document['id'],
+                            'location': json.dumps(['image']), 'label': document['name'], 'mime': mime,
+                            'stored_name': stored, 'sha256': digest(image_path), 'ocr_text': None,
+                            'ocr_status': 'pending', 'ocr_error': None})
+                    else:
+                        images, warnings = read_images(target / document['stored_name'], document['id'])
+                        document['warnings'].extend(warnings)
+                        for item in images:
+                            stored = 'images/' + item['id'] + '.' + ocr.MIME_EXT.get(item['mime'], 'bin')
+                            image_path = target / stored
+                            image_path.parent.mkdir(exist_ok=True)
+

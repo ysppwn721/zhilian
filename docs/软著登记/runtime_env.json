@@ -1,0 +1,36 @@
+{
+  "os": {
+    "system": "Windows",
+    "release": "11",
+    "version": "10.0.26200",
+    "caption": "Microsoft Windows 11 企业版",
+    "build": "26200",
+    "arch": "AMD64"
+  },
+  "cpu": {
+    "name": "Intel(R) Core(TM) i9-14900HX",
+    "cores": "24",
+    "threads": "32",
+    "max_clock_mhz": "2200"
+  },
+  "ram_gb": "31.7",
+  "gpu": "GameViewer Virtual Display Adapter",
+  "gpu_list": [
+    "GameViewer Virtual Display Adapter",
+    "OrayIddDriver Device",
+    "Intel(R) UHD Graphics",
+    "NVIDIA GeForce RTX 5060 Laptop GPU"
+  ],
+  "disk_c_gb": "510",
+  "python": "3.12.14",
+  "packages": {
+    "pdfplumber": "0.11.9",
+    "openpyxl": "3.1.5",
+    "httpx": "0.28.1",
+    "numpy": "2.3.5",
+    "onnxruntime": "1.30.0",
+    "torch": "2.14.0+cpu",
+    "matplotlib": "3.11.2",
+    "pytest": "8.4.2"
+  }
+}
